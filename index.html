@@ -431,6 +431,42 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
   .sbadge { display:none; }
   .land-feats { grid-template-columns:1fr; }
 }
+
+/* ── TRASH / MULTI-SELECT ── */
+.sel-mode-bar{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(245,158,11,.1));border:1px solid rgba(239,68,68,.3);border-radius:var(--r2);padding:10px 14px;margin-bottom:10px;display:none;align-items:center;gap:10px;flex-wrap:wrap}
+.sel-mode-bar.show{display:flex}
+.sel-count{font-family:var(--fm);font-size:12px;color:var(--text);flex:1}
+.tr.selected{background:rgba(239,68,68,.08)!important;border-left:3px solid #ef4444}
+.tr-check{width:20px;display:flex;align-items:center;cursor:pointer}
+.sel-cb{width:14px;height:14px;cursor:pointer;accent-color:#ef4444}
+/* Trash tab */
+.trash-badge{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);font-family:var(--fm);font-size:9px;padding:1px 6px;border-radius:8px}
+/* Notes history */
+.note-hist{background:var(--bg3);border-radius:6px;padding:8px 11px;margin-bottom:6px;border-left:2px solid var(--teal)}
+.note-hist-meta{font-family:var(--fm);font-size:9px;color:var(--dim);margin-bottom:3px}
+.note-hist-text{font-size:12px;color:var(--muted);line-height:1.5}
+/* Comparison */
+.cmp-grid{display:grid;gap:10px}
+.cmp-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem;position:relative}
+.cmp-card.winner{border-color:var(--teal)}
+.cmp-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.cmp-row:last-child{border-bottom:none}
+.cmp-val{font-family:var(--fm);font-weight:600}
+.cmp-best{color:var(--teal)}
+/* Follow-up calendar */
+.fu-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.fu-date{font-family:var(--fm);font-size:11px;padding:4px 9px;background:var(--teal-l);border-radius:6px;color:var(--teal);flex-shrink:0;white-space:nowrap}
+.fu-date.overdue{background:var(--rl);color:#f87171}
+.fu-date.today{background:var(--al);color:var(--amber)}
+.fu-done{width:16px;height:16px;cursor:pointer;accent-color:var(--teal);flex-shrink:0}
+/* Share button */
+.share-btn{font-family:var(--fm);font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid rgba(20,184,166,.3);background:rgba(20,184,166,.08);color:var(--teal);cursor:pointer;transition:all .15s}
+.share-btn:hover{background:rgba(20,184,166,.15)}
+/* Activity log */
+.act-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.act-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--bg3)}
+.act-txt{flex:1;font-size:12px;color:var(--muted);line-height:1.4}
+.act-time{font-family:var(--fm);font-size:9px;color:var(--dim);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -575,6 +611,10 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <button class="nbtn" id="nb-teams" data-label="Teams" onclick="goTo('teams')"><span class="nb-ico">🏐</span><span class="nb-lbl">Teams</span></button>
     <button class="nbtn" id="nb-agents" data-label="Agents" onclick="goTo('agents')"><span class="nb-ico">🤝</span><span class="nb-lbl">Agents</span></button>
     <button class="nbtn" id="nb-notes" data-label="Notes" onclick="goTo('notes')"><span class="nb-ico">📝</span><span class="nb-lbl">Notes</span></button>
+    <button class="nbtn" id="nb-calendar" data-label="Calendar" onclick="goTo('calendar')"><span class="nb-ico">📅</span><span class="nb-lbl">Calendar</span><span class="nb-bdg" id="badge-fu">0</span></button>
+    <button class="nbtn" id="nb-compare" data-label="Compare" onclick="goTo('compare')"><span class="nb-ico">⚖️</span><span class="nb-lbl">Compare</span></button>
+    <div class="sb-sec">Admin</div>
+    <button class="nbtn" id="nb-trash" data-label="Trash" onclick="goTo('trash')"><span class="nb-ico">🗑</span><span class="nb-lbl">Trash</span><span class="nb-bdg trash-badge" id="badge-trash">0</span></button>
    </div>
   </aside>
   <div class="content">
@@ -639,7 +679,17 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
       <button class="clr-btn" onclick="clearAll()">✖ Clear</button>
      </div>
     </div>
-    <div id="tbl-wrap"></div>
+    <div class="sel-mode-bar" id="sel-bar">
+      <span class="sel-count" id="sel-count">0 selected</span>
+      <button class="btn-sm" onclick="selectAll()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">Select All</button>
+      <button class="btn-sm" onclick="compareSelected()" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
+      <button class="btn-sm" onclick="trashSelected()" style="color:#f87171;border-color:rgba(239,68,68,.3)">🗑 Move to Trash</button>
+      <button class="btn-sm" onclick="toggleSelMode()">✖ Cancel</button>
+     </div>
+     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <button class="btn-sm" id="sel-mode-btn" onclick="toggleSelMode()" style="color:var(--muted)">☑ Select</button>
+     </div>
+     <div id="tbl-wrap"></div>
    </div>
    <!-- DETAIL -->
    <div class="view" id="v-detail">
@@ -694,6 +744,32 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     </div>
     <div id="nt-list"></div>
    </div>
+   <!-- CALENDAR -->
+   <div class="view" id="v-calendar">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+     <div style="font-size:18px;font-weight:700">📅 Follow-up Calendar</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Track calls, meetings and reminders for your priority players.</div>
+    <div id="fu-list"></div>
+   </div>
+   <!-- COMPARE -->
+   <div class="view" id="v-compare">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+     <div style="font-size:18px;font-weight:700">⚖️ Compare Players</div>
+     <button class="btn-sm" onclick="clearCompare()">✖ Clear</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Select up to 3 players from the table (hold Shift or use ☑ mode) then click Compare.</div>
+    <div id="cmp-content"><div style="text-align:center;padding:3rem;color:var(--dim)"><div style="font-size:32px;margin-bottom:8px">⚖️</div><div>Select players from the Players tab to compare</div></div></div>
+   </div>
+   <!-- TRASH -->
+   <div class="view" id="v-trash">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+     <div style="font-size:18px;font-weight:700">🗑 Trash</div>
+     <div style="display:flex;gap:7px" id="trash-actions"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Deleted players — restore or leave here. Admin can always see everything.</div>
+    <div id="trash-list"></div>
+   </div>
   </div>
  </div>
 </div>
@@ -724,10 +800,12 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <button class="gmtab on" onclick="switchGMTab('users',this)">Users</button>
    <button class="gmtab" onclick="switchGMTab('sessions',this)">Sessions</button>
    <button class="gmtab" onclick="switchGMTab('regs',this)">Registrations</button>
+   <button class="gmtab" onclick="switchGMTab('activity',this)">Activity Log</button>
   </div>
   <div class="gm-sec on" id="gms-users"><div id="gm-users-wrap"></div></div>
   <div class="gm-sec" id="gms-sessions"><div id="gm-sess-wrap"></div></div>
   <div class="gm-sec" id="gms-regs"><div id="gm-reg-wrap"></div></div>
+  <div class="gm-sec" id="gms-activity"><div id="gm-activity" style="padding:8px"></div></div>
  </div>
 </div>
 
@@ -941,7 +1019,11 @@ async function loadData(){
     if(r.ok){
       var rows=await r.json();
       if(rows&&rows.length){
-        P=rows.map(function(row){return row.data;});
+        // Only show non-deleted players
+        P=rows.filter(function(row){return !row.deleted;}).map(function(row){return row.data;});
+        // Update trash badge
+        var trashed=rows.filter(function(row){return row.deleted;}).length;
+        st('badge-trash',trashed||'');
       }
     }
     // Load notes and teams
@@ -1163,6 +1245,7 @@ async function initApp(){
   await loadData();
   if(!P.length)P=INITIAL_PLAYERS.slice();
   updateKPIs();buildLeagueDD();renderT(getF());renderAg();renderTeams();goTo('dashboard');
+  checkURLPlayer();
 }
 
 // ═══ APP VIEW ROUTING ═════════════════════════════
@@ -1182,6 +1265,9 @@ function goTo(v){
   if(v==='agents')renderAg();
   if(v==='notes')renderNts();
   if(v==='teams')renderTeams();
+  if(v==='calendar')renderCalendar();
+  if(v==='compare')renderCompare();
+  if(v==='trash')renderTrash();
 }
 
 function toggleSB(){
@@ -1377,7 +1463,13 @@ function showDet(id){
     +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
     +'<select class="st-sel" onchange="chSt('+id+',this.value)">'
     +['Priority','Watching','Contacted','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
-    +'</select><button class="btn-del" onclick="delP('+id+')">Delete</button></div></div>'
+    +'</select>'
+    +'<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">'
+    +'<button class="share-btn" onclick="sharePlayer('+id+')">🔗 Share</button>'
+    +'<button class="share-btn" onclick="addFollowUp(String('+id+'),this.dataset.n)" data-n="'+p.name+'" style="color:var(--amber);border-color:rgba(245,158,11,.3);background:var(--al)">📅 Remind</button>'
+    +'<button class="btn-del" onclick="trashOne('+id+')">🗑 Trash</button>'
+    +'</div>'
+    +'</div></div>'
     +'<div class="phys"><div class="ph-c"><div class="ph-v">'+(p.height||'—')+'</div><div class="ph-l">Height cm</div></div>'
     +'<div class="ph-c"><div class="ph-v">'+(p.spike||'—')+'</div><div class="ph-l">Spike</div></div>'
     +'<div class="ph-c"><div class="ph-v">'+(p.block||'—')+'</div><div class="ph-l">Block</div></div>'
@@ -1391,12 +1483,48 @@ function showDet(id){
     +'<div style="font-size:12px;color:var(--muted)">'+(p.league||'')+'</div></div></div>';
   if(p.notes)html+='<div class="panel"><div class="ptitle">Notes</div><p style="font-size:13px;color:var(--muted);line-height:1.7">'+p.notes+'</p></div>';
   if(vids.length)html+='<div class="panel"><div class="ptitle">Videos</div>'+vids.map(function(v){return'<div class="vrow"><a style="width:28px;height:19px;background:#F00;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none" href="'+v+'" target="_blank"><div style="width:0;height:0;border-left:8px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-left:1px"></div></a><div style="flex:1;font-size:12px">'+( v.indexOf('youtu')>=0?'YouTube':'Video')+'</div><a href="'+v+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)">Open \u2197</a></div>';}).join('')+'</div>';
-  html+='<div class="panel"><div class="ptitle">Quick Note</div><textarea class="inp" id="qn-'+id+'" style="min-height:50px">'+(p.quick_note||'')+'</textarea><div style="margin-top:6px"><button class="btn-sm" onclick="saveQN('+id+')" style="color:var(--teal);border-color:rgba(20,184,166,.3)">Save note</button></div></div>';
+  html+='<div class="panel"><div class="ptitle">Scouting Notes</div>'
+    +'<textarea class="inp" id="qn-'+id+'" placeholder="Add observation..." style="min-height:60px">'+(p.quick_note||'')+'</textarea>'
+    +'<div style="margin-top:6px;display:flex;gap:7px">'
+    +'<button class="btn-sm" onclick="saveQNCloud('+id+')" style="color:var(--teal);border-color:rgba(20,184,166,.3)">💾 Save & Log</button>'
+    +'</div>'
+    +'<div id="notes-hist-'+id+'" style="margin-top:10px"></div>'
+  +'</div>';
+  // Load notes history async
+  loadPlayerNotes(String(id)).then(function(notes){
+    var el=document.getElementById('notes-hist-'+id);
+    if(!el||!notes.length)return;
+    el.innerHTML='<div style="font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Note History</div>'
+      +notes.map(function(n){
+        return '<div class="note-hist">'
+          +'<div class="note-hist-meta">'+n.author_name+' · '+new Date(n.created_at).toLocaleDateString()+'</div>'
+          +'<div class="note-hist-text">'+n.note+'</div>'
+        +'</div>';
+      }).join('');
+  });
   g('det-content').innerHTML=html;goTo('detail');
 }
 function chSt(id,val){var p=P.find(function(x){return x.id===id;});if(p){p.status=val;saveData();updateKPIs();}}
 function delP(id){if(!confirm('Delete?'))return;P=P.filter(function(p){return p.id!==id;});saveData();updateKPIs();goTo('dashboard');}
 function saveQN(id){var p=P.find(function(x){return x.id===id;});if(!p)return;var ta=g('qn-'+id);if(ta)p.quick_note=ta.value||'';saveData();var b=event.target;b.textContent='\u2713';setTimeout(function(){b.textContent='Save note';},1500);}
+async function saveQNCloud(id){
+  var p=P.find(function(x){return x.id===id;});if(!p)return;
+  var ta=g('qn-'+id);if(!ta)return;
+  var noteText=ta.value.trim();
+  if(!noteText){toast('Write a note first');return;}
+  p.quick_note=noteText;
+  await saveData();
+  await savePlayerNote(String(id),p.name,noteText);
+  ta.value='';
+  // Reload notes history
+  loadPlayerNotes(String(id)).then(function(notes){
+    var el=document.getElementById('notes-hist-'+id);
+    if(!el)return;
+    el.innerHTML='<div style="font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Note History</div>'
+      +notes.map(function(n){return'<div class="note-hist"><div class="note-hist-meta">'+n.author_name+' \u00b7 '+new Date(n.created_at).toLocaleDateString()+'</div><div class="note-hist-text">'+n.note+'</div></div>';}).join('');
+  });
+  toast('\u2713 Note saved');
+}
 
 // ═══ EDIT PLAYER ══════════════════════════════════
 function openEdit(){
@@ -1696,6 +1824,7 @@ function switchGMTab(tab,btn){
   document.querySelectorAll('.gmtab').forEach(function(b){b.className='gmtab';});
   document.querySelectorAll('.gm-sec').forEach(function(s){s.className='gm-sec';});
   btn.className='gmtab on';g('gms-'+tab).className='gm-sec on';
+  if(tab==='activity')renderActivityLog();
 }
 function renderGMUsers(){
   var wrap=g('gm-users-wrap');
@@ -1934,6 +2063,389 @@ const INITIAL_PLAYERS=[
 {id:95,id_label:"095",name:"Boris Busa",pos:"Opposite",country:"Serbia",born:"1997 (28y)",height:200,weight:97,spike:360,block:340,hand:"Right",eu:"No",club:"Panionios",league:"GREEK LEAGUE",agent:"Direct Obs.",agent_contact:"",status:"Priority",notes:"Opposite 200cm, 97kg. Born 25/04/1997. Serbia. Spike 360cm, Block 340cm. CURRENTLY IN GREEK LEAGUE — Panionios 2025/26. 9 clubs career. Sister: Bianka Busa (pro volleyball player).",vb:"https://volleybox.net/boris-busa-p6469",video:"https://www.youtube.com/watch?v=794CnrqjhN8",clubs:[],quick_note:""},
 {id:96,id_label:"096",name:"Hermans Egleskalns",pos:"Opposite",country:"Latvia",born:"1990 (35y)",height:204,weight:100,spike:357,block:340,hand:"Right",eu:"Yes",club:"AO Floisvos",league:"GREEK LEAGUE",agent:"Direct Obs.",agent_contact:"",status:"Priority",notes:"Opposite 204cm, 100kg. Born 08/12/1990. Latvia — EU passport. Spike 357cm, Block 340cm. CURRENTLY IN GREEK LEAGUE — AO Floisvos 2025/26. 11 clubs. MVP Finnish Championship 2011. Best Opposite France 2017. Prev: Tours VB, Olympiacos, Noliko Maaseik.",vb:"https://volleybox.net/hermans-egleskalns-p715",video:"",clubs:[],quick_note:""}
 ];
+
+
+// ═══ SELECTION MODE ════════════════════════════════════════════
+var SEL_MODE = false;
+var SEL_IDS = new Set();
+var CMP_IDS = [];
+
+function toggleSelMode(){
+  SEL_MODE = !SEL_MODE;
+  SEL_IDS.clear();
+  var bar = g('sel-bar');
+  var btn = g('sel-mode-btn');
+  if(bar) bar.className = 'sel-mode-bar' + (SEL_MODE ? ' show' : '');
+  if(btn) btn.style.color = SEL_MODE ? 'var(--teal)' : 'var(--muted)';
+  renderT(getF());
+}
+
+function toggleSel(id, cb){
+  if(cb && cb.checked) SEL_IDS.add(id);
+  else SEL_IDS.delete(id);
+  var cnt = g('sel-count');
+  if(cnt) cnt.textContent = SEL_IDS.size + ' selected';
+  // highlight row
+  var row = document.querySelector('.tr[data-id="'+id+'"]');
+  if(row) row.classList.toggle('selected', SEL_IDS.has(id));
+}
+
+function selectAll(){
+  var f = getF();
+  f.forEach(function(p){ SEL_IDS.add(p.id); });
+  var cnt = g('sel-count'); if(cnt) cnt.textContent = SEL_IDS.size + ' selected';
+  renderT(f);
+}
+
+// ═══ TRASH / SOFT DELETE ═══════════════════════════════════════
+async function trashSelected(){
+  if(!SEL_IDS.size){ alert('Select players first'); return; }
+  if(!confirm('Move ' + SEL_IDS.size + ' player(s) to trash?')) return;
+  var ids = Array.from(SEL_IDS);
+  // Mark as deleted in Supabase
+  for(var i=0; i<ids.length; i++){
+    var p = P.find(function(x){ return x.id === ids[i]; });
+    if(!p) continue;
+    try{
+      // Find DB row for this player
+      var r = await sbFetch('players?session_id=eq.ope-rethymno-2526&data->>id=eq.'+p.id);
+      if(r.ok){
+        var rows = await r.json();
+        if(rows && rows.length){
+          await sbFetch('players?id=eq.'+rows[0].id, {
+            method:'PATCH',
+            body:JSON.stringify({deleted:true, deleted_at:new Date().toISOString(), deleted_by:CU.id})
+          });
+        }
+      }
+    }catch(e){ console.error(e); }
+    // Log activity
+    await logActivity('🗑 Moved to trash', p.name);
+  }
+  // Refresh
+  await loadData();
+  if(!P.length) P = INITIAL_PLAYERS.slice();
+  SEL_IDS.clear(); SEL_MODE = false;
+  var bar = g('sel-bar'); if(bar) bar.className = 'sel-mode-bar';
+  updateKPIs(); renderT(getF());
+  toast('✓ ' + ids.length + ' player(s) moved to trash');
+}
+
+async function trashOne(id){
+  var p = P.find(function(x){ return x.id === id; });
+  if(!p || !confirm('Move ' + p.name + ' to trash?')) return;
+  try{
+    var r = await sbFetch('players?session_id=eq.ope-rethymno-2526&data->>id=eq.'+p.id);
+    if(r.ok){
+      var rows = await r.json();
+      if(rows && rows.length){
+        await sbFetch('players?id=eq.'+rows[0].id, {
+          method:'PATCH',
+          body:JSON.stringify({deleted:true, deleted_at:new Date().toISOString(), deleted_by:CU.id})
+        });
+      }
+    }
+  }catch(e){ console.error(e); }
+  await logActivity('🗑 Moved to trash', p.name);
+  await loadData();
+  if(!P.length) P = INITIAL_PLAYERS.slice();
+  updateKPIs(); goTo('dashboard');
+  toast('✓ ' + p.name + ' moved to trash');
+}
+
+async function renderTrash(){
+  var list = g('trash-list');
+  var acts = g('trash-actions');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--dim)">Loading...</div>';
+  try{
+    var r = await sbFetch('players?session_id=eq.ope-rethymno-2526&deleted=eq.true&order=deleted_at.desc');
+    if(!r.ok) throw new Error();
+    var rows = await r.json();
+    if(!rows || !rows.length){
+      list.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--dim)"><div style="font-size:32px;margin-bottom:8px">🗑</div><div>Trash is empty</div></div>';
+      if(acts) acts.innerHTML = '';
+      st('badge-trash', 0);
+      return;
+    }
+    st('badge-trash', rows.length);
+    if(acts) acts.innerHTML = '<button class="btn-sm" onclick="emptyTrash()" style="color:#f87171;border-color:rgba(239,68,68,.2)">🗑 Empty Trash</button>';
+    list.innerHTML = rows.map(function(row){
+      var p = row.data;
+      var pc2 = POS_COL[p.pos] || [];
+      var delDate = row.deleted_at ? new Date(row.deleted_at).toLocaleDateString() : '—';
+      return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;opacity:.8">'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+p.name+'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+        +'<span class="pos-b" style="background:'+(pc2[0]||'')+';color:'+(pc2[1]||'')+';border-color:'+(pc2[1]||'')+'40;font-size:9px">'+p.pos+'</span>'
+        +'<span style="font-size:11px;color:var(--dim)">Deleted: '+delDate+'</span>'
+        +'<span style="font-size:11px;color:var(--dim)">by '+( row.deleted_by||'—')+'</span>'
+        +'</div></div>'
+        +'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+p.name+'" onclick="restorePlayer(this.dataset.dbid,this.dataset.name)" style="color:var(--teal);border-color:rgba(20,184,166,.3)">↩ Restore</button>'
+      +'</div>';
+    }).join('');
+  }catch(e){
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--dim)">Error loading trash.</div>';
+  }
+}
+
+async function restorePlayer(dbId, name){
+  try{
+    await sbFetch('players?id=eq.'+dbId, {
+      method:'PATCH',
+      body:JSON.stringify({deleted:false, deleted_at:null, deleted_by:null})
+    });
+    await logActivity('↩ Restored', name);
+    await loadData();
+    if(!P.length) P = INITIAL_PLAYERS.slice();
+    updateKPIs(); renderTrash();
+    toast('✓ ' + name + ' restored');
+  }catch(e){ toast('Error restoring player'); }
+}
+
+async function emptyTrash(){
+  if(!confirm('Permanently delete all trashed players? (Admin can still see them in Supabase)')) return;
+  // We don't actually delete from DB - just mark as "permanently_deleted"
+  // This keeps admin access in Supabase Table Editor
+  try{
+    await sbFetch('players?session_id=eq.ope-rethymno-2526&deleted=eq.true', {
+      method:'PATCH',
+      body:JSON.stringify({deleted_by:'__emptied__'})
+    });
+    await logActivity('🗑 Emptied trash', 'All trashed players');
+    renderTrash();
+    toast('Trash emptied');
+  }catch(e){ toast('Error'); }
+}
+
+// ═══ PLAYER NOTES HISTORY ══════════════════════════════════════
+async function loadPlayerNotes(playerRef){
+  try{
+    var r = await sbFetch('player_notes?player_ref=eq.'+encodeURIComponent(playerRef)+'&order=created_at.desc');
+    if(!r.ok) return [];
+    return await r.json();
+  }catch(e){ return []; }
+}
+
+async function savePlayerNote(playerRef, playerName, noteText){
+  if(!noteText || !noteText.trim()) return;
+  try{
+    await sbFetch('player_notes', {
+      method:'POST',
+      body:JSON.stringify({
+        player_ref: playerRef,
+        player_name: playerName,
+        session_id: 'ope-rethymno-2526',
+        author_id: CU.id,
+        author_name: CU.fn + ' ' + CU.ln,
+        note: noteText.trim()
+      })
+    });
+    await logActivity('📝 Added note', playerName);
+  }catch(e){ console.error(e); }
+}
+
+// ═══ ACTIVITY LOG ══════════════════════════════════════════════
+async function logActivity(action, detail){
+  try{
+    await sbFetch('activity_log', {
+      method:'POST',
+      body:JSON.stringify({
+        session_id:'ope-rethymno-2526',
+        user_id:CU.id,
+        user_name:CU.fn+' '+CU.ln,
+        action:action,
+        detail:detail||''
+      })
+    });
+  }catch(e){}
+}
+
+async function renderActivityLog(){
+  var wrap = g('gm-activity');
+  if(!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:1rem">Loading...</div>';
+  try{
+    var r = await sbFetch('activity_log?order=created_at.desc&limit=50');
+    if(!r.ok) throw new Error();
+    var rows = await r.json();
+    if(!rows || !rows.length){
+      wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--dim)">No activity yet.</div>';
+      return;
+    }
+    wrap.innerHTML = rows.map(function(row){
+      var t = row.created_at ? new Date(row.created_at).toLocaleString() : '';
+      return '<div class="act-item">'
+        +'<div class="act-ico">'+row.action.split(' ')[0]+'</div>'
+        +'<div class="act-txt"><b>'+row.user_name+'</b> '+row.action.split(' ').slice(1).join(' ')+(row.detail?' — '+row.detail:'')+'</div>'
+        +'<div class="act-time">'+t+'</div>'
+      +'</div>';
+    }).join('');
+  }catch(e){
+    wrap.innerHTML = '<div style="color:var(--dim);padding:1rem">Error loading activity.</div>';
+  }
+}
+
+// ═══ FOLLOW-UP CALENDAR ════════════════════════════════════════
+async function renderCalendar(){
+  var list = g('fu-list');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--dim)">Loading...</div>';
+  try{
+    var r = await sbFetch('follow_ups?session_id=eq.ope-rethymno-2526&order=due_date.asc');
+    if(!r.ok) throw new Error();
+    var rows = await r.json();
+    var today = new Date().toISOString().slice(0,10);
+    var pending = rows.filter(function(r){ return !r.done; });
+    st('badge-fu', pending.length || '');
+    if(!rows.length){
+      list.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--dim)"><div style="font-size:32px;margin-bottom:8px">📅</div><div>No follow-ups yet</div><div style="font-size:11px;margin-top:4px;color:var(--dim)">Add reminders from any player profile</div></div>';
+      return;
+    }
+    list.innerHTML = rows.map(function(row){
+      var isOverdue = !row.done && row.due_date < today;
+      var isToday = row.due_date === today;
+      var dateClass = isOverdue ? 'overdue' : isToday ? 'today' : '';
+      return '<div class="fu-card" style="opacity:'+(row.done?.6:1)+'">'
+        +'<input type="checkbox" class="fu-done" '+(row.done?'checked':'')+' data-id="'+row.id+'" onchange="toggleFU(this.dataset.id,this.checked)">'
+        +'<div class="fu-date '+dateClass+'">'+row.due_date+'</div>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:600;'+(row.done?'text-decoration:line-through;color:var(--dim)':'')+'">'+row.title+'</div>'
+        +'<div style="font-size:11px;color:var(--dim)">'+row.player_name+'</div></div>'
+        +'<button class="btn-sm" data-id="'+row.id+'" onclick="deleteFU(this.dataset.id)" style="color:#ef4444;border-color:rgba(239,68,68,.2)">✕</button>'
+      +'</div>';
+    }).join('');
+  }catch(e){
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--dim)">Error loading calendar.</div>';
+  }
+}
+
+async function addFollowUp(playerRef, playerName){
+  var title = prompt('Reminder title:\n(e.g. "Call agent", "Watch match live")');
+  if(!title) return;
+  var date = prompt('Date (YYYY-MM-DD):', new Date(Date.now()+7*86400000).toISOString().slice(0,10));
+  if(!date) return;
+  try{
+    await sbFetch('follow_ups', {
+      method:'POST',
+      body:JSON.stringify({session_id:'ope-rethymno-2526',player_ref:playerRef,player_name:playerName,user_id:CU.id,title:title,due_date:date})
+    });
+    toast('✓ Reminder added');
+  }catch(e){ toast('Error adding reminder'); }
+}
+
+async function toggleFU(id, done){
+  try{await sbFetch('follow_ups?id=eq.'+id,{method:'PATCH',body:JSON.stringify({done:done})});}catch(e){}
+  renderCalendar();
+}
+async function deleteFU(id){
+  if(!confirm('Delete this reminder?')) return;
+  try{await sbFetch('follow_ups?id=eq.'+id,{method:'DELETE'});}catch(e){}
+  renderCalendar();
+}
+
+// ═══ PLAYER COMPARISON ═════════════════════════════════════════
+function compareSelected(){
+  if(SEL_IDS.size < 2){ alert('Select at least 2 players to compare'); return; }
+  CMP_IDS = Array.from(SEL_IDS).slice(0,3);
+  SEL_MODE = false; SEL_IDS.clear();
+  var bar = g('sel-bar'); if(bar) bar.className = 'sel-mode-bar';
+  goTo('compare');
+}
+
+function clearCompare(){
+  CMP_IDS = [];
+  var c = g('cmp-content');
+  if(c) c.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--dim)"><div style="font-size:32px;margin-bottom:8px">⚖️</div><div>Select players from the Players tab to compare</div></div>';
+}
+
+function renderCompare(){
+  var c = g('cmp-content');
+  if(!c) return;
+  if(!CMP_IDS.length){
+    c.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--dim)"><div style="font-size:32px;margin-bottom:8px">⚖️</div><div>Select players from the Players tab and click Compare</div></div>';
+    return;
+  }
+  var players = CMP_IDS.map(function(id){ return P.find(function(p){ return p.id===id; }); }).filter(Boolean);
+  if(!players.length) return;
+
+  var attrs = [
+    {label:'Height cm', key:'height'},
+    {label:'Spike cm', key:'spike'},
+    {label:'Block cm', key:'block'},
+    {label:'Weight kg', key:'weight'},
+    {label:'Position', key:'pos'},
+    {label:'Country', key:'country'},
+    {label:'Born', key:'born'},
+    {label:'EU', key:'eu'},
+    {label:'Club', key:'club'},
+    {label:'Status', key:'status'}
+  ];
+
+  var cols = players.length;
+  c.innerHTML = '<div class="cmp-grid" style="grid-template-columns:repeat('+cols+',1fr)">'
+    + players.map(function(p){
+        var pc2 = POS_COL[p.pos]||[];
+        var sc2 = (ST_COL||{})[p.status]||[];
+        return '<div class="cmp-card">'
+          +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+          +'<div style="width:40px;height:40px;border-radius:10px;background:'+accl(p.id)+';color:'+acc(p.id)+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500">'+mkIni(p.name)+'</div>'
+          +'<div><div style="font-size:13px;font-weight:700">'+p.name+'</div>'
+          +'<span class="pos-b" style="background:'+pc2[0]+';color:'+pc2[1]+';border-color:'+pc2[1]+'40;font-size:9px">'+p.pos+'</span></div>'
+          +'</div>'
+          +attrs.map(function(a){
+            var vals = players.map(function(x){ return parseFloat(x[a.key])||0; });
+            var max = Math.max.apply(null,vals.filter(function(v){return v>0;}));
+            var val = p[a.key];
+            var isNum = !isNaN(parseFloat(val)) && val;
+            var isBest = isNum && parseFloat(val)===max && max>0;
+            return '<div class="cmp-row">'
+              +'<span style="color:var(--dim);font-size:11px">'+a.label+'</span>'
+              +'<span class="cmp-val'+(isBest?' cmp-best':'')+'">'+(val||'—')+'</span>'
+            +'</div>';
+          }).join('')
+        +'</div>';
+      }).join('')
+  +'</div>';
+}
+
+// ═══ SHARE PLAYER ══════════════════════════════════════════════
+function sharePlayer(id){
+  var p = P.find(function(x){ return x.id===id; });
+  if(!p) return;
+  var url = window.location.href.split('?')[0] + '?player=' + id;
+  if(navigator.share){
+    navigator.share({title:p.name+' — PlayerFinder',text:p.pos+' | '+p.country+' | '+p.height+'cm',url:url});
+  } else {
+    navigator.clipboard.writeText(url).then(function(){
+      toast('Link copied: ' + p.name);
+    }).catch(function(){
+      prompt('Copy this link:', url);
+    });
+  }
+}
+
+// Check on load if a player ID is in URL
+function checkURLPlayer(){
+  var params = new URLSearchParams(window.location.search);
+  var pid = params.get('player');
+  if(pid){ setTimeout(function(){ showDet(parseInt(pid)); },500); }
+}
+
+// ═══ NOTIFICATION on registration ══════════════════════════════
+async function notifyNewRegistration(userData){
+  // Save to notifications table for admin to see
+  try{
+    await sbFetch('notifications', {
+      method:'POST',
+      body:JSON.stringify({
+        type:'new_registration',
+        data: userData,
+        sent: false
+      })
+    });
+  }catch(e){}
+}
+
 </script>
 </body>
 </html>
