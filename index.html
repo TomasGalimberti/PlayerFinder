@@ -895,71 +895,174 @@ var SESS=DSESS.map(function(s){return Object.assign({},s);});
 var REGS=[];
 
 // ═══ STORAGE ══════════════════════════════════════
-function sSet(k,v){
-  var s=JSON.stringify(v);
-  try{if(window.storage&&window.storage.set)window.storage.set(k,s);}catch(e){}
-  try{localStorage.setItem(k,s);}catch(e){}
+// ═══ SUPABASE CONFIG ═════════════════════════
+var SB_URL='https://nsujacbhyqavvombxnzb.supabase.co';
+var SB_KEY='sb_publishable_J8XMwfc9nIMbelzKgG-9eg_OiYRvt53';
+
+function sbFetch(path,opts){
+  return fetch(SB_URL+'/rest/v1/'+path,Object.assign({
+    headers:{
+      'apikey':SB_KEY,
+      'Authorization':'Bearer '+SB_KEY,
+      'Content-Type':'application/json',
+      'Prefer':'return=representation'
+    }
+  },opts||{}));
 }
-function sGet(k){
-  try{var r=localStorage.getItem(k);if(r)return JSON.parse(r);}catch(e){}
-  return null;
-}
-function saveData(){
+
+// Keep localStorage as fallback cache
+function sSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function sGet(k){try{var r=localStorage.getItem(k);if(r)return JSON.parse(r);}catch(e){}return null;}
+async function saveData(){
   if(!CU||!CS)return;
+  // Save to localStorage as cache
   sSet('pf_'+CU.id+'_'+CS.id,{P:P,NOTES:NOTES,TEAMS:TEAMS});
-  sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));
-  sSet('pf_regs',REGS);
+  // Save players to Supabase
+  try{
+    // Delete existing players for this session and re-insert all
+    await sbFetch('players?session_id=eq.ope-rethymno-2526',{method:'DELETE'});
+    if(P.length){
+      await sbFetch('players',{
+        method:'POST',
+        body:JSON.stringify(P.map(function(p){return {session_id:'ope-rethymno-2526',data:p};}))
+      });
+    }
+    // Save notes and teams
+    var sd={session_id:'ope-rethymno-2526',user_id:CU.id,notes:NOTES,teams:TEAMS};
+    await sbFetch('session_data?session_id=eq.ope-rethymno-2526&user_id=eq.'+CU.id,{method:'DELETE'});
+    await sbFetch('session_data',{method:'POST',body:JSON.stringify(sd)});
+  }catch(e){console.error('Supabase save error:',e);}
 }
-function loadData(){
+async function loadData(){
   if(!CU||!CS)return;
-  var xu=sGet('pf_xusers');
-  if(xu&&xu.length){USERS=DUSERS.map(function(u){return Object.assign({},u);}).concat(xu);}
-  var d=sGet('pf_'+CU.id+'_'+CS.id);
-  if(d){P=d.P||[];NOTES=d.NOTES||[];TEAMS=d.TEAMS||[];}
-  var rg=sGet('pf_regs');if(rg)REGS=rg;
+  try{
+    // Load players from Supabase
+    var r=await sbFetch('players?session_id=eq.ope-rethymno-2526&order=id.asc');
+    if(r.ok){
+      var rows=await r.json();
+      if(rows&&rows.length){
+        P=rows.map(function(row){return row.data;});
+      }
+    }
+    // Load notes and teams
+    var r2=await sbFetch('session_data?session_id=eq.ope-rethymno-2526&user_id=eq.'+CU.id);
+    if(r2.ok){
+      var sd=await r2.json();
+      if(sd&&sd.length){NOTES=sd[0].notes||[];TEAMS=sd[0].teams||[];}
+    }
+    // Load extra users from Supabase
+    var r3=await sbFetch('users?is_god=eq.false&or=(status.eq.pending,status.eq.active,status.eq.suspended)');
+    if(r3.ok){
+      var dbUsers=await r3.json();
+      if(dbUsers&&dbUsers.length){
+        var extras=dbUsers.filter(function(u){return u.username!=='demo'&&u.username!=='admin';});
+        var mapped=extras.map(function(u){return {id:u.username,pw:u.password,fn:u.first_name||u.username,ln:u.last_name||'',email:u.email||'',club:u.club||'',country:u.country||'',role:u.role||'',status:u.status,joined:u.joined_at?u.joined_at.slice(0,10):'',sessions:['ope-rethymno-2526'],avatar:'',bio:'',db_id:u.id};});
+        USERS=DUSERS.map(function(u){return Object.assign({},u);}).concat(mapped);
+      }
+    }
+  }catch(e){
+    console.error('Supabase load error:',e);
+    // Fallback to localStorage
+    var d=sGet('pf_'+CU.id+'_'+CS.id);
+    if(d){P=d.P||[];NOTES=d.NOTES||[];TEAMS=d.TEAMS||[];}
+  }
 }
 
 // ═══ AUTH ════════════════════════════════════════
-function doLogin(){
+async function doLogin(){
   var u=g('li-user').value.trim().toLowerCase();
   var p=g('li-pass').value.trim();
   var err=g('login-err');
   err.style.display='none';
   if(!u||!p){showErr(err,'Enter username and password.');return;}
-  var user=null;
-  for(var i=0;i<USERS.length;i++){
-    var x=USERS[i];
-    if(x.id.toLowerCase()===u && x.pw===p && x.status==='active'){user=x;break;}
+
+  var btn=g('li-user').closest ? document.querySelector('.btn-big') : null;
+  showErr(err,'<span style="color:var(--teal)">Signing in...</span>');
+
+  try{
+    // Query Supabase for user
+    var r=await sbFetch('users?username=eq.'+encodeURIComponent(u)+'&password=eq.'+encodeURIComponent(p));
+    if(!r.ok)throw new Error('Network error');
+    var rows=await r.json();
+
+    if(!rows||!rows.length){
+      showErr(err,'Invalid username or password.<br><span style="font-family:var(--fm);color:var(--teal);font-size:11px">Try: Demo / PlayerFinder</span>');
+      return;
+    }
+    var dbUser=rows[0];
+    if(dbUser.status==='pending'){showErr(err,'Account pending approval. Check back soon.');return;}
+    if(dbUser.status==='suspended'){showErr(err,'Account suspended. Contact admin.');return;}
+
+    // Map DB user to app user object
+    CU={
+      id:dbUser.username,
+      pw:dbUser.password,
+      fn:dbUser.first_name||dbUser.username,
+      ln:dbUser.last_name||'',
+      email:dbUser.email||'',
+      club:dbUser.club||'',
+      country:dbUser.country||'',
+      role:dbUser.role||'',
+      status:dbUser.status,
+      isGod:dbUser.is_god||false,
+      sessions:['ope-rethymno-2526'],
+      avatar:'',bio:'',
+      db_id:dbUser.id
+    };
+
+    g('li-user').value='';g('li-pass').value='';
+    err.style.display='none';
+
+    if(CU.isGod){showScr('s-godmode');await loadGMData();renderGM();}
+    else{showScr('s-sessions');renderSess();}
+
+  }catch(e){
+    showErr(err,'Connection error. Please try again.');
+    console.error(e);
   }
-  if(!user){showErr(err,'Invalid username or password.<br><span style="font-family:var(--fm);color:var(--teal);font-size:11px">Try: Demo / PlayerFinder</span>');return;}
-  CU=user;
-  g('li-user').value='';g('li-pass').value='';
-  if(user.isGod){showScr('s-godmode');renderGM();}
-  else{showScr('s-sessions');renderSess();}
 }
 
-function doRegister(){
+async function doRegister(){
   var fn=g('ru-fn').value.trim(),un=g('ru-un').value.trim(),pw=g('ru-pw').value.trim();
   var err=g('reg-err');err.style.display='none';
   if(!fn||!un||!pw){showErr(err,'Name, username and password required.');return;}
   if(pw.length<8){showErr(err,'Password must be 8+ characters.');return;}
-  var uid=un.toLowerCase().replace(/[^a-z0-9]/g,'_');
-  if(USERS.find(function(x){return x.id===uid;})){showErr(err,'Username taken.');return;}
-  var nu={id:uid,pw:pw,fn:fn,ln:g('ru-ln').value.trim(),email:g('ru-em').value.trim(),
-    club:g('ru-cl').value.trim(),country:g('ru-co').value.trim(),
-    phone:g('ru-ph').value.trim(),role:g('ru-ro').value,source:g('ru-src').value,
-    needs:g('ru-nd').value.trim(),status:'pending',
-    joined:new Date().toISOString().slice(0,10),sessions:[],avatar:'',bio:''};
-  USERS.push(nu);REGS.push(Object.assign({},nu,{at:new Date().toISOString()}));
-  sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));
-  sSet('pf_regs',REGS);
-  var d=document.createElement('div');d.style.cssText='text-align:center;padding:2rem';
-  d.innerHTML='<div style="font-size:36px">\u2705</div><div style="font-size:17px;font-weight:700;margin:10px 0">Account created!</div><div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem">Pending admin approval.</div>';
-  var b=document.createElement('button');b.className='btn-big';b.textContent='Go to Login';
-  b.onclick=function(){switchLT('in');};d.appendChild(b);
-  g('lp-up').innerHTML='';g('lp-up').appendChild(d);
-}
 
+  showErr(err,'<span style="color:var(--teal)">Creating account...</span>');
+  try{
+    // Check if username exists
+    var check=await sbFetch('users?username=eq.'+encodeURIComponent(un.toLowerCase()));
+    if(check.ok){var ex=await check.json();if(ex&&ex.length){showErr(err,'Username already taken. Choose another.');return;}}
+
+    // Insert new user
+    var newUser={
+      username:un.toLowerCase(),
+      password:pw,
+      first_name:fn,
+      last_name:g('ru-ln').value.trim(),
+      email:g('ru-em').value.trim(),
+      club:g('ru-cl').value.trim(),
+      country:g('ru-co').value.trim(),
+      phone:g('ru-ph').value.trim(),
+      role:g('ru-ro').value,
+      source:g('ru-src').value,
+      needs:g('ru-nd').value.trim(),
+      status:'pending',
+      is_god:false
+    };
+    var r=await sbFetch('users',{method:'POST',body:JSON.stringify(newUser)});
+    if(!r.ok)throw new Error('Failed to create account');
+
+    var d=document.createElement('div');d.style.cssText='text-align:center;padding:2rem';
+    d.innerHTML='<div style="font-size:36px">✅</div><div style="font-size:17px;font-weight:700;margin:10px 0">Account created!</div><div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem">Pending admin approval.</div>';
+    var b=document.createElement('button');b.className='btn-big';b.textContent='Go to Login';
+    b.onclick=function(){switchLT('in');};d.appendChild(b);
+    g('lp-up').innerHTML='';g('lp-up').appendChild(d);
+  }catch(e){
+    showErr(err,'Error creating account. Please try again.');
+    console.error(e);
+  }
+}
 function showErr(el,msg){el.innerHTML=msg;el.style.display='block';}
 function doLogout(){CU=null;CS=null;P=[];NOTES=[];TEAMS=[];closeConf('conf-logout');showScr('s-landing');}
 
@@ -1057,7 +1160,7 @@ function acc(id){return ACC[id%8];}function accl(id){return ACCL[id%8];}
 // ═══ APP INIT ═════════════════════════════════════
 async function initApp(){
   P=[];NOTES=[];TEAMS=[];FP=null;FEU=null;FST=null;FLEG=null;SEL={};
-  loadData();
+  await loadData();
   if(!P.length)P=INITIAL_PLAYERS.slice();
   updateKPIs();buildLeagueDD();renderT(getF());renderAg();renderTeams();goTo('dashboard');
 }
@@ -1563,6 +1666,26 @@ function uploadAvatar(){
 }
 
 // ═══ GOD MODE ═════════════════════════════════════
+async function loadGMData(){
+  try{
+    var r=await sbFetch('users?order=joined_at.desc');
+    if(r.ok){
+      var dbUsers=await r.json();
+      if(dbUsers&&dbUsers.length){
+        // Rebuild USERS array from DB
+        USERS=dbUsers.map(function(u){return{
+          id:u.username,pw:u.password,
+          fn:u.first_name||u.username,ln:u.last_name||'',
+          email:u.email||'',club:u.club||'',country:u.country||'',
+          role:u.role||'',status:u.status,isGod:u.is_god||false,
+          joined:u.joined_at?u.joined_at.slice(0,10):'',
+          sessions:['ope-rethymno-2526'],avatar:'',bio:'',db_id:u.id
+        };});
+      }
+    }
+  }catch(e){console.error('loadGMData error:',e);}
+}
+
 function renderGM(){
   var active=USERS.filter(function(u){return u.status==='active';}).length;
   var pending=USERS.filter(function(u){return u.status==='pending';}).length;
@@ -1597,9 +1720,21 @@ function renderGMUsers(){
   }).join('');
   wrap.innerHTML='<div class="gm-tbl">'+hdr+rows+'</div>';
 }
-function gmApprove(i){USERS[i].status='active';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('\u2713 Approved');}
-function gmSuspend(i){if(!confirm('Suspend?'))return;USERS[i].status='suspended';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('Suspended');}
-function gmUnsuspend(i){USERS[i].status='active';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('\u2713 Reactivated');}
+async function gmApprove(i){
+  var u=USERS[i];if(!u)return;
+  if(u.db_id){try{await sbFetch('users?id=eq.'+u.db_id,{method:'PATCH',body:JSON.stringify({status:'active'})});}catch(e){}}
+  await loadGMData();renderGM();toast('\u2713 '+u.fn+' approved');
+}
+async function gmSuspend(i){
+  var u=USERS[i];if(!u||!confirm('Suspend '+u.fn+'?'))return;
+  if(u.db_id){try{await sbFetch('users?id=eq.'+u.db_id,{method:'PATCH',body:JSON.stringify({status:'suspended'})});}catch(e){}}
+  await loadGMData();renderGM();toast('Suspended');
+}
+async function gmUnsuspend(i){
+  var u=USERS[i];if(!u)return;
+  if(u.db_id){try{await sbFetch('users?id=eq.'+u.db_id,{method:'PATCH',body:JSON.stringify({status:'active'})});}catch(e){}}
+  await loadGMData();renderGM();toast('\u2713 Reactivated');
+}
 
 function renderGMSess(){
   var wrap=g('gm-sess-wrap');
@@ -1636,7 +1771,11 @@ function renderGMRegs(){
       +'</div></div></div>';
   }).join('');
 }
-function gmReject(i){if(!confirm('Reject and remove?'))return;USERS.splice(i,1);sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('User rejected');}
+async function gmReject(i){
+  var u=USERS[i];if(!u||!u.db_id||!confirm('Reject and remove '+u.fn+'?'))return;
+  try{await sbFetch('users?id=eq.'+u.db_id,{method:'DELETE'});}catch(e){}
+  await loadGMData();renderGM();toast('User rejected');
+}
 
 // ═══ TOAST ════════════════════════════════════════
 function toast(msg){
