@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player Finder — Scout Smarter. Find Better.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--bg2:#111827;--bg3:#1f2937;--bg4:#374151;
+  --border:#1f2937;--b2:#374151;
+  --text:#f1f5f9;--muted:#94a3b8;--dim:#475569;
+  --teal:#14b8a6;--tl:rgba(20,184,166,.15);
+  --blue:#3b82f6;--bl:rgba(59,130,246,.15);
+  --green:#22c55e;--gl:rgba(34,197,94,.15);
+  --amber:#f59e0b;--al:rgba(245,158,11,.15);
+  --red:#ef4444;--rl:rgba(239,68,68,.15);
+  --violet:#a78bfa;--vl:rgba(167,139,250,.15);
+  --rose:#fb7185;--rsl:rgba(251,113,133,.15);
+  --gold:#f59e0b;
+  --fh:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'JetBrains Mono','Courier New',monospace;
+  --r:8px;--r2:12px;
+  --sh:0 1px 4px rgba(0,0,0,.4);--sh2:0 4px 20px rgba(0,0,0,.5);
+}
+body{background:var(--bg);color:var(--text);font-family:var(--fh);font-size:14px;line-height:1.5;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg3)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ── SCREENS ── */
+.screen{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);overflow-y:auto}
+.screen.active{display:flex;flex-direction:column}
+#s-app.active{overflow:hidden}
+
+/* ── LANDING ── */
+#s-landing{
+  background:radial-gradient(ellipse at 20% 50%,rgba(20,184,166,.08),transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(167,139,250,.06),transparent 50%),
+             var(--bg);
+  align-items:center;justify-content:center;flex-direction:column;padding:1.5rem;min-height:100vh
+}
+.land-card{background:var(--bg2);border:1px solid var(--b2);border-radius:16px;padding:2rem;width:420px;max-width:calc(100vw - 2rem);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.land-tabs{display:flex;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:1.5rem}
+.ltab{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);font-family:var(--fh);font-size:13px;font-weight:500;cursor:pointer;border-radius:6px;transition:all .2s}
+.ltab.on{background:var(--bg2);color:var(--teal);box-shadow:var(--sh)}
+.lfl{margin-bottom:10px}
+.lfl label{display:block;font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.linp{width:100%;padding:10px 13px;background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--text);font-family:var(--fh);font-size:13px;outline:none;transition:all .15s}
+.linp:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(20,184,166,.1)}
+.linp::placeholder{color:var(--dim)}
+select.linp{cursor:pointer}
+textarea.linp{resize:vertical;min-height:60px}
+.btn-big{width:100%;padding:12px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;font-family:var(--fh);font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .15s}
+.btn-big:hover{opacity:.88}
+.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+.err.show{display:block}
+.form-h{font-size:17px;font-weight:700;margin-bottom:3px}
+.form-sub{font-size:12px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
+.land-feats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:1.5rem;width:420px;max-width:calc(100vw - 2rem)}
+.feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px;text-align:center}
+.feat-ico{font-size:20px;margin-bottom:5px}
+.feat-t{font-size:11px;font-weight:600;color:var(--teal);margin-bottom:2px}
+.feat-d{font-size:10px;color:var(--dim);line-height:1.4}
+
+/* ── SESSIONS ── */
+.sess-bar{background:#080d1a;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;border-bottom:1px solid rgba(20,184,166,.12)}
+.user-chip{display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;cursor:pointer}
+.user-chip:hover{border-color:var(--teal)}
+.uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--violet));display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.sess-body{padding:2.5rem 2rem;max-width:900px;margin:0 auto}
+.sess-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.sess-card{background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.25rem;cursor:pointer;transition:all .2s}
+.sess-card:hover{border-color:rgba(20,184,166,.4);transform:translateY(-2px);box-shadow:0 8px 30px rgba(20,184,166,.1)}
+.sess-add{border:1px dashed var(--b2);border-radius:14px;padding:1.25rem;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;gap:8px;color:var(--dim)}
+.sess-add:hover{border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.04)}
+.lout-btn{font-family:var(--fm);font-size:11px;padding:5px 12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);cursor:pointer;border-radius:6px;transition:all .15s}
+.lout-btn:hover{color:var(--red);border-color:rgba(239,68,68,.3)}
+
+/* ── APP TOPBAR ── */
+.topbar{background:#080d1a;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;z-index:200;border-bottom:1px solid rgba(20,184,166,.1);flex-shrink:0}
+.logo-btn{display:flex;align-items:center;gap:9px;cursor:pointer;background:none;border:none}
+.logo-btn:hover{opacity:.8}
+.logo-t{font-family:var(--fm);font-size:14px;font-weight:500;color:#fff;display:flex;align-items:center;gap:6px}
+.logo-t em{color:var(--teal);font-style:normal}
+.logo-sub{font-family:var(--fm);font-size:8px;color:rgba(20,184,166,.4);text-transform:uppercase;letter-spacing:.1em}
+.topbar-r{display:flex;gap:5px;align-items:center}
+.tstat{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.35);padding:3px 9px;border:1px solid rgba(255,255,255,.08);border-radius:16px}
+.tstat b{color:var(--teal)}
+.sbadge{font-family:var(--fm);font-size:10px;color:var(--teal);padding:3px 9px;border:1px solid rgba(20,184,166,.25);border-radius:16px;background:rgba(20,184,166,.06)}
+.tbtn{font-family:var(--fm);font-size:10px;padding:4px 10px;border:1px solid rgba(20,184,166,.2);background:transparent;color:rgba(20,184,166,.7);cursor:pointer;border-radius:6px;transition:all .15s}
+.tbtn:hover{color:var(--teal);border-color:var(--teal);background:rgba(20,184,166,.08)}
+/* dropdowns */
+.dd-wrap{position:relative}
+.dd-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:1px solid var(--b2);border-radius:8px;box-shadow:var(--sh2);overflow:hidden;z-index:300;display:none;min-width:140px}
+.dd-menu.open{display:block}
+.dd-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;font-size:12px;color:var(--muted);transition:background .12s;border-bottom:1px solid var(--border)}
+.dd-row:last-child{border-bottom:none}
+.dd-row:hover{background:var(--bg3);color:var(--text)}
+/* user chip in topbar */
+.top-user{display:flex;align-items:center;gap:7px;padding:4px 10px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;cursor:pointer;transition:all .15s}
+.top-user:hover{border-color:var(--teal)}
+.top-av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--violet));display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── APP BODY ── */
+.app-body{display:flex;flex:1;overflow:hidden;min-height:0}
+/* sidebar */
+.sidebar{width:190px;background:rgba(17,24,39,.98);border-right:1px solid rgba(20,184,166,.07);flex-shrink:0;display:flex;flex-direction:column;transition:width .25s;overflow:hidden}
+.sidebar.closed{width:48px}
+.sb-inner{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px;min-width:190px}
+.sb-toggle{width:22px;height:22px;position:absolute;right:-11px;top:50%;transform:translateY(-50%);border-radius:50%;background:var(--bg3);border:1px solid var(--b2);color:var(--dim);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;z-index:5;transition:all .2s}
+.sb-toggle:hover{color:var(--teal)}
+.sidebar{position:relative}
+.sb-sec{font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;padding:3px 6px 7px;margin-top:8px;white-space:nowrap}
+.sb-sec:first-child{margin-top:0}
+.nbtn{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-family:var(--fh);font-size:12px;font-weight:500;width:100%;text-align:left;margin-bottom:2px;transition:all .15s;white-space:nowrap}
+.nbtn:hover{background:rgba(20,184,166,.08);color:var(--teal)}
+.nbtn.on{background:rgba(20,184,166,.12);color:var(--teal);border:1px solid rgba(20,184,166,.2)}
+.sidebar.closed .nbtn{justify-content:center;padding:9px 6px}
+.nb-ico{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.nb-lbl{flex:1}.nb-bdg{margin-left:auto;font-family:var(--fm);font-size:9px;padding:1px 6px;border-radius:8px;background:var(--bg3);color:var(--dim)}
+.nbtn.on .nb-bdg{background:rgba(20,184,166,.2);color:var(--teal)}
+.sidebar.closed .nb-lbl,.sidebar.closed .nb-bdg,.sidebar.closed .sb-sec,.sidebar.closed .add-lbl{display:none}
+.add-btn{width:100%;margin:6px 0 3px;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;font-family:var(--fh);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.add-btn:hover{opacity:.85}
+/* content */
+.content{flex:1;overflow-y:auto;overflow-x:hidden}
+.view{display:none;padding:1.1rem}
+.view.on{display:block}
+
+/* ── KPIs ── */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.1rem}
+.kpi{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:.9rem 1rem;border-left:3px solid var(--kc);box-shadow:var(--sh);transition:all .2s}
+.kpi:hover{transform:translateY(-1px);box-shadow:var(--sh2)}
+.kv{font-size:26px;font-weight:700;color:var(--kc);line-height:1;margin-bottom:2px;font-family:var(--fm)}
+.kl{font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+
+/* ── FILTER STRIP ── */
+.fstrip{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px 12px;margin-bottom:1.1rem;box-shadow:var(--sh);display:flex;flex-direction:column;gap:7px}
+.frow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.flbl{font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;width:52px;flex-shrink:0}
+.fsep{width:1px;height:18px;background:var(--b2);flex-shrink:0;margin:0 2px}
+/* search */
+.srch-w{flex:1;position:relative;min-width:0}
+.srch-i{width:100%;padding:8px 10px 8px 28px;border:1.5px solid var(--b2);border-radius:8px;font-family:var(--fm);font-size:11px;outline:none;background:var(--bg3);color:var(--text);transition:all .15s}
+.srch-i:focus{border-color:var(--teal);background:var(--bg2)}
+.srch-i::placeholder{color:var(--dim)}
+.srch-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--teal);font-size:12px;pointer-events:none}
+.srch-cnt{font-family:var(--fm);font-size:10px;color:var(--dim);white-space:nowrap;flex-shrink:0}
+/* chips */
+.chip{font-family:var(--fm);font-size:10px;padding:5px 11px;border-radius:6px;border:1px solid transparent;background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-weight:500}
+.chip .cnt{font-size:9px;opacity:.7}
+.ch-all{border-color:var(--b2);color:var(--muted)}.ch-all:hover,.ch-all.on{background:var(--bg3);color:var(--text);font-weight:600}
+.ch-out{border-color:rgba(59,130,246,.4);color:#60a5fa}.ch-out:hover,.ch-out.on{background:rgba(59,130,246,.12);border-color:#3b82f6}
+.ch-opp{border-color:rgba(251,113,133,.4);color:#fb7185}.ch-opp:hover,.ch-opp.on{background:rgba(251,113,133,.12);border-color:#fb7185}
+.ch-set{border-color:rgba(34,197,94,.4);color:#4ade80}.ch-set:hover,.ch-set.on{background:rgba(34,197,94,.12);border-color:#22c55e}
+.ch-mid{border-color:rgba(167,139,250,.4);color:#a78bfa}.ch-mid:hover,.ch-mid.on{background:rgba(167,139,250,.12);border-color:#a78bfa}
+.ch-lib{border-color:rgba(245,158,11,.4);color:#fbbf24}.ch-lib:hover,.ch-lib.on{background:rgba(245,158,11,.12);border-color:#f59e0b}
+/* filter dropdowns */
+.fdd-wrap{position:relative}
+.fdd-btn{font-family:var(--fm);font-size:10px;padding:5px 11px;border-radius:6px;border:1px solid var(--b2);background:var(--bg3);color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.fdd-btn:hover,.fdd-btn.on-teal{border-color:var(--teal);color:var(--teal);background:var(--tl)}
+.fdd-btn.on-amber{border-color:var(--amber);color:var(--amber);background:var(--al)}
+.fdd{position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:1px solid var(--b2);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:100;display:none;min-width:170px;max-height:240px;overflow-y:auto}
+.fdd.open{display:block}
+.fdd-item{padding:8px 14px;cursor:pointer;font-size:12px;color:var(--muted);transition:background .12s;border-bottom:1px solid var(--border)}
+.fdd-item:last-child{border-bottom:none}
+.fdd-item:hover{background:var(--bg3);color:var(--text)}
+.fdd-item.on{color:var(--teal);background:var(--tl);font-weight:600}
+.clr-btn{font-family:var(--fm);font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--b2);background:var(--bg3);color:var(--muted);cursor:pointer;transition:all .15s}
+.clr-btn:hover{background:var(--bg4);color:var(--text)}
+/* view mode */
+.vm-wrap{display:flex;background:var(--bg3);border-radius:8px;padding:2px;margin-left:4px}
+.vm-btn{width:28px;height:26px;border:none;background:transparent;color:var(--dim);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s}
+.vm-btn:hover{color:var(--muted)}
+.vm-btn.on{background:var(--bg2);color:var(--teal);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+
+/* ── TABLE ── */
+.tbl{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh)}
+.tbl-h{display:grid;grid-template-columns:.28fr 1.7fr .85fr .85fr .45fr .38fr .42fr 1.5fr 1.1fr .4fr;background:var(--bg);border-bottom:1px solid var(--b2)}
+.th{font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;padding:8px 9px;border-right:1px solid var(--border)}.th:last-child{border-right:none}
+.tr{display:grid;grid-template-columns:.28fr 1.7fr .85fr .85fr .45fr .38fr .42fr 1.5fr 1.1fr .4fr;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .1s}
+.tr:hover{background:rgba(20,184,166,.04)}.tr:last-child{border-bottom:none}
+.td{padding:8px 9px;font-size:12px;border-right:1px solid rgba(255,255,255,.03);display:flex;align-items:center;overflow:hidden}.td:last-child{border-right:none}
+.pos-b{font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:4px;white-space:nowrap;font-weight:500;border:1px solid transparent}
+.st-b{font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:4px;white-space:nowrap;font-weight:500}
+.eu-b{font-family:var(--fm);font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.empty{padding:2.5rem;text-align:center;color:var(--dim)}
+
+/* ── DETAIL ── */
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding:9px 12px;background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);box-shadow:var(--sh)}
+.back-btn{font-family:var(--fm);font-size:11px;color:var(--muted);cursor:pointer;border:none;background:transparent;display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;transition:all .15s}
+.back-btn:hover{background:var(--bg3);color:var(--teal)}
+.edit-btn{font-family:var(--fh);font-size:12px;font-weight:600;padding:8px 16px;border-radius:7px;border:1px solid rgba(20,184,166,.3);background:rgba(20,184,166,.1);color:var(--teal);cursor:pointer}
+.edit-btn:hover{background:rgba(20,184,166,.2)}
+.d-hero{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1.25rem;margin-bottom:10px;box-shadow:var(--sh)}
+.d-top{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+.d-av{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:15px;font-weight:500;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+.d-nm{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:5px}
+.d-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.d-tag{font-family:var(--fm);font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--b2);color:var(--dim)}
+.phys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.ph-c{background:var(--bg3);border-radius:7px;padding:9px;text-align:center;border:1px solid var(--b2)}
+.ph-v{font-family:var(--fm);font-size:17px;font-weight:500;color:var(--teal);line-height:1}
+.ph-l{font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase}
+.panel{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:1rem;margin-bottom:9px;box-shadow:var(--sh)}
+.ptitle{font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(20,184,166,.15)}
+.two-c{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.alrt{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--amber);display:flex;gap:5px;margin-bottom:9px}
+.alrt-b{color:var(--blue);background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.2)}
+.st-sel{font-family:var(--fm);font-size:11px;padding:5px 9px;border:1px solid var(--b2);border-radius:6px;background:var(--bg3);color:var(--text);cursor:pointer;outline:none}
+.btn-del{font-family:var(--fm);font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.25);background:transparent;color:#ef4444;cursor:pointer}
+.vrow{display:flex;align-items:center;gap:9px;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:5px}
+
+/* ── SEARCH ── */
+.sv-ban{background:linear-gradient(135deg,rgba(20,184,166,.1),rgba(59,130,246,.1));border:1px solid rgba(20,184,166,.2);border-radius:var(--r2);padding:.9rem 1.1rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:12px}
+.sv-i{flex:1;padding:10px 14px;border:1px solid rgba(20,184,166,.3);border-radius:8px;font-family:var(--fh);font-size:14px;outline:none;background:var(--bg3);color:var(--text)}
+.sv-i:focus{border-color:var(--teal);background:var(--bg2)}
+.sv-i::placeholder{color:var(--dim)}
+.src-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:11px}
+.src-card:hover{border-color:var(--teal);transform:translateX(2px)}
+.src-av{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:500;flex-shrink:0}
+.hl{background:rgba(20,184,166,.2);color:var(--teal);padding:0 2px;border-radius:3px;font-weight:600}
+.no-r{text-align:center;padding:2.5rem;color:var(--dim)}
+
+/* ── PRIORITY ── */
+.pri-hd{background:linear-gradient(135deg,rgba(245,158,11,.1),var(--bg2));border:1px solid rgba(245,158,11,.2);border-radius:var(--r2);padding:.9rem 1.1rem;margin-bottom:1.1rem}
+.pri-big{font-size:32px;font-weight:700;color:var(--amber);font-family:var(--fm)}
+.pri-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 14px;margin-bottom:9px;display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;box-shadow:var(--sh);cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+.pri-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--amber)}
+.pri-card:hover{box-shadow:var(--sh2);transform:translateY(-1px);border-color:rgba(245,158,11,.3)}
+.pri-card.sel{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.05)}
+.pri-av{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500;flex-shrink:0}
+.sel-btn{font-family:var(--fm);font-size:10px;padding:5px 11px;border-radius:6px;border:1px solid rgba(245,158,11,.4);color:var(--amber);background:transparent;cursor:pointer}
+.sel-btn:hover,.sel-btn.on{background:var(--amber);color:#000;font-weight:600}
+.rate-sel{font-family:var(--fm);font-size:10px;padding:4px 7px;border:1px solid var(--b2);border-radius:6px;background:var(--bg3);color:var(--muted);cursor:pointer}
+
+/* ── GOD MODE ── */
+#s-godmode{background:var(--bg);align-items:stretch}
+.gm-bar{background:#080d1a;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;border-bottom:2px solid var(--gold);flex-shrink:0}
+.gm-badge{font-family:var(--fm);font-size:10px;padding:3px 10px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);border-radius:16px;color:var(--gold);font-weight:600}
+.gm-main{padding:1.5rem 2rem;max-width:1100px;margin:0 auto;flex:1;overflow-y:auto}
+.gm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.gm-stat{background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:1rem;border-top:2px solid var(--gold)}
+.gm-stat .v{font-size:24px;font-weight:700;color:var(--gold);font-family:var(--fm)}.gm-stat .l{font-size:10px;color:var(--dim);margin-top:2px}
+.gm-tabs{display:flex;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:1.5rem;width:fit-content}
+.gmtab{padding:8px 18px;border:none;background:transparent;color:var(--muted);font-family:var(--fh);font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;transition:all .2s}
+.gmtab.on{background:var(--bg2);color:var(--gold);box-shadow:var(--sh)}
+.gm-sec{display:none}.gm-sec.on{display:block}
+.gm-tbl{background:var(--bg2);border:1px solid var(--b2);border-radius:10px;overflow:hidden}
+.gm-row{border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}.gm-row:hover{background:rgba(255,255,255,.02)}
+.gm-cell{padding:10px 12px;font-size:12px;display:flex;align-items:center}
+.sp{font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:10px;font-weight:600}
+.sp-a{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.sp-p{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.sp-s{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.act-btn{font-family:var(--fm);font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid;cursor:pointer;background:transparent;margin-right:4px}
+.btn-ok{border-color:rgba(34,197,94,.4);color:#4ade80}.btn-ok:hover{background:rgba(34,197,94,.1)}
+.btn-ng{border-color:rgba(239,68,68,.4);color:#f87171}.btn-ng:hover{background:rgba(239,68,68,.1)}
+.btn-wa{border-color:rgba(245,158,11,.4);color:#fbbf24}.btn-wa:hover{background:rgba(245,158,11,.1)}
+
+/* ── TEAMS / AGENTS / NOTES ── */
+.team-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem;margin-bottom:9px;border-left:3px solid var(--teal);transition:all .2s}
+.ag-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem;margin-bottom:9px;border-left:2px solid var(--teal)}
+.note-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:11px 13px;margin-bottom:7px}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:600;display:none;align-items:flex-start;justify-content:center;padding:1.25rem;overflow-y:auto}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border-radius:var(--r2);width:600px;max-width:100%;box-shadow:0 20px 80px rgba(0,0,0,.5);border:1px solid var(--b2);animation:su .18s ease}
+@keyframes su{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.modal-hd{background:var(--bg);border-radius:var(--r2) var(--r2) 0 0;padding:1.1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,184,166,.15)}
+.modal-hd h2{font-size:15px;font-weight:700;color:var(--teal);font-family:var(--fm)}
+.mx{background:var(--bg3);border:1px solid var(--b2);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.mx:hover{background:var(--bg4);color:var(--text)}
+.modal-body{padding:1.25rem}
+.modal-ft{padding:.9rem 1.25rem;border-top:1px solid var(--b2);display:flex;gap:7px;justify-content:flex-end;background:var(--bg);border-radius:0 0 var(--r2) var(--r2)}
+/* confirm popup */
+.conf-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:700;display:none;align-items:center;justify-content:center}
+.conf-bg.open{display:flex}
+.conf-box{background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.75rem;width:380px;max-width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:su .18s ease}
+/* profile */
+.prof-av-w{position:relative;width:80px;height:80px;margin:0 auto 1rem;cursor:pointer}
+.prof-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--violet));display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:22px;font-weight:700;color:#fff;border:3px solid rgba(20,184,166,.3)}
+.prof-ov{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:20px}
+.prof-av-w:hover .prof-ov{opacity:1}
+/* forms */
+.em-sec{margin-bottom:1rem}
+.em-sec-t{font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(20,184,166,.15)}
+.fg{display:grid;gap:8px;margin-bottom:8px}.fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr 1fr}.fg4{grid-template-columns:1fr 1fr 1fr 1fr}
+.fl{display:flex;flex-direction:column;gap:3px}
+.fl label{font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em}
+.inp{background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:8px 11px;color:var(--text);font-family:var(--fh);font-size:13px;outline:none;transition:all .15s;width:100%}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(20,184,166,.1);background:var(--bg2)}
+.inp::placeholder{color:var(--dim)}
+textarea.inp{resize:vertical;min-height:65px}select.inp{cursor:pointer}
+.brow{display:flex;gap:7px;margin-top:.75rem;flex-wrap:wrap}
+.btn-p{font-family:var(--fh);font-size:12px;font-weight:600;padding:9px 20px;border-radius:7px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;cursor:pointer}
+.btn-p:hover{opacity:.88}
+.btn-s{font-family:var(--fh);font-size:12px;padding:9px 14px;border-radius:7px;border:1px solid var(--b2);background:transparent;color:var(--muted);cursor:pointer}
+.btn-s:hover{background:var(--bg3);color:var(--text)}
+.btn-sm{font-family:var(--fm);font-size:10px;padding:5px 11px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--dim);cursor:pointer}
+.btn-sm:hover{background:var(--bg3);color:var(--text)}
+.m-tabs{display:flex;gap:5px;margin-bottom:1rem}
+.mtab{font-family:var(--fm);font-size:10px;padding:6px 13px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--dim);cursor:pointer}
+.mtab.on{border-color:var(--teal);color:var(--teal);background:var(--tl)}
+.mpanel{display:none}.mpanel.on{display:block}
+.hint{background:var(--tl);border:1px solid rgba(20,184,166,.2);border-radius:7px;padding:9px 11px;font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+.hint strong{color:var(--teal)}
+.paste-a{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:11px;color:var(--text);font-family:var(--fh);font-size:13px;outline:none;resize:vertical;min-height:150px}
+.paste-a::placeholder{color:var(--dim)}
+.prog-w{display:none;margin-bottom:8px}
+.prog-b{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--teal),var(--violet));width:0;transition:width .3s}
+.prog-l{font-family:var(--fm);font-size:10px;color:var(--dim);margin-top:4px}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--teal);color:#000;font-weight:700;padding:11px 18px;border-radius:7px;font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(20,184,166,.4);font-family:var(--fm);display:none}
+a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════════════ */
+
+/* Sidebar collapsed: floating icon strip with tooltips */
+.sidebar.closed { width:56px; box-shadow:2px 0 16px rgba(0,0,0,.5); }
+.sidebar.closed .sb-inner { padding:10px 6px; min-width:56px; }
+.sidebar.closed .sb-sec,
+.sidebar.closed .nb-lbl,
+.sidebar.closed .nb-bdg,
+.sidebar.closed .add-lbl { display:none!important; }
+.sidebar.closed .nbtn {
+  justify-content:center; padding:10px 0; border-radius:10px;
+  margin-bottom:4px; position:relative;
+}
+.sidebar.closed .nb-ico { font-size:18px; width:auto; }
+.sidebar.closed .add-btn { padding:10px 0; font-size:18px; justify-content:center; border-radius:10px; }
+/* Tooltip */
+.sidebar.closed .nbtn:hover::after {
+  content:attr(data-label);
+  position:absolute; left:62px; top:50%; transform:translateY(-50%);
+  background:var(--bg2); border:1px solid var(--b2); color:var(--text);
+  font-size:11px; padding:4px 10px; border-radius:6px; white-space:nowrap;
+  pointer-events:none; z-index:999; box-shadow:var(--sh2);
+}
+
+/* Tablet ≤ 900px */
+@media (max-width:900px) {
+  .kpis { grid-template-columns:repeat(2,1fr); }
+  .tbl-h { display:grid; grid-template-columns:.3fr 1.5fr .8fr .4fr .4fr 1fr .3fr; }
+  .tr    { grid-template-columns:.3fr 1.5fr .8fr .4fr .4fr 1fr .3fr; }
+  .tbl-h>.th:nth-child(4),.tr>.td:nth-child(4),
+  .tbl-h>.th:nth-child(5),.tr>.td:nth-child(5),
+  .tbl-h>.th:nth-child(7),.tr>.td:nth-child(7) { display:none; }
+  .gm-kpis { grid-template-columns:repeat(2,1fr); }
+  .fg3,.fg4 { grid-template-columns:1fr 1fr; }
+}
+
+/* Mobile ≤ 600px */
+@media (max-width:600px) {
+  /* Landing */
+  .land-card { padding:1.25rem 1rem; }
+  .land-feats { grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* Topbar */
+  .topbar { padding:0 .75rem; }
+  .logo-sub { display:none; }
+  .tstat { display:none; }
+  .sbadge { font-size:9px; padding:2px 7px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .top-user span { display:none; }
+
+  /* Sidebar stays collapsed on mobile, no toggle */
+  .sidebar { width:52px!important; }
+  .sidebar .sb-sec,.sidebar .nb-lbl,.sidebar .nb-bdg,.sidebar .add-lbl { display:none!important; }
+  .sidebar .nbtn { justify-content:center; padding:10px 0; border-radius:10px; }
+  .sidebar .nb-ico { font-size:17px; width:auto; }
+  .sidebar .add-btn { padding:10px 0; font-size:17px; justify-content:center; border-radius:10px; }
+  .sidebar .sb-toggle { display:none; }
+
+  /* Content */
+  .view { padding:.75rem; }
+  .kpis { grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:.75rem; }
+  .kv { font-size:20px; }
+
+  /* Filter strip */
+  .fstrip { padding:8px; }
+  .frow { gap:4px; }
+  .flbl { display:none; }
+  .fdd-btn,.clr-btn { font-size:9px; padding:4px 8px; }
+  .chip { font-size:9px; padding:4px 8px; }
+
+  /* Table → card-like rows */
+  .tbl-h { display:none; }
+  .tr { display:flex; flex-direction:row; flex-wrap:wrap; padding:10px 12px; gap:4px; align-items:center; }
+  .tr>.td:nth-child(1),.tr>.td:nth-child(5),
+  .tr>.td:nth-child(6),.tr>.td:nth-child(7) { display:none; }
+  .tr>.td:nth-child(2) { flex:1; min-width:0; }
+  .tr>.td:nth-child(3) { flex:0 0 auto; }
+  .tr>.td:nth-child(8) { flex:1; font-size:11px; color:var(--dim)!important; }
+  .tr>.td:nth-child(9) { flex:0 0 auto; }
+  .tr>.td:nth-child(10) { flex:0 0 auto; }
+
+  /* Detail */
+  .d-top { flex-direction:column; }
+  .phys { grid-template-columns:repeat(2,1fr); }
+  .two-c { grid-template-columns:1fr; }
+  .back-bar { flex-direction:column; gap:8px; align-items:flex-start; }
+
+  /* Priority */
+  .pri-card { grid-template-columns:auto 1fr; gap:8px; }
+  .pri-card>div:last-child { grid-column:1/-1; display:flex; gap:8px; }
+
+  /* Sessions */
+  .sess-grid { grid-template-columns:1fr 1fr; gap:10px; }
+  .sess-body { padding:1.25rem 1rem; }
+
+  /* Modals */
+  .modal { width:calc(100vw - 1rem)!important; margin-top:.5rem; }
+  .modal-body { padding:.9rem; }
+  .fg2,.fg3,.fg4 { grid-template-columns:1fr!important; }
+
+  /* God mode */
+  .gm-main { padding:1rem; }
+  .gm-kpis { grid-template-columns:repeat(2,1fr); gap:8px; }
+
+  /* Hide grid view button on mobile */
+  #vm-grid { display:none; }
+}
+
+/* Very small ≤ 380px */
+@media (max-width:380px) {
+  .sess-grid { grid-template-columns:1fr; }
+  .sbadge { display:none; }
+  .land-feats { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div class="screen active" id="s-landing">
+ <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:100%;padding:1.5rem">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:2rem">
+   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="24" r="23" stroke="#14b8a6" stroke-width="1.5" opacity=".4"/>
+    <circle cx="18" cy="18" r="8" fill="rgba(20,184,166,.15)" stroke="#14b8a6" stroke-width="1.5"/>
+    <line x1="24" y1="24" x2="37" y2="37" stroke="#14b8a6" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="18" cy="18" r="4" fill="#14b8a6"/>
+    <circle cx="18" cy="18" r="1.8" fill="#0a0f1e"/>
+   </svg>
+   <div>
+    <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:#fff">Player<em style="color:#14b8a6;font-style:normal">Finder</em></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(20,184,166,.5);text-transform:uppercase;letter-spacing:.18em;margin-top:3px">Scout Smarter. Find Better.</div>
+   </div>
+  </div>
+  <div class="land-card">
+   <div class="land-tabs">
+    <button class="ltab on" id="ltab-in" onclick="switchLT('in')">Sign In</button>
+    <button class="ltab" id="ltab-up" onclick="switchLT('up')">Create Account</button>
+   </div>
+   <!-- SIGN IN -->
+   <div id="lp-in">
+    <div class="form-h">Welcome back</div>
+    <div class="form-sub">Sign in to your scouting sessions.</div>
+    <div class="err" id="login-err"></div>
+    <div class="lfl"><label>Username</label><input class="linp" id="li-user" placeholder="Username" autocomplete="username"></div>
+    <div class="lfl"><label>Password</label><div style="position:relative"><input class="linp" id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:38px"><button type="button" onclick="togglePw('li-pass',this)" title="Show/hide password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--dim);padding:0;display:flex;align-items:center;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+    <button class="btn-big" onclick="doLogin()">Sign In →</button>
+
+   </div>
+   <!-- CREATE ACCOUNT -->
+   <div id="lp-up" style="display:none">
+    <div class="form-h">Create your account</div>
+    <div class="form-sub">Join Player Finder Pro — free trial, no credit card required.</div>
+    <div class="err" id="reg-err"></div>
+    <div class="fg fg2" style="margin-bottom:0">
+     <div class="lfl"><label>First Name *</label><input class="linp" id="ru-fn" placeholder="Lionel"></div>
+     <div class="lfl"><label>Last Name</label><input class="linp" id="ru-ln" placeholder="Messi"></div>
+    </div>
+    <div class="lfl"><label>Username *</label><input class="linp" id="ru-un" placeholder="lionel.messi"></div>
+    <div class="lfl"><label>Password * (min 8 chars)</label><div style="position:relative"><input class="linp" id="ru-pw" type="password" placeholder="••••••••" style="padding-right:38px"><button type="button" onclick="togglePw('ru-pw',this)" title="Show/hide password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--dim);padding:0;display:flex;align-items:center;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+    <div class="lfl"><label>Email</label><input class="linp" id="ru-em" type="email" placeholder="argentina@campeon.del.mundo"></div>
+    <div class="lfl"><label>Club / Team</label><input class="linp" id="ru-cl" placeholder="Inter Milan Volleyball"></div>
+    <div class="fg fg2" style="margin-bottom:0">
+     <div class="lfl"><label>Country</label><input class="linp" id="ru-co" placeholder="Italy"></div>
+     <div class="lfl"><label>Phone</label><input class="linp" id="ru-ph" placeholder="+39 ..."></div>
+    </div>
+    <div class="lfl"><label>Role</label>
+     <select class="linp" id="ru-ro">
+      <option>Head Coach</option><option>Assistant Coach</option><option>Scout / Analyst</option>
+      <option>Sports Director</option><option>Agent</option><option>Other</option>
+     </select>
+    </div>
+    <div class="lfl"><label>How did you find us?</label>
+     <select class="linp" id="ru-src">
+      <option value="">— Select —</option>
+      <option>FIVB/CEV Network</option><option>Colleague recommendation</option>
+      <option>Social media</option><option>Google search</option><option>Other</option>
+     </select>
+    </div>
+    <div class="lfl"><label>Scouting needs (optional)</label><textarea class="linp" id="ru-nd" placeholder="Which positions? Which leagues?"></textarea></div>
+    <button class="btn-big" onclick="doRegister()">Create Account →</button>
+    <div style="font-size:10px;color:var(--dim);margin-top:8px;text-align:center;line-height:1.5">Your data may be used to send relevant scouting updates.</div>
+   </div>
+  </div>
+  <div class="land-feats">
+   <div class="feat"><div class="feat-ico">🏐</div><div class="feat-t">96+ Players</div><div class="feat-d">Pre-loaded from 5 agencies</div></div>
+   <div class="feat"><div class="feat-ico">🔍</div><div class="feat-t">Smart Search</div><div class="feat-d">Instant keyword search</div></div>
+   <div class="feat"><div class="feat-ico">⭐</div><div class="feat-t">Priority Lists</div><div class="feat-d">Rate and shortlist players</div></div>
+  </div>
+ </div>
+</div>
+
+<!-- SESSIONS -->
+<div class="screen" id="s-sessions">
+ <div class="sess-bar">
+  <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="showConf('conf-logout')">
+   <svg width="26" height="26" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="23" stroke="#14b8a6" stroke-width="1.5" opacity=".4"/><circle cx="18" cy="18" r="8" fill="rgba(20,184,166,.15)" stroke="#14b8a6" stroke-width="1.5"/><line x1="24" y1="24" x2="37" y2="37" stroke="#14b8a6" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="18" r="4" fill="#14b8a6"/><circle cx="18" cy="18" r="1.8" fill="#0a0f1e"/></svg>
+   <span style="font-family:var(--fm);font-size:14px;color:#fff">Player<em style="color:#14b8a6;font-style:normal">Finder</em></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+   <div class="user-chip"><div class="uav" id="sess-av">PF</div><span id="sess-name" style="font-size:12px;color:var(--text)">Player Finder</span></div>
+   <button class="lout-btn" onclick="showConf('conf-logout')">Sign out</button>
+  </div>
+ </div>
+ <div class="sess-body">
+  <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px">Welcome, <em id="sess-welcome" style="color:var(--teal);font-style:normal">Demo</em></div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:2rem">Select a scouting session or create a new one.</div>
+  <div class="sess-grid" id="sess-grid"></div>
+ </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="s-app">
+ <header class="topbar">
+  <button class="logo-btn" onclick="showConf('conf-exit')">
+   <svg width="24" height="24" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="23" stroke="#14b8a6" stroke-width="1.5" opacity=".4"/><circle cx="18" cy="18" r="8" fill="rgba(20,184,166,.15)" stroke="#14b8a6" stroke-width="1.5"/><line x1="24" y1="24" x2="37" y2="37" stroke="#14b8a6" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="18" r="4" fill="#14b8a6"/><circle cx="18" cy="18" r="1.8" fill="#0a0f1e"/></svg>
+   <span class="logo-t">Player<em>Finder</em><span class="logo-sub">Scout Smarter. Find Better.</span></span>
+  </button>
+  <div class="topbar-r">
+   <div class="tstat">Players: <b id="top-n">0</b></div>
+   <div class="tstat">Priority: <b id="top-p">0</b></div>
+   <div class="sbadge" id="sess-badge">Session</div>
+   <div class="dd-wrap">
+    <button class="tbtn" id="lang-btn" onclick="toggleMenu('lang-d')">EN ▾</button>
+    <div class="dd-menu" id="lang-d">
+     <div class="dd-row" onclick="setLang('en',this)">🇬🇧 English</div>
+     <div class="dd-row" onclick="setLang('es',this)">🇦🇷 Español</div>
+     <div class="dd-row" onclick="setLang('it',this)">🇮🇹 Italiano</div>
+     <div class="dd-row" onclick="setLang('el',this)">🇬🇷 Ελληνικά</div>
+    </div>
+   </div>
+   <div class="dd-wrap">
+    <button class="tbtn" onclick="toggleMenu('exp-d')">↓ Export ▾</button>
+    <div class="dd-menu" id="exp-d">
+     <div class="dd-row" onclick="exportCSV()">📄 CSV</div>
+     <div class="dd-row" onclick="exportExcel()">📊 Excel (.xls)</div>
+     <div class="dd-row" onclick="exportPDF()">📑 PDF</div>
+    </div>
+   </div>
+   <div class="top-user" onclick="openProfile()">
+    <div class="top-av" id="app-av">PF</div>
+    <span id="app-name" style="font-size:11px;color:var(--muted)">Demo</span>
+   </div>
+  </div>
+ </header>
+ <div class="app-body">
+  <aside class="sidebar" id="sidebar">
+   <button class="sb-toggle" id="sb-toggle" onclick="toggleSB()">◀</button>
+   <div class="sb-inner">
+    <button class="add-btn" onclick="openAdd()"><span>+</span><span class="add-lbl"> Add Player</span></button>
+    <div class="sb-sec">Database</div>
+    <button class="nbtn on" id="nb-dashboard" data-label="Players" onclick="goTo('dashboard')"><span class="nb-ico">◉</span><span class="nb-lbl">Players</span><span class="nb-bdg" id="badge-n">0</span></button>
+    <button class="nbtn" id="nb-search" data-label="Search" onclick="goTo('search')"><span class="nb-ico">🔍</span><span class="nb-lbl">Search</span></button>
+    <button class="nbtn" id="nb-priority" data-label="Priority" onclick="goTo('priority')"><span class="nb-ico">⭐</span><span class="nb-lbl">Priority</span><span class="nb-bdg" id="badge-p">0</span></button>
+    <div class="sb-sec">Scouting</div>
+    <button class="nbtn" id="nb-teams" data-label="Teams" onclick="goTo('teams')"><span class="nb-ico">🏐</span><span class="nb-lbl">Teams</span></button>
+    <button class="nbtn" id="nb-agents" data-label="Agents" onclick="goTo('agents')"><span class="nb-ico">🤝</span><span class="nb-lbl">Agents</span></button>
+    <button class="nbtn" id="nb-notes" data-label="Notes" onclick="goTo('notes')"><span class="nb-ico">📝</span><span class="nb-lbl">Notes</span></button>
+   </div>
+  </aside>
+  <div class="content">
+   <!-- DASHBOARD -->
+   <div class="view on" id="v-dashboard">
+    <div class="kpis">
+     <div class="kpi" style="--kc:var(--teal)"><div class="kv" id="kpi-n">0</div><div class="kl">Total Players</div></div>
+     <div class="kpi" style="--kc:var(--violet)"><div class="kv" id="kpi-eu">0</div><div class="kl">EU Passport</div></div>
+     <div class="kpi" style="--kc:var(--amber)"><div class="kv" id="kpi-p">0</div><div class="kl">Priority</div></div>
+     <div class="kpi" style="--kc:var(--green)"><div class="kv" id="kpi-g">0</div><div class="kl">Greek League</div></div>
+    </div>
+    <div class="fstrip">
+     <!-- Row 1: search + view mode -->
+     <div class="frow">
+      <div class="srch-w"><span class="srch-ico">⟐</span><input class="srch-i" id="dash-q" placeholder="Search players..." oninput="applyF()"></div>
+      <span class="srch-cnt" id="srch-cnt"></span>
+      <div class="vm-wrap">
+       <button class="vm-btn on" id="vm-list" onclick="setVM('list')" title="List">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="0" y="1" width="14" height="2" rx="1"/><rect x="0" y="6" width="14" height="2" rx="1"/><rect x="0" y="11" width="14" height="2" rx="1"/></svg>
+       </button>
+       <button class="vm-btn" id="vm-card" onclick="setVM('card')" title="Cards">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="0" y="0" width="14" height="4" rx="1.5"/><rect x="0" y="5" width="14" height="4" rx="1.5"/><rect x="0" y="10" width="14" height="4" rx="1.5"/></svg>
+       </button>
+       <button class="vm-btn" id="vm-grid" onclick="setVM('grid')" title="Grid">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="0" y="0" width="6" height="6" rx="1.5"/><rect x="8" y="0" width="6" height="6" rx="1.5"/><rect x="0" y="8" width="6" height="6" rx="1.5"/><rect x="8" y="8" width="6" height="6" rx="1.5"/></svg>
+       </button>
+      </div>
+     </div>
+     <!-- Row 2: position chips + filter dropdowns -->
+     <div class="frow">
+      <span class="flbl">Pos:</span>
+      <button class="chip ch-all on" id="ch-all" onclick="setPos(null,this)">All <span class="cnt" id="ct-all">0</span></button>
+      <button class="chip ch-out" id="ch-out" onclick="setPos('Outside',this)">Outside <span class="cnt" id="ct-out">0</span></button>
+      <button class="chip ch-opp" id="ch-opp" onclick="setPos('Opposite',this)">Opposite <span class="cnt" id="ct-opp">0</span></button>
+      <button class="chip ch-set" id="ch-set" onclick="setPos('Setter',this)">Setter <span class="cnt" id="ct-set">0</span></button>
+      <button class="chip ch-mid" id="ch-mid" onclick="setPos('Middle',this)">Middle <span class="cnt" id="ct-mid">0</span></button>
+      <button class="chip ch-lib" id="ch-lib" onclick="setPos('Libero',this)">Libero <span class="cnt" id="ct-lib">0</span></button>
+      <div class="fsep"></div>
+      <div class="fdd-wrap">
+       <button class="fdd-btn on-amber" id="fdd-pri-btn" onclick="toggleMenu('fdd-pri')">⭐ Priority ▾</button>
+       <div class="fdd" id="fdd-pri">
+        <div class="fdd-item" onclick="setStatusF(null,this)">All statuses</div>
+        <div class="fdd-item" onclick="setStatusF('Priority',this)">⭐ Priority</div>
+        <div class="fdd-item" onclick="setStatusF('Watching',this)">👁 Watching</div>
+        <div class="fdd-item" onclick="setStatusF('Contacted',this)">📞 Contacted</div>
+        <div class="fdd-item" onclick="setStatusF('Discarded',this)">✗ Discarded</div>
+       </div>
+      </div>
+      <button class="chip" id="ch-disc" onclick="setStatusF('Discarded',this)" style="border-color:rgba(239,68,68,.4);color:#f87171">✗ Discard <span class="cnt" id="ct-disc">0</span></button>
+      <div class="fdd-wrap">
+       <button class="fdd-btn" id="fdd-eu-btn" onclick="toggleMenu('fdd-eu')">EU Passport ▾</button>
+       <div class="fdd" id="fdd-eu">
+        <div class="fdd-item" onclick="setEUF(null,this)">All passports</div>
+        <div class="fdd-item" onclick="setEUF('Yes',this)">✓ EU only</div>
+        <div class="fdd-item" onclick="setEUF('No',this)">✗ Non-EU only</div>
+       </div>
+      </div>
+      <div class="fdd-wrap">
+       <button class="fdd-btn" id="fdd-lg-btn" onclick="toggleMenu('fdd-lg')">League ▾</button>
+       <div class="fdd" id="fdd-lg"><div class="fdd-item" onclick="setLeagueF(null,this)">All leagues</div></div>
+      </div>
+      <button class="clr-btn" onclick="clearAll()">✖ Clear</button>
+     </div>
+    </div>
+    <div id="tbl-wrap"></div>
+   </div>
+   <!-- DETAIL -->
+   <div class="view" id="v-detail">
+    <div class="back-bar">
+     <button class="back-btn" onclick="goTo('dashboard')">← Back to Players</button>
+     <button class="edit-btn" onclick="openEdit()">✏️ Edit Player</button>
+    </div>
+    <div id="det-content"></div>
+   </div>
+   <!-- SEARCH -->
+   <div class="view" id="v-search">
+    <div class="sv-ban">
+     <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:7px">🔍 Global Search</div>
+      <input class="sv-i" id="sv-q" placeholder="Name, country, position, agent, club, notes..." oninput="doSearch()">
+     </div>
+     <div style="text-align:right;min-width:70px">
+      <div style="font-size:26px;font-weight:700;color:var(--teal);font-family:var(--fm)" id="sv-cnt">—</div>
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm)">results</div>
+     </div>
+    </div>
+    <div id="sv-results"></div>
+   </div>
+   <!-- PRIORITY -->
+   <div class="view" id="v-priority">
+    <div class="pri-hd">
+     <div style="display:flex;align-items:center;justify-content:space-between">
+      <div><div class="pri-big" id="pri-big">0</div><div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--fm)">PRIORITY PLAYERS</div></div>
+      <div style="text-align:right;font-size:12px"><div style="color:var(--amber);font-weight:600;margin-bottom:3px">How to add:</div><div style="color:var(--muted)">Set any player Status → Priority</div></div>
+     </div>
+    </div>
+    <div id="pri-list"></div>
+   </div>
+   <!-- TEAMS -->
+   <div class="view" id="v-teams">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+     <div style="font-size:18px;font-weight:700">Teams &amp; Clubs</div>
+     <button class="btn-sm" onclick="openTeamModal()">+ Add Team</button>
+    </div>
+    <div id="teams-list"></div>
+   </div>
+   <!-- AGENTS -->
+   <div class="view" id="v-agents">
+    <div style="font-size:18px;font-weight:700;margin-bottom:1rem">Agents &amp; Agencies</div>
+    <div id="ag-list"></div>
+   </div>
+   <!-- NOTES -->
+   <div class="view" id="v-notes">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+     <div style="font-size:18px;font-weight:700">Session Notes</div>
+     <button class="btn-sm" onclick="addNote()">+ Add Note</button>
+    </div>
+    <div id="nt-list"></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- GOD MODE -->
+<div class="screen" id="s-godmode">
+ <div class="gm-bar">
+  <div style="display:flex;align-items:center;gap:10px">
+   <svg width="24" height="24" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="23" stroke="#f59e0b" stroke-width="1.5"/><circle cx="18" cy="18" r="8" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/><line x1="24" y1="24" x2="37" y2="37" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="18" r="4" fill="#f59e0b"/><circle cx="18" cy="18" r="1.8" fill="#0a0f1e"/></svg>
+   <span style="font-family:var(--fm);font-size:14px;color:#fff">Player<em style="color:var(--gold);font-style:normal">Finder</em></span>
+   <div class="gm-badge">⚡ GOD MODE</div>
+  </div>
+  <div style="display:flex;gap:8px">
+   <button class="btn-sm" onclick="gotoSess()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">← Sessions</button>
+   <button class="btn-sm" onclick="doLogout()" style="color:var(--red);border-color:rgba(239,68,68,.2)">Sign out</button>
+  </div>
+ </div>
+ <div class="gm-main">
+  <div style="font-size:22px;font-weight:700;margin-bottom:4px">Admin Dashboard</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:1.25rem">Full access — users, sessions, registrations</div>
+  <div class="gm-kpis">
+   <div class="gm-stat"><div class="v" id="gm-tu">0</div><div class="l">Total Users</div></div>
+   <div class="gm-stat"><div class="v" id="gm-au">0</div><div class="l">Active</div></div>
+   <div class="gm-stat"><div class="v" id="gm-pu">0</div><div class="l">Pending</div></div>
+   <div class="gm-stat"><div class="v" id="gm-ts">0</div><div class="l">Sessions</div></div>
+  </div>
+  <div class="gm-tabs">
+   <button class="gmtab on" onclick="switchGMTab('users',this)">Users</button>
+   <button class="gmtab" onclick="switchGMTab('sessions',this)">Sessions</button>
+   <button class="gmtab" onclick="switchGMTab('regs',this)">Registrations</button>
+  </div>
+  <div class="gm-sec on" id="gms-users"><div id="gm-users-wrap"></div></div>
+  <div class="gm-sec" id="gms-sessions"><div id="gm-sess-wrap"></div></div>
+  <div class="gm-sec" id="gms-regs"><div id="gm-reg-wrap"></div></div>
+ </div>
+</div>
+
+<!-- EDIT PLAYER MODAL -->
+<div class="modal-bg" id="em-bg">
+ <div class="modal">
+  <div class="modal-hd"><h2>✏️ Edit Player — <span id="em-name">—</span></h2><button class="mx" onclick="closeModal('em-bg')">✕</button></div>
+  <div class="modal-body">
+   <div class="em-sec"><div class="em-sec-t">Identity</div>
+    <div class="fg fg2"><div class="fl"><label>Full Name</label><input class="inp" id="ef-name"></div><div class="fl"><label>Position</label><select class="inp" id="ef-pos"><option>Outside</option><option>Opposite</option><option>Setter</option><option>Middle</option><option>Libero</option></select></div></div>
+    <div class="fg fg3"><div class="fl"><label>Country</label><input class="inp" id="ef-country"></div><div class="fl"><label>Born / Age</label><input class="inp" id="ef-born"></div><div class="fl"><label>Hand</label><select class="inp" id="ef-hand"><option>Right</option><option>Left</option></select></div></div>
+    <div class="fg fg2"><div class="fl"><label>EU Passport</label><select class="inp" id="ef-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div><div class="fl"><label>Status</label><select class="inp" id="ef-status"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div></div>
+   </div>
+   <div class="em-sec"><div class="em-sec-t">Physical</div>
+    <div class="fg fg4"><div class="fl"><label>Height cm</label><input class="inp" id="ef-ht" type="number"></div><div class="fl"><label>Spike cm</label><input class="inp" id="ef-sp" type="number"></div><div class="fl"><label>Block cm</label><input class="inp" id="ef-bl" type="number"></div><div class="fl"><label>Weight kg</label><input class="inp" id="ef-wt" type="number"></div></div>
+   </div>
+   <div class="em-sec"><div class="em-sec-t">Club & Agent</div>
+    <div class="fg fg2"><div class="fl"><label>Current Club</label><input class="inp" id="ef-club"></div><div class="fl"><label>League</label><input class="inp" id="ef-league"></div></div>
+    <div class="fg fg2"><div class="fl"><label>Agent / Agency</label><input class="inp" id="ef-agent"></div><div class="fl"><label>Contact</label><input class="inp" id="ef-contact"></div></div>
+   </div>
+   <div class="em-sec"><div class="em-sec-t">Links</div>
+    <div class="fg fg2"><div class="fl"><label>Volleybox URL</label><input class="inp" id="ef-vb"></div><div class="fl"><label>Video URL</label><input class="inp" id="ef-vid"></div></div>
+   </div>
+   <div class="em-sec"><div class="em-sec-t">Notes</div>
+    <div class="fl" style="margin-bottom:8px"><label>Observation Notes</label><textarea class="inp" id="ef-notes"></textarea></div>
+    <div class="fl"><label>Verdict</label><textarea class="inp" id="ef-verdict"></textarea></div>
+   </div>
+  </div>
+  <div class="modal-ft"><button class="btn-s" onclick="closeModal('em-bg')">Cancel</button><button class="btn-p" onclick="saveEdit()">💾 Save Changes</button></div>
+ </div>
+</div>
+
+<!-- ADD PLAYER MODAL -->
+<div class="modal-bg" id="am-bg">
+ <div class="modal" style="width:520px">
+  <div class="modal-hd"><h2>Add Player</h2><button class="mx" onclick="closeModal('am-bg')">✕</button></div>
+  <div class="modal-body">
+   <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Import from Volleybox URL, paste text, or enter manually.</div>
+   <div class="m-tabs">
+    <button class="mtab on" onclick="switchAddTab('url',this)">🔗 Volleybox URL</button>
+    <button class="mtab" onclick="switchAddTab('paste',this)">📋 Paste text</button>
+    <button class="mtab" onclick="switchAddTab('manual',this)">✏️ Manual</button>
+   </div>
+   <div class="mpanel on" id="mp-url">
+    <div class="hint"><strong>Paste the Volleybox URL and click Import.</strong> Requires Anthropic API key configured below.</div>
+    <div style="display:flex;gap:7px;margin-bottom:8px"><input class="inp" id="am-url" placeholder="https://volleybox.net/..." style="flex:1"><button class="btn-p" id="btn-import" onclick="doImport()" style="padding:8px 14px;font-size:12px">Import</button></div>
+    <div class="prog-w" id="pw-url"><div class="prog-b"><div class="prog-f" id="pf-url"></div></div><div class="prog-l" id="pl-url"></div></div>
+    <div style="margin-top:8px"><button class="btn-sm" onclick="setAPIKey()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">⚙ Configure API Key</button></div>
+   </div>
+   <div class="mpanel" id="mp-paste">
+    <div class="hint"><strong>Open Volleybox → Ctrl+A → Ctrl+C → paste below → Extract</strong></div>
+    <textarea class="paste-a" id="am-paste" placeholder="Paste full Volleybox page text here..."></textarea>
+    <div class="brow"><button class="btn-p" onclick="doPaste()">Extract data</button></div>
+    <div class="prog-w" id="pw-paste"><div class="prog-b"><div class="prog-f" id="pf-paste"></div></div><div class="prog-l" id="pl-paste"></div></div>
+   </div>
+   <div class="mpanel" id="mp-manual">
+    <div class="fg fg2"><div class="fl"><label>Full Name *</label><input class="inp" id="mf-name"></div><div class="fl"><label>Position *</label><select class="inp" id="mf-pos"><option>Outside</option><option>Opposite</option><option>Setter</option><option>Middle</option><option>Libero</option></select></div></div>
+    <div class="fg fg3"><div class="fl"><label>Country</label><input class="inp" id="mf-country"></div><div class="fl"><label>Born / Age</label><input class="inp" id="mf-born"></div><div class="fl"><label>EU</label><select class="inp" id="mf-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div></div>
+    <div class="fg fg4"><div class="fl"><label>Height cm</label><input class="inp" id="mf-ht" type="number"></div><div class="fl"><label>Spike cm</label><input class="inp" id="mf-sp" type="number"></div><div class="fl"><label>Block cm</label><input class="inp" id="mf-bl" type="number"></div><div class="fl"><label>Status</label><select class="inp" id="mf-st"><option>Watching</option><option>Priority</option><option>Contacted</option></select></div></div>
+    <div class="fg fg2"><div class="fl"><label>Club</label><input class="inp" id="mf-club"></div><div class="fl"><label>Agent</label><input class="inp" id="mf-agent"></div></div>
+    <div class="fg fg2"><div class="fl"><label>Volleybox URL</label><input class="inp" id="mf-vb"></div><div class="fl"><label>Video URL</label><input class="inp" id="mf-vid"></div></div>
+    <div class="fl"><label>Notes</label><textarea class="inp" id="mf-notes"></textarea></div>
+   </div>
+   <div id="prev-box" style="display:none;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);padding:.9rem;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+     <div style="width:38px;height:38px;border-radius:9px;background:var(--tl);color:var(--teal);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:11px;font-weight:500;flex-shrink:0" id="prev-av">?</div>
+     <div><div style="font-size:15px;font-weight:700" id="prev-nm">—</div><div style="font-size:11px;color:var(--muted)" id="prev-mt">—</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="prev-ns"></div>
+   </div>
+   <div id="eval-sec" style="display:none">
+    <div class="fg fg2" style="margin-top:8px"><div class="fl"><label>Status</label><select class="inp" id="eval-st"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div><div class="fl"><label>Agent</label><input class="inp" id="eval-agent"></div></div>
+    <div class="fl"><label>Notes</label><textarea class="inp" id="eval-notes"></textarea></div>
+   </div>
+   <div class="brow"><button class="btn-p" onclick="saveNew()">Save Player</button><button class="btn-s" onclick="closeModal('am-bg')">Cancel</button></div>
+  </div>
+ </div>
+</div>
+
+<!-- ADD TEAM MODAL -->
+<div class="modal-bg" id="tm-bg">
+ <div class="modal" style="width:480px">
+  <div class="modal-hd"><h2>🏐 Add Team</h2><button class="mx" onclick="closeModal('tm-bg')">✕</button></div>
+  <div class="modal-body">
+   <div class="fg fg2"><div class="fl"><label>Team Name *</label><input class="inp" id="tm-name" placeholder="Olympiacos VC"></div><div class="fl"><label>Country</label><input class="inp" id="tm-country" placeholder="Italy"></div></div>
+   <div class="fg fg2"><div class="fl"><label>League</label><input class="inp" id="tm-league" placeholder="Greek League A1"></div><div class="fl"><label>Division</label><input class="inp" id="tm-div" placeholder="A1"></div></div>
+   <div class="fg fg2"><div class="fl"><label>Head Coach</label><input class="inp" id="tm-coach"></div><div class="fl"><label>Email</label><input class="inp" id="tm-email" type="email"></div></div>
+   <div class="fl"><label>Notes</label><textarea class="inp" id="tm-notes"></textarea></div>
+  </div>
+  <div class="modal-ft"><button class="btn-s" onclick="closeModal('tm-bg')">Cancel</button><button class="btn-p" onclick="saveTeam()">Save Team</button></div>
+ </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-bg" id="prof-bg">
+ <div class="modal" style="width:500px">
+  <div class="modal-hd"><h2>👤 My Profile</h2><button class="mx" onclick="closeModal('prof-bg')">✕</button></div>
+  <div class="modal-body">
+   <div class="prof-av-w" onclick="uploadAvatar()"><div class="prof-av" id="prof-av">PF</div><div class="prof-ov">📷</div></div>
+   <div style="text-align:center;margin-bottom:1.25rem">
+    <div style="font-size:17px;font-weight:700" id="prof-fullname">Player Finder</div>
+    <div style="font-size:12px;color:var(--teal);margin-top:2px" id="prof-role">Head Coach</div>
+    <div style="font-size:11px;color:var(--muted)" id="prof-club">Rethimno Volleyball</div>
+   </div>
+   <div class="em-sec-t" style="margin-bottom:10px">Edit Information</div>
+   <div class="fg fg2"><div class="fl"><label>First Name</label><input class="inp" id="pf-fn"></div><div class="fl"><label>Last Name</label><input class="inp" id="pf-ln"></div></div>
+   <div class="fg fg2"><div class="fl"><label>Email</label><input class="inp" id="pf-em" type="email"></div><div class="fl"><label>Phone</label><input class="inp" id="pf-ph"></div></div>
+   <div class="fg fg2"><div class="fl"><label>Club</label><input class="inp" id="pf-cl"></div><div class="fl"><label>Country</label><input class="inp" id="pf-co"></div></div>
+   <div class="fl"><label>Role</label><select class="inp" id="pf-ro"><option>Head Coach</option><option>Assistant Coach</option><option>Scout / Analyst</option><option>Sports Director</option><option>Agent</option><option>Other</option></select></div>
+   <div class="fl" style="margin-top:8px"><label>Bio</label><textarea class="inp" id="pf-bio" style="min-height:50px"></textarea></div>
+  </div>
+  <div class="modal-ft"><button class="btn-s" onclick="closeModal('prof-bg')">Cancel</button><button class="btn-p" onclick="saveProfile()">💾 Save</button></div>
+ </div>
+</div>
+
+<!-- CONFIRM EXIT SESSION -->
+<div class="conf-bg" id="conf-exit">
+ <div class="conf-box">
+  <div style="font-size:36px;margin-bottom:10px">🏐</div>
+  <div style="font-size:17px;font-weight:700;margin-bottom:6px">Exit Session?</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.5">Leave <b id="conf-sess-name">this session</b> and return to the session selector?<br>Your data is saved automatically.</div>
+  <div style="display:flex;gap:10px;justify-content:center">
+   <button class="btn-p" onclick="doExit()">Continue →</button>
+   <button class="btn-s" onclick="closeConf('conf-exit')">Stay</button>
+  </div>
+ </div>
+</div>
+
+<!-- CONFIRM LOGOUT -->
+<div class="conf-bg" id="conf-logout">
+ <div class="conf-box">
+  <div style="font-size:36px;margin-bottom:10px">👋</div>
+  <div style="font-size:17px;font-weight:700;margin-bottom:6px">Sign out?</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem">You'll be returned to the login screen.</div>
+  <div style="display:flex;gap:10px;justify-content:center">
+   <button class="btn-p" onclick="doLogout()">Sign out</button>
+   <button class="btn-s" onclick="closeConf('conf-logout')">Cancel</button>
+  </div>
+ </div>
+</div>
+
+<div id="toast-el" class="toast"></div>
+
+
+<script>
+
+// ═══ STATE ═══════════════════════════════════════
+var CU=null,CS=null,P=[],NOTES=[],TEAMS=[],PEND=null,EID=null;
+var VM='list',SB=true,FP=null,FEU=null,FST=null,FLEG=null,SEL={};
+
+// ═══ USERS - NO 'login:' KEY, USE 'id' TO MATCH ═
+var DUSERS=[
+  {id:'demo',pw:'PlayerFinder',fn:'Player',ln:'Finder',email:'demo@playerfinder.app',
+   club:'Rethimno Volleyball',country:'Greece',role:'Head Coach',
+   status:'active',joined:'2025-01-01',sessions:['rethimno-2526'],avatar:'',bio:''},
+  {id:'admin',pw:'admin2025',fn:'Admin',ln:'God',email:'admin@playerfinder.app',
+   club:'HQ',country:'Global',role:'Admin',status:'active',isGod:true,
+   joined:'2024-01-01',sessions:[],avatar:'',bio:''}
+];
+var DSESS=[{id:'rethimno-2526',name:'OPE Rethymno 2025/26',
+  league:'Greek Volleyball League',icon:'🏐',owner:'demo',
+  created:'2025-06-01',status:'active'}];
+var USERS=DUSERS.map(function(u){return Object.assign({},u);});
+var SESS=DSESS.map(function(s){return Object.assign({},s);});
+var REGS=[];
+
+// ═══ STORAGE ══════════════════════════════════════
+function sSet(k,v){
+  var s=JSON.stringify(v);
+  try{if(window.storage&&window.storage.set)window.storage.set(k,s);}catch(e){}
+  try{localStorage.setItem(k,s);}catch(e){}
+}
+function sGet(k){
+  try{var r=localStorage.getItem(k);if(r)return JSON.parse(r);}catch(e){}
+  return null;
+}
+function saveData(){
+  if(!CU||!CS)return;
+  sSet('pf_'+CU.id+'_'+CS.id,{P:P,NOTES:NOTES,TEAMS:TEAMS});
+  sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));
+  sSet('pf_regs',REGS);
+}
+function loadData(){
+  if(!CU||!CS)return;
+  var xu=sGet('pf_xusers');
+  if(xu&&xu.length){USERS=DUSERS.map(function(u){return Object.assign({},u);}).concat(xu);}
+  var d=sGet('pf_'+CU.id+'_'+CS.id);
+  if(d){P=d.P||[];NOTES=d.NOTES||[];TEAMS=d.TEAMS||[];}
+  var rg=sGet('pf_regs');if(rg)REGS=rg;
+}
+
+// ═══ AUTH ════════════════════════════════════════
+function doLogin(){
+  var u=g('li-user').value.trim().toLowerCase();
+  var p=g('li-pass').value.trim();
+  var err=g('login-err');
+  err.style.display='none';
+  if(!u||!p){showErr(err,'Enter username and password.');return;}
+  var user=null;
+  for(var i=0;i<USERS.length;i++){
+    var x=USERS[i];
+    if(x.id.toLowerCase()===u && x.pw===p && x.status==='active'){user=x;break;}
+  }
+  if(!user){showErr(err,'Invalid username or password.<br><span style="font-family:var(--fm);color:var(--teal);font-size:11px">Try: Demo / PlayerFinder</span>');return;}
+  CU=user;
+  g('li-user').value='';g('li-pass').value='';
+  if(user.isGod){showScr('s-godmode');renderGM();}
+  else{showScr('s-sessions');renderSess();}
+}
+
+function doRegister(){
+  var fn=g('ru-fn').value.trim(),un=g('ru-un').value.trim(),pw=g('ru-pw').value.trim();
+  var err=g('reg-err');err.style.display='none';
+  if(!fn||!un||!pw){showErr(err,'Name, username and password required.');return;}
+  if(pw.length<8){showErr(err,'Password must be 8+ characters.');return;}
+  var uid=un.toLowerCase().replace(/[^a-z0-9]/g,'_');
+  if(USERS.find(function(x){return x.id===uid;})){showErr(err,'Username taken.');return;}
+  var nu={id:uid,pw:pw,fn:fn,ln:g('ru-ln').value.trim(),email:g('ru-em').value.trim(),
+    club:g('ru-cl').value.trim(),country:g('ru-co').value.trim(),
+    phone:g('ru-ph').value.trim(),role:g('ru-ro').value,source:g('ru-src').value,
+    needs:g('ru-nd').value.trim(),status:'pending',
+    joined:new Date().toISOString().slice(0,10),sessions:[],avatar:'',bio:''};
+  USERS.push(nu);REGS.push(Object.assign({},nu,{at:new Date().toISOString()}));
+  sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));
+  sSet('pf_regs',REGS);
+  var d=document.createElement('div');d.style.cssText='text-align:center;padding:2rem';
+  d.innerHTML='<div style="font-size:36px">\u2705</div><div style="font-size:17px;font-weight:700;margin:10px 0">Account created!</div><div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem">Pending admin approval.</div>';
+  var b=document.createElement('button');b.className='btn-big';b.textContent='Go to Login';
+  b.onclick=function(){switchLT('in');};d.appendChild(b);
+  g('lp-up').innerHTML='';g('lp-up').appendChild(d);
+}
+
+function showErr(el,msg){el.innerHTML=msg;el.style.display='block';}
+function doLogout(){CU=null;CS=null;P=[];NOTES=[];TEAMS=[];closeConf('conf-logout');showScr('s-landing');}
+
+// ═══ SESSIONS ════════════════════════════════════
+function renderSess(){
+  if(!CU)return;
+  var av=g('sess-av'),ini=mkIni(CU.fn+' '+CU.ln);
+  if(CU.avatar){av.style.cssText='background:url('+CU.avatar+') center/cover;width:28px;height:28px;border-radius:50%';}
+  else{av.textContent=ini;av.style.background='';}
+  g('sess-name').textContent=CU.fn+' '+CU.ln;
+  g('sess-welcome').textContent=CU.fn;
+  var mySess=SESS.filter(function(s){return s.owner===CU.id||(CU.sessions&&CU.sessions.indexOf(s.id)>=0);});
+  var grid=g('sess-grid');grid.innerHTML='';
+  mySess.forEach(function(s){
+    var card=document.createElement('div');card.className='sess-card';
+    card.onclick=(function(sid){return function(){enterSess(sid);};})(s.id);
+    card.innerHTML='<div style="font-size:28px;margin-bottom:8px">'+s.icon+'</div>'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:2px">'+s.name+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:8px">'+s.league+'</div>'
+      +'<div style="display:flex;gap:6px"><span style="font-family:var(--fm);font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:10px;color:var(--dim)">96 players</span>'
+      +'<span style="font-family:var(--fm);font-size:10px;padding:2px 8px;background:var(--tl);border-radius:10px;color:var(--teal)">Active</span></div>';
+    grid.appendChild(card);
+  });
+  var add=document.createElement('div');add.className='sess-add';add.onclick=newSess;
+  add.innerHTML='<div style="width:40px;height:40px;border-radius:50%;border:2px dashed currentColor;display:flex;align-items:center;justify-content:center;font-size:20px">+</div><div style="font-size:13px;font-weight:600">New Session</div><div style="font-size:11px;text-align:center;line-height:1.4">Create a new scouting session</div>';
+  grid.appendChild(add);
+}
+
+function enterSess(sid){
+  CS=SESS.find(function(s){return s.id===sid;});if(!CS)return;
+  g('sess-badge').textContent=CS.name;
+  var ini=mkIni(CU.fn+' '+CU.ln);
+  var av=g('app-av');
+  if(CU.avatar){av.style.cssText='background:url('+CU.avatar+') center/cover;';}
+  else{av.textContent=ini;av.style.background='';}
+  g('app-name').textContent=CU.fn+' '+CU.ln.charAt(0)+'.';
+  showScr('s-app');initApp();
+}
+
+function newSess(){
+  var n=prompt('Session name:');if(!n)return;
+  var l=prompt('League:');
+  var s={id:n.toLowerCase().replace(/[^a-z0-9]/g,'-')+'-'+Date.now(),name:n,league:l||'—',
+    icon:'🏐',owner:CU.id,created:new Date().toISOString().slice(0,10),status:'active'};
+  SESS.push(s);if(!CU.sessions)CU.sessions=[];CU.sessions.push(s.id);
+  renderSess();toast('Session created');
+}
+
+function gotoSess(){showScr('s-sessions');renderSess();}
+function doExit(){CS=null;P=[];NOTES=[];TEAMS=[];closeConf('conf-exit');showScr('s-sessions');}
+
+// ═══ SCREEN / UI UTILS ════════════════════════════
+function g(id){return document.getElementById(id);}
+function st(id,v){var el=g(id);if(el)el.textContent=v;}
+function showScr(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=g(id);if(el)el.classList.add('active');
+}
+function openModal(id){g(id).classList.add('open');}
+function closeModal(id){g(id).classList.remove('open');}
+function showConf(id){g(id).classList.add('open');}
+function closeConf(id){g(id).classList.remove('open');}
+function switchLT(tab){
+  g('ltab-in').className='ltab'+(tab==='in'?' on':'');
+  g('ltab-up').className='ltab'+(tab==='up'?' on':'');
+  g('lp-in').style.display=tab==='in'?'block':'none';
+  g('lp-up').style.display=tab==='up'?'block':'none';
+}
+
+// close dropdowns on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.dd-wrap')&&!e.target.closest('.fdd-wrap')){
+    document.querySelectorAll('.dd-menu.open,.fdd.open').forEach(function(m){m.classList.remove('open');});
+  }
+});
+function toggleMenu(id){
+  var el=g(id),was=el.classList.contains('open');
+  document.querySelectorAll('.dd-menu.open,.fdd.open').forEach(function(m){m.classList.remove('open');});
+  if(!was)el.classList.add('open');
+}
+function setLang(lang){g('lang-btn').textContent=lang.toUpperCase()+' \u25be';g('lang-d').classList.remove('open');}
+
+// ═══ HELPERS ══════════════════════════════════════
+var ACC=['#2563eb','#0d9488','#7c3aed','#16a34a','#dc2626','#f59e0b','#be185d','#0891b2'];
+var ACCL=['rgba(37,99,235,.15)','rgba(13,148,136,.15)','rgba(124,58,237,.15)','rgba(22,163,74,.15)','rgba(220,38,38,.15)','rgba(245,158,11,.15)','rgba(190,24,93,.15)','rgba(8,145,178,.15)'];
+var POS={Outside:['rgba(59,130,246,.15)','#60a5fa'],Opposite:['rgba(251,113,133,.15)','#fb7185'],
+  Setter:['rgba(34,197,94,.15)','#4ade80'],Middle:['rgba(167,139,250,.15)','#a78bfa'],Libero:['rgba(245,158,11,.15)','#fbbf24']};
+var STC={Priority:['rgba(245,158,11,.15)','#fbbf24'],Watching:['rgba(59,130,246,.15)','#60a5fa'],
+  Contacted:['rgba(34,197,94,.15)','#4ade80'],Discarded:['rgba(239,68,68,.15)','#f87171']};
+function mkIni(n){return(n||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();}
+function pc(pos){return POS[pos]||['rgba(59,130,246,.15)','#60a5fa'];}
+function sc(st){return STC[st]||['rgba(59,130,246,.15)','#60a5fa'];}
+function acc(id){return ACC[id%8];}function accl(id){return ACCL[id%8];}
+
+// ═══ APP INIT ═════════════════════════════════════
+async function initApp(){
+  P=[];NOTES=[];TEAMS=[];FP=null;FEU=null;FST=null;FLEG=null;SEL={};
+  loadData();
+  if(!P.length)P=INITIAL_PLAYERS.slice();
+  updateKPIs();buildLeagueDD();renderT(getF());renderAg();renderTeams();goTo('dashboard');
+}
+
+// ═══ APP VIEW ROUTING ═════════════════════════════
+function goTo(v){
+  ['dashboard','search','priority','teams','agents','notes','detail'].forEach(function(id){
+    var el=g('v-'+id);if(el)el.className='view'+(id===v?' on':'');
+  });
+  var nbMap={dashboard:'dashboard',search:'search',priority:'priority',
+    teams:'teams',agents:'agents',notes:'notes',detail:'dashboard'};
+  ['dashboard','search','priority','teams','agents','notes'].forEach(function(id){
+    var el=g('nb-'+id);if(el)el.className='nbtn'+(nbMap[v]===id?' on':'');
+  });
+  var c=document.querySelector('.content');if(c)c.scrollTop=0;
+  if(v==='dashboard'){updateKPIs();renderT(getF());}
+  if(v==='search'){g('sv-q').value='';doSearch();setTimeout(function(){g('sv-q').focus();},50);}
+  if(v==='priority')renderPri();
+  if(v==='agents')renderAg();
+  if(v==='notes')renderNts();
+  if(v==='teams')renderTeams();
+}
+
+function toggleSB(){
+  SB=!SB;var sb=g('sidebar');
+  sb.classList.toggle('closed',!SB);
+  g('sb-toggle').textContent=SB?'\u25c4':'\u25ba';
+}
+function setVM(m){
+  VM=m;
+  ['list','card','grid'].forEach(function(x){var el=g('vm-'+x);if(el)el.className='vm-btn'+(x===m?' on':'');});
+  renderT(getF());
+}
+
+// ═══ KPIs ═════════════════════════════════════════
+function updateKPIs(){
+  var n=P.length,eu=P.filter(function(p){return p.eu==='Yes';}).length;
+  var pri=P.filter(function(p){return p.status==='Priority';}).length;
+  var gk=P.filter(function(p){return p.league&&p.league.indexOf('GREEK')>=0;}).length;
+  ['kpi-n','top-n','badge-n'].forEach(function(id){st(id,n);});
+  st('kpi-eu',eu);st('kpi-p',pri);st('top-p',pri);st('badge-p',pri);st('pri-big',pri);st('kpi-g',gk);
+  st('ct-all',n);
+  var disc=P.filter(function(p){return p.status==='Discarded';}).length;
+  st('ct-disc',disc);
+  var pk={out:'Outside',opp:'Opposite',set:'Setter',mid:'Middle',lib:'Libero'};
+  Object.keys(pk).forEach(function(k){st('ct-'+k,P.filter(function(p){return p.pos===pk[k];}).length);});
+}
+
+// ═══ FILTERS ══════════════════════════════════════
+function buildLeagueDD(){
+  var lgs={};P.forEach(function(p){if(p.league&&p.league!=='—')lgs[p.league]=(lgs[p.league]||0)+1;});
+  var dd=g('fdd-lg');if(!dd)return;
+  while(dd.children.length>1)dd.removeChild(dd.lastChild);
+  Object.keys(lgs).sort().forEach(function(l){
+    var it=document.createElement('div');it.className='fdd-item';
+    it.textContent=l+' ('+lgs[l]+')';
+    it.onclick=(function(league,item){return function(){setLeagueF(league,item);};})(l,it);
+    dd.appendChild(it);
+  });
+}
+function setPos(pos,btn){
+  FP=pos;
+  document.querySelectorAll('.ch-all,.ch-out,.ch-opp,.ch-set,.ch-mid,.ch-lib').forEach(function(c){c.classList.remove('on');});
+  btn.classList.add('on');applyF();
+}
+function setStatusF(val,el){
+  FST=val;
+  // reset all dropdown items
+  document.querySelectorAll('#fdd-pri .fdd-item').forEach(function(d){d.classList.remove('on');});
+  // reset discard chip
+  var dc=g('ch-disc');
+  if(dc){dc.style.background='';dc.style.borderColor='rgba(239,68,68,.4)';dc.style.color='#f87171';}
+  // highlight clicked element
+  if(el){
+    if(el.id==='ch-disc'){
+      // direct chip click - highlight it
+      el.style.background='rgba(239,68,68,.18)';
+    } else {
+      el.classList.add('on');
+    }
+  }
+  var btn=g('fdd-pri-btn');
+  if(btn){
+    btn.textContent=(val&&val!=='Discarded'?'⭐ '+val:'⭐ Priority')+' ▾';
+    btn.className='fdd-btn'+(val&&val!=='Discarded'?' on-amber':'');
+  }
+  var dd=g('fdd-pri');if(dd)dd.classList.remove('open');
+  applyF();
+}
+function setEUF(val,el){
+  FEU=val;
+  document.querySelectorAll('#fdd-eu .fdd-item').forEach(function(d){d.classList.remove('on');});
+  if(el)el.classList.add('on');
+  var btn=g('fdd-eu-btn');
+  if(btn){btn.textContent=(val==='Yes'?'EU Only':val==='No'?'Non-EU':'EU Passport')+' \u25be';btn.className='fdd-btn'+(val?' on-teal':'');}
+  g('fdd-eu').classList.remove('open');applyF();
+}
+function setLeagueF(l,el){
+  FLEG=l;
+  document.querySelectorAll('#fdd-lg .fdd-item').forEach(function(d){d.classList.remove('on');});
+  if(el)el.classList.add('on');
+  var btn=g('fdd-lg-btn');
+  if(btn){btn.textContent=(l||'League')+' \u25be';btn.className='fdd-btn'+(l?' on-teal':'');}
+  g('fdd-lg').classList.remove('open');applyF();
+}
+function clearAll(){
+  FP=null;FEU=null;FST=null;FLEG=null;
+  document.querySelectorAll('.ch-all,.ch-out,.ch-opp,.ch-set,.ch-mid,.ch-lib').forEach(function(c){c.classList.remove('on');});
+  g('ch-all').classList.add('on');g('dash-q').value='';
+  g('fdd-pri-btn').textContent='⭐ Priority ▾';g('fdd-pri-btn').className='fdd-btn on-amber';
+  g('fdd-eu-btn').textContent='EU Passport ▾';g('fdd-eu-btn').className='fdd-btn';
+  g('fdd-lg-btn').textContent='League ▾';g('fdd-lg-btn').className='fdd-btn';
+  document.querySelectorAll('.fdd-item').forEach(function(d){d.classList.remove('on');});
+  var dc=g('ch-disc');if(dc){dc.style.background='';dc.style.borderColor='rgba(239,68,68,.4)';dc.style.color='#f87171';}
+  applyF();
+}
+function getF(){
+  var f=P.slice(),q=(g('dash-q')||{}).value||'';q=q.toLowerCase().trim();
+  if(FP)f=f.filter(function(p){return p.pos===FP;});
+  if(FEU)f=f.filter(function(p){return p.eu===FEU;});
+  if(FST)f=f.filter(function(p){return p.status===FST;});
+  if(FLEG)f=f.filter(function(p){return p.league===FLEG;});
+  if(q)f=f.filter(function(p){return[p.name,p.pos,p.country,p.born,p.club,p.league,p.agent,p.notes,p.status].join(' ').toLowerCase().indexOf(q)>=0;});
+  return f;
+}
+function applyF(){
+  var f=getF();var sc2=g('srch-cnt');
+  if(sc2)sc2.textContent=f.length!==P.length?(f.length+' shown'):'';renderT(f);
+}
+
+// ═══ TABLE/CARDS/GRID ═════════════════════════════
+function renderT(list){
+  var wrap=g('tbl-wrap');if(!list.length){wrap.innerHTML='<div class="empty">No players match filters.</div>';return;}
+  if(VM==='card')renderCards(list,wrap);else if(VM==='grid')renderGrid(list,wrap);else renderList(list,wrap);
+}
+
+function posBadge(p){var c=pc(p.pos);return '<span class="pos-b" style="background:'+c[0]+';color:'+c[1]+';border-color:'+c[1]+'40">'+p.pos+'</span>';}
+function stBadge(p){var c=sc(p.status);return '<span class="st-b" style="background:'+c[0]+';color:'+c[1]+'">'+(p.status||'Watching')+'</span>';}
+
+function renderList(list,wrap){
+  var rows=list.map(function(p){
+    var c=pc(p.pos),s=sc(p.status),cl=p.club&&p.club!=='—'?p.club:'—';
+    return '<div class="tr" onclick="showDet('+p.id+')">'
+      +'<div class="td" style="font-family:var(--fm);font-size:9px;color:var(--dim)">'+(p.id_label||p.id)+'</div>'
+      +'<div class="td" style="flex-direction:column;align-items:flex-start;gap:1px"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+(p.country||'—')+(p.eu==='Yes'?' \u00b7 <span style="color:#a78bfa;font-weight:700;font-size:9px">EU</span>':'')+'</div></div>'
+      +'<div class="td">'+posBadge(p)+'</div>'
+      +'<div class="td" style="color:var(--muted);font-size:12px">'+(p.country||'—')+'</div>'
+      +'<div class="td" style="font-family:var(--fm);font-size:10px;color:var(--muted)">'+(p.born||'—')+'</div>'
+      +'<div class="td" style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+(p.height||'—')+'</div>'
+      +'<div class="td">'+(p.eu==='Yes'?'<span class="eu-b">EU</span>':'<span style="color:var(--dim);font-size:10px">\u2014</span>')+'</div>'
+      +'<div class="td" style="font-size:11px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+cl+(p.league&&p.league!==cl?'<span style="color:var(--dim)"> | '+p.league+'</span>':'')+'</div>'
+      +'<div class="td">'+stBadge(p)+'</div>'
+      +'<div class="td" onclick="event.stopPropagation()" style="gap:3px">'
+      +(p.vb?'<a style="font-size:14px;opacity:.7;text-decoration:none" href="'+p.vb+'" target="_blank">📊</a>':'')
+      +(p.video?'<a style="font-size:14px;opacity:.7;text-decoration:none" href="'+p.video.split('|')[0].trim()+'" target="_blank">\u25b6\ufe0f</a>':'')
+      +'</div></div>';
+  }).join('');
+  wrap.innerHTML='<div class="tbl"><div class="tbl-h">'+
+    ['ID','Name','Position','Country','Born','Ht','EU','Club','Status',''].map(function(h){return '<div class="th">'+h+'</div>';}).join('')+
+    '</div>'+rows+'</div>';
+}
+
+function renderCards(list,wrap){
+  wrap.innerHTML='<div style="padding:8px;display:flex;flex-direction:column;gap:6px">'+
+    list.map(function(p){
+      var cs=sc(p.status),cp=pc(p.pos),c=acc(p.id),cl=accl(p.id);
+      return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;border-left:3px solid '+cs[1]+'" onclick="showDet('+p.id+')">'
+        +'<div style="width:40px;height:40px;border-radius:10px;background:'+cl+';color:'+c+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500;flex-shrink:0">'+mkIni(p.name)+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+p.name+'</div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+        +'<span class="pos-b" style="background:'+cp[0]+';color:'+cp[1]+';border-color:'+cp[1]+'40;font-size:9px">'+p.pos+'</span>'
+        +'<span style="font-size:11px;color:var(--muted)">'+(p.country||'—')+'</span>'
+        +(p.born?'<span style="font-family:var(--fm);font-size:10px;color:var(--dim)">'+p.born+'</span>':'')
+        +(p.eu==='Yes'?'<span class="eu-b" style="font-size:9px">EU</span>':'')
+        +(p.club&&p.club!=='—'?'<span style="font-size:11px;color:var(--dim)">📍 '+p.club+'</span>':'')
+        +'</div></div>'
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'
+        +'<span class="st-b" style="background:'+cs[0]+';color:'+cs[1]+';font-size:9px">'+(p.status||'Watching')+'</span>'
+        +(p.height?'<span style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+p.height+' cm</span>':'')
+        +'</div></div>';
+    }).join('')+'</div>';
+}
+
+function renderGrid(list,wrap){
+  wrap.innerHTML='<div style="padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">'+
+    list.map(function(p){
+      var cs=sc(p.status),cp=pc(p.pos),c=acc(p.id),cl=accl(p.id);
+      return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:12px;padding:14px 10px;cursor:pointer;text-align:center;border-top:3px solid '+cs[1]+'" onclick="showDet('+p.id+')">'
+        +'<div style="width:44px;height:44px;border-radius:12px;background:'+cl+';color:'+c+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:13px;font-weight:500;margin:0 auto 8px">'+mkIni(p.name)+'</div>'
+        +'<div style="font-size:12px;font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
+        +'<span class="pos-b" style="background:'+cp[0]+';color:'+cp[1]+';border-color:'+cp[1]+'40;font-size:9px">'+p.pos+'</span>'
+        +'<div style="font-size:10px;color:var(--muted);margin-top:4px">'+(p.country||'—')+'</div>'
+        +(p.height?'<div style="font-family:var(--fm);font-size:11px;color:var(--teal);margin-top:3px">'+p.height+' cm</div>':'')
+        +'</div>';
+    }).join('')+'</div>';
+}
+
+// ═══ DETAIL ═══════════════════════════════════════
+function showDet(id){
+  var p=P.find(function(x){return x.id===id;});if(!p)return;EID=id;
+  var cpv=pc(p.pos),scp=sc(p.status),c=acc(p.id),cl=accl(p.id);
+  var vids=(p.video||'').split('|').map(function(v){return v.trim();}).filter(Boolean);
+  var html='<div class="d-hero"><div class="d-top">'
+    +'<div class="d-av" style="background:'+cl+';color:'+c+'">'+mkIni(p.name)+'</div>'
+    +'<div style="flex:1"><div class="d-nm">'+p.name+'</div><div class="d-tags">'
+    +'<span class="st-b" style="background:'+scp[0]+';color:'+scp[1]+'">'+p.status+'</span>'
+    +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40">'+p.pos+'</span>'
+    +(p.country?'<span class="d-tag">'+p.country+'</span>':'')
+    +(p.born?'<span class="d-tag">'+p.born+'</span>':'')
+    +(p.eu==='Yes'?'<span class="eu-b" style="font-size:10px;padding:3px 9px">EU</span>':'')
+    +(p.vb?'<a href="'+p.vb+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal);border:1px solid rgba(20,184,166,.3);padding:2px 9px;border-radius:6px">Volleybox \u2197</a>':'')
+    +'</div></div>'
+    +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
+    +'<select class="st-sel" onchange="chSt('+id+',this.value)">'
+    +['Priority','Watching','Contacted','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
+    +'</select><button class="btn-del" onclick="delP('+id+')">Delete</button></div></div>'
+    +'<div class="phys"><div class="ph-c"><div class="ph-v">'+(p.height||'—')+'</div><div class="ph-l">Height cm</div></div>'
+    +'<div class="ph-c"><div class="ph-v">'+(p.spike||'—')+'</div><div class="ph-l">Spike</div></div>'
+    +'<div class="ph-c"><div class="ph-v">'+(p.block||'—')+'</div><div class="ph-l">Block</div></div>'
+    +'<div class="ph-c"><div class="ph-v">'+(p.weight||'—')+'</div><div class="ph-l">Weight kg</div></div></div></div>';
+  if(p.alert)html+='<div class="alrt">\u26a0 '+p.alert+'</div>';
+  if(p.agent)html+='<div class="alrt alrt-b">Agent: '+p.agent+(p.agent_contact?' \u00b7 '+p.agent_contact:'')+'</div>';
+  html+='<div class="two-c"><div class="panel"><div class="ptitle">Career</div>'
+    +(p.clubs&&p.clubs.length?p.clubs.map(function(cl){return'<div style="display:flex;justify-content:space-between;padding:6px 9px;background:var(--bg3);border-radius:6px;margin-bottom:4px"><div><div style="font-size:12px;font-weight:500">'+cl.name+'</div><div style="font-size:10px;color:var(--muted)">'+cl.country+'</div></div><div style="font-family:var(--fm);font-size:10px;color:var(--muted)">'+cl.years+'</div></div>';}).join(''):'<div style="font-size:12px;color:var(--muted)">No clubs data</div>')
+    +'</div><div class="panel"><div class="ptitle">Current Club</div>'
+    +'<div style="font-size:14px;font-weight:600;margin-bottom:3px">'+(p.club||'—')+'</div>'
+    +'<div style="font-size:12px;color:var(--muted)">'+(p.league||'')+'</div></div></div>';
+  if(p.notes)html+='<div class="panel"><div class="ptitle">Notes</div><p style="font-size:13px;color:var(--muted);line-height:1.7">'+p.notes+'</p></div>';
+  if(vids.length)html+='<div class="panel"><div class="ptitle">Videos</div>'+vids.map(function(v){return'<div class="vrow"><a style="width:28px;height:19px;background:#F00;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none" href="'+v+'" target="_blank"><div style="width:0;height:0;border-left:8px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-left:1px"></div></a><div style="flex:1;font-size:12px">'+( v.indexOf('youtu')>=0?'YouTube':'Video')+'</div><a href="'+v+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)">Open \u2197</a></div>';}).join('')+'</div>';
+  html+='<div class="panel"><div class="ptitle">Quick Note</div><textarea class="inp" id="qn-'+id+'" style="min-height:50px">'+(p.quick_note||'')+'</textarea><div style="margin-top:6px"><button class="btn-sm" onclick="saveQN('+id+')" style="color:var(--teal);border-color:rgba(20,184,166,.3)">Save note</button></div></div>';
+  g('det-content').innerHTML=html;goTo('detail');
+}
+function chSt(id,val){var p=P.find(function(x){return x.id===id;});if(p){p.status=val;saveData();updateKPIs();}}
+function delP(id){if(!confirm('Delete?'))return;P=P.filter(function(p){return p.id!==id;});saveData();updateKPIs();goTo('dashboard');}
+function saveQN(id){var p=P.find(function(x){return x.id===id;});if(!p)return;var ta=g('qn-'+id);if(ta)p.quick_note=ta.value||'';saveData();var b=event.target;b.textContent='\u2713';setTimeout(function(){b.textContent='Save note';},1500);}
+
+// ═══ EDIT PLAYER ══════════════════════════════════
+function openEdit(){
+  if(!EID)return;var p=P.find(function(x){return x.id===EID;});if(!p)return;
+  g('em-name').textContent=p.name;
+  function sv(id,v){var el=g(id);if(el)el.value=(v===null||v===undefined)?'':String(v);}
+  sv('ef-name',p.name);sv('ef-pos',p.pos);sv('ef-country',p.country);sv('ef-born',p.born);
+  sv('ef-hand',p.hand||'Right');sv('ef-eu',p.eu||'No');sv('ef-status',p.status||'Watching');
+  sv('ef-ht',p.height||'');sv('ef-sp',p.spike||'');sv('ef-bl',p.block||'');sv('ef-wt',p.weight||'');
+  sv('ef-club',p.club&&p.club!=='—'?p.club:'');sv('ef-league',p.league||'');
+  sv('ef-agent',p.agent||'');sv('ef-contact',p.agent_contact||'');
+  sv('ef-vb',p.vb||'');sv('ef-vid',p.video||'');sv('ef-notes',p.notes||'');sv('ef-verdict',p.verdict||'');
+  openModal('em-bg');
+}
+function saveEdit(){
+  var p=P.find(function(x){return x.id===EID;});if(!p)return;
+  function gv(id){var el=g(id);return el?(el.value||'').trim():'';}
+  p.name=gv('ef-name')||p.name;p.pos=gv('ef-pos');p.country=gv('ef-country');p.born=gv('ef-born');
+  p.hand=gv('ef-hand');p.eu=gv('ef-eu');p.status=gv('ef-status');
+  p.height=parseInt(gv('ef-ht'))||null;p.spike=parseInt(gv('ef-sp'))||null;
+  p.block=parseInt(gv('ef-bl'))||null;p.weight=parseInt(gv('ef-wt'))||null;
+  p.club=gv('ef-club')||'—';p.league=gv('ef-league');p.agent=gv('ef-agent');
+  p.agent_contact=gv('ef-contact');p.vb=gv('ef-vb');p.video=gv('ef-vid');
+  p.notes=gv('ef-notes');p.verdict=gv('ef-verdict');
+  saveData();updateKPIs();closeModal('em-bg');showDet(EID);toast('\u2713 '+p.name+' updated');
+}
+
+// ═══ SEARCH ═══════════════════════════════════════
+function doSearch(){
+  var q=(g('sv-q')||{}).value||'';q=q.toLowerCase().trim();
+  var res=g('sv-results');st('sv-cnt',q?'...':'\u2014');
+  if(!q){res.innerHTML='<div class="no-r"><div style="font-size:30px;color:var(--dim);margin-bottom:8px">🔍</div><div>Type a keyword</div></div>';return;}
+  var hits=P.filter(function(p){return[p.name,p.pos,p.country,p.born,p.club,p.league,p.agent,p.notes,p.status,p.id_label].join(' ').toLowerCase().indexOf(q)>=0;});
+  st('sv-cnt',hits.length);
+  if(!hits.length){res.innerHTML='<div class="no-r"><div style="font-size:30px;color:var(--dim);margin-bottom:8px">\u25cb</div><div>No results for \"'+q+'\"</div></div>';return;}
+  function hl(v){if(!v)return'\u2014';var re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');return String(v).replace(re,function(m){return'<span class="hl">'+m+'</span>';});}
+  res.innerHTML=hits.map(function(p){
+    var cpv=pc(p.pos),scp=sc(p.status),c=acc(p.id),cl=accl(p.id);
+    return'<div class="src-card" onclick="showDet('+p.id+')">'
+      +'<div class="src-av" style="background:'+cl+';color:'+c+'">'+mkIni(p.name)+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:2px">'+hl(p.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);display:flex;gap:7px;flex-wrap:wrap">'
+      +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
+      +'<span>'+hl(p.country)+'</span>'
+      +(p.eu==='Yes'?'<span class="eu-b" style="font-size:8px">EU</span>':'')
+      +(p.club&&p.club!=='—'?'<span>'+hl(p.club)+'</span>':'')+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">'
+      +'<span class="st-b" style="background:'+scp[0]+';color:'+scp[1]+';font-size:9px">'+p.status+'</span>'
+      +'<span style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+(p.height||'\u2014')+' cm</span>'
+      +(p.vb?'<a href="'+p.vb+'" target="_blank" style="font-family:var(--fm);font-size:9px;color:var(--teal)" onclick="event.stopPropagation()">VB \u2197</a>':'')
+      +'</div></div>';
+  }).join('');
+}
+
+// ═══ PRIORITY ═════════════════════════════════════
+function renderPri(){
+  var pris=P.filter(function(p){return p.status==='Priority';});
+  st('pri-big',pris.length);var list=g('pri-list');if(!list)return;
+  if(!pris.length){list.innerHTML='<div style="text-align:center;padding:2.5rem;color:var(--muted)"><div style="font-size:32px;color:var(--dim);margin-bottom:7px">\u2b50</div><div>No Priority players yet</div><div style="font-size:11px;margin-top:4px;color:var(--dim)">Change any player Status to Priority</div></div>';return;}
+  list.innerHTML=pris.map(function(p){
+    var c=acc(p.id),cl=accl(p.id),cpv=pc(p.pos),sel=!!SEL[p.id];
+    return'<div class="pri-card'+(sel?' sel':'')+'" id="pc-'+p.id+'" onclick="showDet('+p.id+')">'
+      +'<div class="pri-av" style="background:'+cl+';color:'+c+'">'+mkIni(p.name)+'</div>'
+      +'<div><div style="font-size:14px;font-weight:700;margin-bottom:3px">'+p.name+'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'
+      +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
+      +'<span style="font-size:11px;color:var(--muted)">'+(p.country||'\u2014')+'</span>'
+      +(p.height?'<span style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+p.height+'cm</span>':'')
+      +(p.eu==='Yes'?'<span class="eu-b" style="font-size:9px">EU</span>':'')
+      +(p.vb?'<a href="'+p.vb+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)" onclick="event.stopPropagation()">Volleybox \u2197</a>':'')
+      +(p.video?'<a href="'+p.video.split('|')[0].trim()+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:#f87171" onclick="event.stopPropagation()">\u25b6 Video</a>':'')
+      +'</div>'+(p.notes?'<div style="font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:460px">'+p.notes+'</div>':'')+'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px" onclick="event.stopPropagation()">'
+      +'<button class="sel-btn'+(sel?' on':'')+'" onclick="togSelPri('+p.id+',this)">'+(sel?'\u2713 Selected':'[ ] Select')+'</button>'
+      +'<select class="rate-sel" onchange="saveRate('+p.id+',this.value)"><option value="">Rate...</option>'
+      +[10,9,8,7,6,5,4,3,2,1].map(function(n){return'<option value="'+n+'"'+(p.rating==n?' selected':'')+'>'+n+'/10</option>';}).join('')
+      +'</select></div></div>';
+  }).join('');
+}
+function togSelPri(id,btn){SEL[id]=!SEL[id];btn.textContent=SEL[id]?'\u2713 Selected':'[ ] Select';btn.classList.toggle('on',!!SEL[id]);var card=g('pc-'+id);if(card)card.classList.toggle('sel',!!SEL[id]);}
+function saveRate(id,val){var p=P.find(function(x){return x.id===id;});if(p){p.rating=val;saveData();}}
+
+// ═══ TEAMS ════════════════════════════════════════
+function renderTeams(){
+  var list=g('teams-list');if(!list)return;
+  if(!TEAMS.length){list.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">No teams yet.</div>';return;}
+  list.innerHTML=TEAMS.map(function(t,i){
+    return'<div class="team-card"><div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+'</div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+(t.league||'\u2014')+' \u00b7 '+(t.country||'\u2014')+'</div>'
+      +(t.coach?'<div style="font-size:11px;color:var(--dim);margin-top:3px">Coach: '+t.coach+'</div>':'')+'</div>'
+      +'<button class="btn-sm" style="color:#ef4444;border-color:rgba(239,68,68,.2)" data-i="'+i+'" onclick="delTeam(this.dataset.i)">Delete</button></div>'
+      +(t.notes?'<div style="font-size:11px;color:var(--dim);margin-top:7px;padding-top:7px;border-top:1px solid var(--border)">'+t.notes+'</div>':'')+'</div>';
+  }).join('');
+}
+function openTeamModal(){openModal('tm-bg');}
+function saveTeam(){
+  var n=(g('tm-name').value||'').trim();if(!n){alert('Team name required');return;}
+  TEAMS.push({name:n,country:(g('tm-country').value||'').trim(),league:(g('tm-league').value||'').trim(),
+    division:(g('tm-div').value||'').trim(),coach:(g('tm-coach').value||'').trim(),
+    email:(g('tm-email').value||'').trim(),notes:(g('tm-notes').value||'').trim()});
+  saveData();closeModal('tm-bg');renderTeams();toast('\u2713 '+n+' added');
+  ['tm-name','tm-country','tm-league','tm-div','tm-coach','tm-email','tm-notes'].forEach(function(id){var el=g(id);if(el)el.value='';});
+}
+function delTeam(i){if(!confirm('Delete?'))return;TEAMS.splice(parseInt(i),1);saveData();renderTeams();}
+
+// ═══ AGENTS & NOTES ═══════════════════════════════
+function renderAg(){
+  var list=g('ag-list');if(!list)return;
+  var agMap={};
+  P.forEach(function(p){if(p.agent&&p.agent!=='Direct Obs.'){if(!agMap[p.agent])agMap[p.agent]={name:p.agent,contact:p.agent_contact||'',players:[]};agMap[p.agent].players.push(p.name);}});
+  var ags=Object.values(agMap);
+  if(!ags.length){list.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">No agents found.</div>';return;}
+  list.innerHTML=ags.map(function(a){
+    return'<div class="ag-card"><div style="font-size:14px;font-weight:700;margin-bottom:2px;margin-top:4px">'+a.name+'</div>'
+      +(a.contact?'<div style="font-size:12px;color:var(--muted);margin-bottom:5px"><a href="mailto:'+a.contact+'">'+a.contact+'</a></div>':'')
+      +'<div style="font-size:11px;color:var(--dim);margin-top:5px">Players: '+a.players.join(' \u00b7 ')+'</div></div>';
+  }).join('');
+}
+function renderNts(){
+  var list=g('nt-list');if(!list)return;
+  if(!NOTES.length){list.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">No notes yet.</div>';return;}
+  list.innerHTML=NOTES.map(function(n,i){
+    return'<div class="note-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
+      +'<div style="font-family:var(--fm);font-size:10px;color:var(--muted)">'+n.date+'</div>'
+      +'<button class="btn-sm" style="color:#ef4444;border-color:rgba(239,68,68,.2)" data-i="'+i+'" onclick="delNote(this.dataset.i)">Delete</button></div>'
+      +'<div style="font-size:13px;white-space:pre-wrap">'+n.text+'</div></div>';
+  }).join('');
+}
+function addNote(){var text=prompt('New note:');if(!text)return;NOTES.unshift({date:new Date().toLocaleDateString(),text:text});saveData();renderNts();}
+function delNote(i){if(!confirm('Delete?'))return;NOTES.splice(parseInt(i),1);saveData();renderNts();}
+
+// ═══ ADD PLAYER ═══════════════════════════════════
+function openAdd(){PEND=null;openModal('am-bg');}
+function switchAddTab(m,btn){
+  document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('on');});
+  btn.classList.add('on');g('mp-'+m).classList.add('on');
+  PEND=null;g('prev-box').style.display='none';g('eval-sec').style.display='none';
+}
+function getAPIKey(){try{return localStorage.getItem('pf_api_key')||'';}catch(e){return '';}}
+function setAPIKey(){
+  var k=prompt('Enter Anthropic API key\n(console.anthropic.com)\n\nBlank to clear:');
+  if(k===null)return;
+  try{if(k.trim()){localStorage.setItem('pf_api_key',k.trim());toast('API key saved');}else{localStorage.removeItem('pf_api_key');toast('API key cleared');}}catch(e){}
+}
+async function doImport(){
+  var url=(g('am-url').value||'').trim();if(!url){alert('Enter a Volleybox URL');return;}
+  var key=getAPIKey();if(!key){alert('Configure API key first');return;}
+  var btn=g('btn-import');btn.disabled=true;btn.textContent='...';
+  showProg('pw-url','pf-url','pl-url',20,'Connecting...');
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        system:'Extract volleyball player data. Return ONLY raw JSON starting with {. Schema: {"name":"","pos":"Outside|Opposite|Setter|Middle|Libero","country":"","born":"","hand":"Right|Left","height":0,"weight":0,"spike":0,"block":0,"eu":"Yes|No","club":"","league":"","clubs":[{"name":"","country":"","years":""}],"agent":"","alert":""}',
+        messages:[{role:'user',content:'Extract from: '+url}]})});
+    showProg('pw-url','pf-url','pl-url',70,'Parsing...');
+    var data=await res.json();
+    var txt=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('\n');
+    PEND=parseJ(txt);if(!PEND)throw new Error('no data');PEND.vb=url;
+    showProg('pw-url','pf-url','pl-url',100,'Done \u2713');setTimeout(function(){hideProg('pw-url');},600);showPrev(PEND);
+  }catch(e){hideProg('pw-url');var pl=g('pl-url');pl.style.color='#ef4444';pl.textContent='Failed — try Paste text';g('pw-url').style.display='block';}
+  btn.disabled=false;btn.textContent='Import';
+}
+function parseJ(txt){
+  txt=txt.replace(/```json|```/g,'').trim();
+  var m=txt.match(/\{[\s\S]*?"(name|pos)"[\s\S]*?\}/);if(!m)return null;
+  try{var s=m[0],d=0,end=0;for(var i=0;i<s.length;i++){if(s[i]==='{')d++;else if(s[i]==='}'){d--;if(d===0){end=i;break;}}}return JSON.parse(s.slice(0,end+1));}catch(e){return null;}
+}
+function showPrev(p){
+  g('prev-av').textContent=mkIni(p.name||'?');
+  g('prev-nm').textContent=p.name||'\u2014';
+  g('prev-mt').textContent=(p.pos||'')+' \u00b7 '+(p.country||'');
+  g('prev-ns').innerHTML=[[p.height,'Ht'],[p.spike,'Sp'],[p.block,'Bl'],[p.weight,'Wt']].map(function(a){
+    return'<div style="background:var(--bg2);border-radius:7px;padding:6px 8px;text-align:center;border:1px solid var(--b2)"><div style="font-family:var(--fm);font-size:13px;font-weight:500;color:var(--teal)">'+(a[0]||'\u2014')+'</div><div style="font-size:9px;color:var(--muted)">'+a[1]+'</div></div>';
+  }).join('');
+  g('prev-box').style.display='block';g('eval-sec').style.display='block';PEND=p;
+}
+function saveNew(){
+  var p=PEND;
+  if(!p){
+    var n=(g('mf-name').value||'').trim();if(!n){alert('Player name required');return;}
+    p={name:n,pos:g('mf-pos').value,country:(g('mf-country').value||'').trim(),
+      born:(g('mf-born').value||'').trim(),eu:g('mf-eu').value,
+      height:parseInt(g('mf-ht').value)||null,spike:parseInt(g('mf-sp').value)||null,
+      block:parseInt(g('mf-bl').value)||null,club:(g('mf-club').value||'\u2014').trim(),
+      agent:(g('mf-agent').value||'').trim(),vb:(g('mf-vb').value||'').trim(),
+      video:(g('mf-vid').value||'').trim(),notes:(g('mf-notes').value||'').trim(),clubs:[]};
+  }
+  var np=Object.assign({},p,{
+    id:Date.now()%9999999,id_label:String(P.length+1).padStart(3,'0'),
+    status:(g('eval-st')||{}).value||'Watching',
+    agent:((g('eval-agent')||{}).value||p.agent||'').trim(),
+    notes:((g('eval-notes')||{}).value||p.notes||'').trim()
+  });
+  P.push(np);saveData();updateKPIs();closeModal('am-bg');renderT(getF());toast('\u2713 '+np.name+' added');
+}
+function showProg(wid,fid,lid,pct,lbl){g(wid).style.display='block';g(fid).style.width=pct+'%';var l=g(lid);l.textContent=lbl;l.style.color='var(--muted)';}
+function hideProg(wid){var el=g(wid);if(el)el.style.display='none';}
+
+// ═══ EXPORT ═══════════════════════════════════════
+function exportCSV(){
+  g('exp-d').classList.remove('open');
+  var cols=['ID','Name','Position','Country','Born','Height','EU','Club','League','Agent','Status','Notes','Volleybox','Video'];
+  var rows=P.map(function(p){return[p.id_label||p.id,p.name,p.pos,p.country,p.born,p.height,p.eu,p.club,p.league,p.agent,p.status,p.notes,p.vb,p.video].map(function(v){return '"'+(String(v||'').replace(/"/g,'""'))+'"';}).join(',');});
+  var blob=new Blob([[cols.join(',')].concat(rows).join('\n')],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='PlayerFinder_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+function exportExcel(){
+  g('exp-d').classList.remove('open');
+  var cols=['ID','Name','Position','Country','Born','Height','EU','Club','League','Agent','Status','Notes','Volleybox','Video'];
+  var hrow='<Row>'+cols.map(function(c){return'<Cell ss:StyleID="hdr"><Data ss:Type="String">'+c+'</Data></Cell>';}).join('')+'</Row>';
+  var rows=P.map(function(p){var cells=[p.id_label||p.id,p.name,p.pos,p.country,p.born,p.height||'',p.eu,p.club,p.league,p.agent,p.status,p.notes,p.vb,p.video];return'<Row>'+cells.map(function(v){var val=String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return'<Cell><Data ss:Type="String">'+val+'</Data></Cell>';}).join('')+'</Row>';}).join('');
+  var xml='<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="hdr"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#0a0f1e" ss:Pattern="Solid"/></Style></Styles><Worksheet ss:Name="Player Finder"><Table>'+hrow+rows+'</Table></Worksheet></Workbook>';
+  var blob=new Blob([xml],{type:'application/vnd.ms-excel'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='PlayerFinder_'+new Date().toISOString().slice(0,10)+'.xls';a.click();
+}
+function exportPDF(){
+  g('exp-d').classList.remove('open');
+  var date=new Date().toLocaleDateString('en-GB');
+  var pc2={Outside:'rgba(29,78,216,.15)',Opposite:'rgba(190,24,93,.15)',Setter:'rgba(21,128,61,.15)',Middle:'rgba(109,40,217,.15)',Libero:'rgba(180,83,9,.15)'};
+  var fc2={Outside:'#60a5fa',Opposite:'#fb7185',Setter:'#4ade80',Middle:'#a78bfa',Libero:'#fbbf24'};
+  var sc2={Priority:'#fbbf24',Watching:'#60a5fa',Contacted:'#4ade80',Discarded:'#f87171'};
+  var rows=P.map(function(p,i){var bg=i%2===0?'#0a0f1e':'#111827';return'<tr style="background:'+bg+'"><td style="font-family:monospace;font-size:9px;color:#6b7280">'+(p.id_label||p.id)+'</td><td style="font-weight:600;color:#f1f5f9">'+p.name+'</td><td><span style="background:'+(pc2[p.pos]||'rgba(59,130,246,.15)')+';color:'+(fc2[p.pos]||'#60a5fa')+';padding:1px 7px;border-radius:4px;font-size:9px">'+p.pos+'</span></td><td style="color:#94a3b8">'+(p.country||'—')+'</td><td style="font-family:monospace;font-size:10px;color:#94a3b8">'+(p.born||'—')+'</td><td style="font-family:monospace;font-size:11px;color:#94a3b8">'+(p.height||'—')+'</td><td>'+(p.eu==='Yes'?'<span style="background:rgba(167,139,250,.2);color:#a78bfa;padding:1px 5px;border-radius:4px;font-size:9px">EU</span>':'')+'</td><td style="font-size:11px;color:#64748b">'+(p.club&&p.club!=='—'?p.club:'—')+'</td><td><span style="color:'+(sc2[p.status]||'#60a5fa')+';font-size:9px">'+p.status+'</span></td></tr>';}).join('');
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;background:#0a0f1e;color:#f1f5f9}table{width:100%;border-collapse:collapse}th{font-size:9px;text-transform:uppercase;color:#f1f5f9;background:#080d1a;padding:7px 9px;border-bottom:1px solid #14b8a6}td{padding:6px 9px;vertical-align:middle}@media print{@page{margin:10mm;size:A4 landscape}}</style></head><body><div style="background:#080d1a;padding:16px 24px;display:flex;justify-content:space-between;border-bottom:2px solid #14b8a6"><h1 style="font-size:18px;font-weight:700;color:#fff">Player<span style="color:#14b8a6">Finder</span> — Rethimno 2025/26</h1><div style="font-size:11px;color:#6b7280">'+date+' · '+P.length+' players</div></div><table><thead><tr><th>ID</th><th>Name</th><th>Position</th><th>Country</th><th>Born</th><th>Ht</th><th>EU</th><th>Club</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+  w.document.close();setTimeout(function(){w.print();},500);
+}
+
+// ═══ PROFILE ══════════════════════════════════════
+function openProfile(){
+  if(!CU)return;
+  var av=g('prof-av'),ini=mkIni(CU.fn+' '+CU.ln);
+  if(CU.avatar){av.style.cssText='background:url('+CU.avatar+') center/cover;width:80px;height:80px;border-radius:50%';av.textContent='';}
+  else{av.textContent=ini;av.style.background='';}
+  g('prof-fullname').textContent=CU.fn+' '+CU.ln;
+  g('prof-role').textContent=CU.role||'\u2014';
+  g('prof-club').textContent=CU.club||'\u2014';
+  function sv(id,v){var el=g(id);if(el)el.value=v||'';}
+  sv('pf-fn',CU.fn);sv('pf-ln',CU.ln);sv('pf-em',CU.email);
+  sv('pf-ph',CU.phone||'');sv('pf-cl',CU.club);sv('pf-co',CU.country);
+  sv('pf-ro',CU.role||'Head Coach');sv('pf-bio',CU.bio||'');
+  openModal('prof-bg');
+}
+function saveProfile(){
+  if(!CU)return;
+  CU.fn=(g('pf-fn').value||'').trim()||CU.fn;
+  CU.ln=(g('pf-ln').value||'').trim()||CU.ln;
+  CU.email=(g('pf-em').value||'').trim();
+  CU.phone=(g('pf-ph').value||'').trim();
+  CU.club=(g('pf-cl').value||'').trim();
+  CU.country=(g('pf-co').value||'').trim();
+  CU.role=g('pf-ro').value;
+  CU.bio=(g('pf-bio').value||'').trim();
+  g('app-name').textContent=CU.fn+' '+CU.ln.charAt(0)+'.';
+  closeModal('prof-bg');toast('\u2713 Profile updated');
+}
+function uploadAvatar(){
+  var input=document.createElement('input');input.type='file';input.accept='image/*';
+  input.onchange=function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){CU.avatar=ev.target.result;openProfile();};
+    reader.readAsDataURL(file);
+  };input.click();
+}
+
+// ═══ GOD MODE ═════════════════════════════════════
+function renderGM(){
+  var active=USERS.filter(function(u){return u.status==='active';}).length;
+  var pending=USERS.filter(function(u){return u.status==='pending';}).length;
+  st('gm-tu',USERS.length);st('gm-au',active);st('gm-pu',pending);st('gm-ts',SESS.length);
+  renderGMUsers();renderGMSess();renderGMRegs();
+}
+function switchGMTab(tab,btn){
+  document.querySelectorAll('.gmtab').forEach(function(b){b.className='gmtab';});
+  document.querySelectorAll('.gm-sec').forEach(function(s){s.className='gm-sec';});
+  btn.className='gmtab on';g('gms-'+tab).className='gm-sec on';
+}
+function renderGMUsers(){
+  var wrap=g('gm-users-wrap');
+  var hdr='<div style="display:grid;grid-template-columns:.8fr 1.2fr 1.4fr .8fr .8fr .8fr 1.2fr;background:var(--bg3);border-bottom:1px solid var(--b2);border-radius:10px 10px 0 0">'
+    +['Username','Name','Email','Club','Role','Status','Actions'].map(function(h){return'<div class="gm-cell" style="font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">'+h+'</div>';}).join('')+'</div>';
+  var rows=USERS.map(function(u,i){
+    var spC=u.status==='active'?'sp-a':u.status==='pending'?'sp-p':'sp-s';
+    var acts='';
+    if(!u.isGod&&u.id!=='demo'){
+      if(u.status==='pending')acts+='<button class="act-btn btn-ok" data-i="'+i+'" onclick="gmApprove(parseInt(this.dataset.i))">Approve</button>';
+      if(u.status==='active')acts+='<button class="act-btn btn-ng" data-i="'+i+'" onclick="gmSuspend(parseInt(this.dataset.i))">Suspend</button>';
+      if(u.status==='suspended')acts+='<button class="act-btn btn-wa" data-i="'+i+'" onclick="gmUnsuspend(parseInt(this.dataset.i))">Reactivate</button>';
+    }
+    return'<div class="gm-row" style="display:grid;grid-template-columns:.8fr 1.2fr 1.4fr .8fr .8fr .8fr 1.2fr">'
+      +'<div class="gm-cell" style="font-family:var(--fm);font-size:11px;color:var(--teal)">'+u.id+(u.isGod?' \u26a1':'')+'</div>'
+      +'<div class="gm-cell" style="font-size:12px;font-weight:500">'+u.fn+' '+u.ln+'</div>'
+      +'<div class="gm-cell" style="font-size:11px;color:var(--muted)">'+(u.email||'\u2014')+'</div>'
+      +'<div class="gm-cell" style="font-size:11px;color:var(--muted)">'+(u.club||'\u2014')+'</div>'
+      +'<div class="gm-cell" style="font-size:11px;color:var(--muted)">'+(u.role||'\u2014')+'</div>'
+      +'<div class="gm-cell"><span class="sp '+spC+'">'+u.status+'</span></div>'
+      +'<div class="gm-cell">'+acts+'</div></div>';
+  }).join('');
+  wrap.innerHTML='<div class="gm-tbl">'+hdr+rows+'</div>';
+}
+function gmApprove(i){USERS[i].status='active';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('\u2713 Approved');}
+function gmSuspend(i){if(!confirm('Suspend?'))return;USERS[i].status='suspended';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('Suspended');}
+function gmUnsuspend(i){USERS[i].status='active';sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('\u2713 Reactivated');}
+
+function renderGMSess(){
+  var wrap=g('gm-sess-wrap');
+  var hdr='<div style="display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr .8fr;background:var(--bg3);border-bottom:1px solid var(--b2);border-radius:10px 10px 0 0">'
+    +['Session','Owner','Created','Players','Status'].map(function(h){return'<div class="gm-cell" style="font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">'+h+'</div>';}).join('')+'</div>';
+  var rows=SESS.map(function(s){
+    var owner=USERS.find(function(u){return u.id===s.owner;});
+    return'<div class="gm-row" style="display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr .8fr">'
+      +'<div class="gm-cell" style="font-size:12px;font-weight:500">'+s.icon+' '+s.name+'</div>'
+      +'<div class="gm-cell" style="font-size:11px;color:var(--muted)">'+(owner?owner.fn+' '+owner.ln:'\u2014')+'</div>'
+      +'<div class="gm-cell" style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+s.created+'</div>'
+      +'<div class="gm-cell" style="font-family:var(--fm);font-size:12px;color:var(--teal)">96</div>'
+      +'<div class="gm-cell"><span class="sp sp-a">'+s.status+'</span></div></div>';
+  }).join('');
+  wrap.innerHTML='<div class="gm-tbl">'+hdr+rows+'</div>';
+}
+function renderGMRegs(){
+  var wrap=g('gm-reg-wrap');
+  var pending=USERS.filter(function(u){return u.status==='pending';});
+  if(!pending.length){wrap.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">No pending registrations.</div>';return;}
+  wrap.innerHTML=pending.map(function(u){
+    var idx=USERS.indexOf(u);
+    return'<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:1rem;margin-bottom:10px">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:700;margin-bottom:4px">'+u.fn+' '+u.ln+' <span style="font-family:var(--fm);font-size:10px;color:var(--muted)">@'+u.id+'</span></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;color:var(--muted)">'
+      +'<span>📧 '+(u.email||'\u2014')+'</span><span>🏐 '+(u.club||'\u2014')+'</span>'
+      +'<span>🌍 '+(u.country||'\u2014')+'</span><span>👤 '+(u.role||'\u2014')+'</span>'
+      +'<span>📅 '+u.joined+'</span><span>📍 '+(u.source||'\u2014')+'</span></div>'
+      +(u.needs?'<div style="font-size:11px;color:var(--dim);margin-top:6px;padding:6px 9px;background:var(--bg3);border-radius:6px">Needs: '+u.needs+'</div>':'')+'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px">'
+      +'<button class="act-btn btn-ok" data-i="'+idx+'" onclick="gmApprove(parseInt(this.dataset.i))">\u2713 Approve</button>'
+      +'<button class="act-btn btn-ng" data-i="'+idx+'" onclick="gmReject(parseInt(this.dataset.i))">\u2717 Reject</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+function gmReject(i){if(!confirm('Reject and remove?'))return;USERS.splice(i,1);sSet('pf_xusers',USERS.filter(function(u){return u.id!=='demo'&&u.id!=='admin';}));renderGM();toast('User rejected');}
+
+// ═══ TOAST ════════════════════════════════════════
+function toast(msg){
+  var t=g('toast-el');if(!t)return;
+  t.textContent=msg;t.style.display='block';t.style.opacity='1';
+  clearTimeout(t._t);
+  t._t=setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.style.display='none';t.style.opacity='1';t.style.transition='';},300);},2500);
+}
+
+function togglePw(inputId, btn) {
+  var inp = document.getElementById(inputId);
+  if (!inp) return;
+  var showing = inp.type !== 'password';
+  inp.type = showing ? 'password' : 'text';
+  var eyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  var eyeSlash = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  var svg = btn.querySelector('svg');
+  if (svg) svg.innerHTML = showing ? eyeOpen : eyeSlash;
+  btn.style.color = showing ? 'var(--dim)' : 'var(--teal)';
+}
+
+async function doPaste(){
+  var txt=(document.getElementById('am-paste')||{}).value||'';
+  txt=txt.trim();
+  if(txt.length<20){alert('Paste more text first');return;}
+  var key=getAPIKey();
+  if(!key){alert('API key required.\nClick "Configure API Key" button or use Manual entry tab.');return;}
+  showProg('pw-paste','pf-paste','pl-paste',25,'Processing...');
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,
+        system:'Extract volleyball player data from text. Return ONLY raw JSON starting with {. Schema: {"name":"","pos":"Outside|Opposite|Setter|Middle|Libero","country":"","born":"","hand":"Right|Left","height":0,"weight":0,"spike":0,"block":0,"eu":"Yes|No","club":"","league":"","clubs":[{"name":"","country":"","years":""}],"agent":"","alert":""}',
+        messages:[{role:'user',content:'Extract player data from this text:\n\n'+txt.slice(0,4000)}]})});
+    var data=await res.json();
+    var raw=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    PEND=parseJ(raw);if(!PEND)throw new Error('no data');
+    showProg('pw-paste','pf-paste','pl-paste',100,'Done ✓');
+    setTimeout(function(){hideProg('pw-paste');},500);showPrev(PEND);
+  }catch(e){
+    hideProg('pw-paste');
+    var pl=document.getElementById('pl-paste');
+    if(pl){pl.style.color='#ef4444';pl.textContent='Failed — use Manual entry tab';}
+    document.getElementById('pw-paste').style.display='block';
+  }
+}
+
+// Auto-collapse sidebar on mobile
+(function(){
+  if(window.innerWidth<=600){
+    SB=false;
+    var sb=document.getElementById('sidebar');
+    if(sb)sb.classList.add('closed');
+    var sbt=document.getElementById('sb-toggle');
+    if(sbt)sbt.textContent='►';
+  }
+})();
+
+const INITIAL_PLAYERS=[
+{id:1,id_label:"001",name:"Adnan Bjelopoljak",pos:"Setter",country:"Bosnia",born:"1996 (29y)",height:199,eu:"No",club:"OK Bosna Sarajevo",league:"Bosnian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Talented, jumper, leader, all-rounder. Contract 25/26.",vb:"",video:""},
+{id:2,id_label:"002",name:"Adi Osmanovic",pos:"Opposite",country:"Bosnia",born:"1995 (30y)",height:206,eu:"No",club:"Neftochimik Burgas",league:"Bulgarian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Left-handed, champion. Contract 25/26.",vb:"",video:""},
+{id:3,id_label:"003",name:"Leo Meyer",pos:"Setter",country:"France",born:"1997 (28y)",height:197,eu:"Yes",club:"Burgan SC",league:"Kuwaiti League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Quick, strong jump serve, all-rounder. EU France. Contract 25/27.",vb:"",video:""},
+{id:4,id_label:"004",name:"Alan Causevic",pos:"Middle",country:"Bosnia",born:"2004 (21y)",height:208,eu:"No",club:"OK Bosna Sarajevo",league:"Bosnian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Tall, talented, jumper, big potential. 21y.",vb:"",video:""},
+{id:5,id_label:"005",name:"Haroon Nikroz",pos:"Opposite",country:"Afghanistan",born:"2004 (21y)",height:196,eu:"No",club:"Tolo Sports Complex",league:"Afghan League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Amazing talent, LEFT-handed, 21y.",vb:"",video:""},
+{id:6,id_label:"006",name:"Adnan Silajdzic",pos:"Middle",country:"Bosnia",born:"2003 (22y)",height:207,eu:"No",club:"OK Kakanj",league:"Bosnian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Tall natural blocker, big potential. 22y.",vb:"",video:""},
+{id:7,id_label:"007",name:"Anil Isic",pos:"Opposite",country:"Bosnia",born:"2007 (18y)",height:196,eu:"No",club:"OK Napredak Odzak",league:"Bosnian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Left-handed, future investment, fighter. 18y.",vb:"",video:""},
+{id:8,id_label:"008",name:"Hasan Hadzic",pos:"Opposite",country:"Bosnia",born:"2001 (24y)",height:206,eu:"No",club:"OK Kakanj",league:"Bosnian League",agent:"Prime Time SA",agent_contact:"info@ptsportsagency.com",status:"Watching",notes:"Starter, scorer, jumper, all-rounder.",vb:"",video:""},
+{id:9,id_label:"009",name:"Giorgos Tzioumakas",pos:"Opposite",country:"Greece",born:"—",height:205,eu:"Yes",club:"—",league:"Greek League",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"Opposite/MB. Greek EU. Available 2026-27.",vb:"",video:""},
+{id:10,id_label:"010",name:"Salimou Souare",pos:"Opposite",country:"Mali",born:"—",height:200,eu:"No",club:"—",league:"—",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"200cm Opposite. Available 2026-27.",vb:"",video:""},
+{id:11,id_label:"011",name:"Stelios Tzioumakas",pos:"Outside",country:"Greece",born:"—",height:195,eu:"Yes",club:"—",league:"Greek League",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"Outside, Greek EU. Available 2026-27.",vb:"",video:""},
+{id:12,id_label:"012",name:"Daouda Yacoubou",pos:"Outside",country:"Benin",born:"—",height:200,eu:"No",club:"—",league:"—",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"200cm Outside.",vb:"",video:""},
+{id:13,id_label:"013",name:"Kyle Wilson",pos:"Outside",country:"Bahamas",born:"—",height:193,eu:"No",club:"—",league:"—",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"193cm Outside.",vb:"",video:""},
+{id:14,id_label:"014",name:"Daniel Maciel",pos:"Outside",country:"Brazil",born:"—",height:196,eu:"No",club:"—",league:"—",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"196cm Outside.",vb:"",video:""},
+{id:15,id_label:"015",name:"Bryan Gustavo",pos:"Middle",country:"Cuba",born:"—",height:202,eu:"No",club:"—",league:"—",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"202cm Middle.",vb:"",video:""},
+{id:16,id_label:"016",name:"Onur Kucur",pos:"Setter",country:"Turkey",born:"—",height:203,eu:"No",club:"—",league:"Turkish League",agent:"Ultinity Sports",agent_contact:"info@ultinitysports.com",status:"Watching",notes:"203cm Setter.",vb:"",video:""},
+{id:17,id_label:"017",name:"Amir Taghavi",pos:"Setter",country:"Iran",born:"2001 (25y)",height:202,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 202cm. EX NT Iran.",vb:"",video:""},
+{id:18,id_label:"018",name:"Paulo Lamounier",pos:"Setter",country:"Brazil",born:"1993 (33y)",height:185,eu:"No",club:"—",league:"Brazilian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 185cm. EX NT Brazil.",vb:"",video:""},
+{id:19,id_label:"019",name:"Amir Hossein",pos:"Setter",country:"Egypt",born:"2002 (24y)",height:188,eu:"No",club:"—",league:"Egyptian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 188cm.",vb:"",video:""},
+{id:20,id_label:"020",name:"Mike Novickiy",pos:"Setter",country:"Russia",born:"2000 (26y)",height:199,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 199cm.",vb:"",video:""},
+{id:21,id_label:"021",name:"Rodrigo Siuves",pos:"Setter",country:"Brazil",born:"2006 (20y)",height:183,eu:"No",club:"—",league:"Brazilian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 183cm. Very young 20y.",vb:"",video:""},
+{id:22,id_label:"022",name:"Ivan Markovic",pos:"Setter",country:"Serbia",born:"1999 (27y)",height:191,eu:"No",club:"—",league:"Serbian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 191cm.",vb:"",video:""},
+{id:23,id_label:"023",name:"Moritz Gartner",pos:"Setter",country:"Germany",born:"2001 (25y)",height:192,eu:"Yes",club:"—",league:"German League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Setter 192cm. EU Germany.",vb:"",video:""},
+{id:24,id_label:"024",name:"Nikita Ivankov",pos:"Opposite",country:"Russia",born:"1999 (27y)",height:200,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 200cm.",vb:"",video:""},
+{id:25,id_label:"025",name:"Daniil Pyvovarenko",pos:"Opposite",country:"Ukraine",born:"2004 (22y)",height:206,eu:"No",club:"—",league:"Ukrainian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 206cm. Young 22y.",vb:"",video:""},
+{id:26,id_label:"026",name:"Jair Santiago",pos:"Opposite",country:"Puerto Rico",born:"1995 (31y)",height:208,eu:"No",club:"Free Agent",league:"—",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 208cm. Season 25/26. EX NT Puerto Rico.",vb:"https://volleybox.net/jair-santiago",video:"https://youtu.be/Rk_Nu7CKOzc"},
+{id:27,id_label:"027",name:"Alex Emerson",pos:"Opposite",country:"Venezuela",born:"1993 (33y)",height:204,eu:"No",club:"—",league:"Venezuelan League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 204cm. YES NT Venezuela.",vb:"",video:""},
+{id:28,id_label:"028",name:"Kelvin Nwanchikwu",pos:"Opposite",country:"Nigeria",born:"2002 (24y)",height:215,eu:"No",club:"—",league:"Nigerian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 215cm EXCEPTIONAL HEIGHT. 24y.",vb:"",video:""},
+{id:29,id_label:"029",name:"Marko Milovanovic",pos:"Opposite",country:"Montenegro",born:"1995 (31y)",height:200,eu:"No",club:"—",league:"Montenegrin League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 200cm.",vb:"",video:""},
+{id:30,id_label:"030",name:"Yuri Kruzhkov",pos:"Opposite",country:"Russia",born:"1994 (32y)",height:199,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 199cm.",vb:"",video:""},
+{id:31,id_label:"031",name:"Jesus Chourio",pos:"Opposite",country:"Venezuela",born:"1991 (35y)",height:201,eu:"No",club:"—",league:"Venezuelan League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 201cm.",vb:"",video:""},
+{id:32,id_label:"032",name:"Carlos Araujo",pos:"Opposite",country:"Cuba",born:"1992 (34y)",height:198,eu:"No",club:"—",league:"Cuban League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 198cm.",vb:"",video:""},
+{id:33,id_label:"033",name:"Igobe Sikuku",pos:"Opposite",country:"Botswana",born:"1994 (32y)",height:201,eu:"No",club:"—",league:"—",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 201cm.",vb:"",video:""},
+{id:34,id_label:"034",name:"Alireza Abaloch",pos:"Opposite",country:"Iran",born:"1998 (28y)",height:198,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 198cm.",vb:"",video:""},
+{id:35,id_label:"035",name:"Pavel Kandulinski",pos:"Opposite",country:"Belarus",born:"1997 (29y)",height:200,eu:"No",club:"—",league:"Belarusian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 200cm.",vb:"",video:""},
+{id:36,id_label:"036",name:"Evgenii Tiurin",pos:"Opposite",country:"Slovakia",born:"1989 (37y)",height:203,eu:"No",club:"—",league:"Slovak League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 203cm. Veteran.",vb:"",video:""},
+{id:37,id_label:"037",name:"Danila Myslivko",pos:"Opposite",country:"Russia",born:"2002 (24y)",height:198,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 198cm.",vb:"",video:""},
+{id:38,id_label:"038",name:"Mahdi Aghababaei",pos:"Opposite",country:"Iran",born:"1997 (29y)",height:202,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 202cm.",vb:"",video:""},
+{id:39,id_label:"039",name:"Abdulrahman Almutawa",pos:"Opposite",country:"Kuwait",born:"1995 (31y)",height:196,eu:"No",club:"—",league:"Kuwaiti League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 196cm.",vb:"",video:""},
+{id:40,id_label:"040",name:"Oforah Izuchukwu",pos:"Opposite",country:"Nigeria",born:"2002 (24y)",height:203,eu:"No",club:"—",league:"Nigerian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Opposite 203cm.",vb:"",video:""},
+{id:41,id_label:"041",name:"Michal Wojcik",pos:"Outside",country:"Poland",born:"2001 (25y)",height:199,eu:"Yes",club:"—",league:"Polish League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 199cm. EU Poland.",vb:"",video:""},
+{id:42,id_label:"042",name:"Hiroshi Centelles",pos:"Outside",country:"Cuba",born:"1990 (36y)",height:197,eu:"No",club:"—",league:"Cuban League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 197cm.",vb:"",video:""},
+{id:43,id_label:"043",name:"Sebastian Giraldo",pos:"Outside",country:"Colombia",born:"1997 (29y)",height:195,eu:"No",club:"—",league:"Colombian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 195cm.",vb:"",video:""},
+{id:44,id_label:"044",name:"Mohammad Norouzi",pos:"Outside",country:"Iran",born:"1997 (29y)",height:195,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 195cm.",vb:"",video:""},
+{id:45,id_label:"045",name:"Nikita Axyutin",pos:"Outside",country:"Russia",born:"1994 (32y)",height:200,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 200cm.",vb:"",video:""},
+{id:46,id_label:"046",name:"Carlos Beroes",pos:"Outside",country:"Venezuela",born:"2005 (21y)",height:204,eu:"No",club:"—",league:"Venezuelan League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 204cm. Young 21y.",vb:"",video:""},
+{id:47,id_label:"047",name:"Danil Kharitanov",pos:"Outside",country:"Russia",born:"2001 (25y)",height:201,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 201cm.",vb:"",video:""},
+{id:48,id_label:"048",name:"Wilton Rodriguez",pos:"Outside",country:"Brazil",born:"1999 (27y)",height:203,eu:"No",club:"—",league:"Brazilian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 203cm.",vb:"",video:""},
+{id:49,id_label:"049",name:"Tim Sokolov",pos:"Outside",country:"Russia",born:"1996 (30y)",height:198,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 198cm.",vb:"",video:""},
+{id:50,id_label:"050",name:"Hazem Rashed",pos:"Outside",country:"Egypt",born:"2003 (23y)",height:200,eu:"No",club:"—",league:"Egyptian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 200cm. Young.",vb:"",video:""},
+{id:51,id_label:"051",name:"Abouelsoud Eiad",pos:"Outside",country:"Egypt",born:"1995 (31y)",height:203,eu:"No",club:"—",league:"Egyptian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 203cm.",vb:"",video:""},
+{id:52,id_label:"052",name:"Jorge Gonzalez",pos:"Outside",country:"Cuba",born:"1991 (35y)",height:204,eu:"No",club:"—",league:"Cuban League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 204cm. Veteran.",vb:"",video:""},
+{id:53,id_label:"053",name:"Luis Reinoso",pos:"Outside",country:"Dominican Rep.",born:"2000 (26y)",height:192,eu:"No",club:"—",league:"Dominican League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 192cm.",vb:"",video:""},
+{id:54,id_label:"054",name:"Luiz Perotto",pos:"Outside",country:"Brazil",born:"1992 (34y)",height:193,eu:"No",club:"—",league:"Brazilian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 193cm.",vb:"",video:""},
+{id:55,id_label:"055",name:"Denis Kochnev",pos:"Outside",country:"Russia",born:"1995 (31y)",height:200,eu:"No",club:"—",league:"Russian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 200cm.",vb:"",video:""},
+{id:56,id_label:"056",name:"Battur Batsuuri",pos:"Outside",country:"Mongolia",born:"1998 (28y)",height:195,eu:"No",club:"—",league:"Mongolian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Outside 195cm.",vb:"",video:""},
+{id:57,id_label:"057",name:"Sauhein Vantsovich",pos:"Middle",country:"Belarus",born:"1996 (30y)",height:202,eu:"No",club:"—",league:"Belarusian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 202cm.",vb:"",video:""},
+{id:58,id_label:"058",name:"Mohsen Vazehi",pos:"Middle",country:"Iran",born:"1997 (29y)",height:202,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 202cm.",vb:"",video:""},
+{id:59,id_label:"059",name:"Amirali Mohammad",pos:"Middle",country:"Iran",born:"1993 (33y)",height:206,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 206cm.",vb:"",video:""},
+{id:60,id_label:"060",name:"Leandro Mejia",pos:"Middle",country:"Colombia",born:"1996 (30y)",height:200,eu:"No",club:"—",league:"Colombian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 200cm.",vb:"",video:""},
+{id:61,id_label:"061",name:"Alireza Abdollahi",pos:"Middle",country:"Iran",born:"2002 (24y)",height:206,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 206cm.",vb:"",video:""},
+{id:62,id_label:"062",name:"Dave Belemene",pos:"Middle",country:"Congo",born:"1994 (32y)",height:203,eu:"No",club:"—",league:"—",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 203cm.",vb:"",video:""},
+{id:63,id_label:"063",name:"Jose Sandoval",pos:"Middle",country:"Cuba",born:"1994 (32y)",height:205,eu:"No",club:"—",league:"Cuban League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 205cm.",vb:"",video:""},
+{id:64,id_label:"064",name:"Matias Diaz",pos:"Middle",country:"Argentina",born:"2005 (21y)",height:199,eu:"No",club:"—",league:"Argentine League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 199cm. Very young.",vb:"",video:""},
+{id:65,id_label:"065",name:"Dainer Ocoro",pos:"Middle",country:"Colombia",born:"2004 (22y)",height:205,eu:"No",club:"—",league:"Colombian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 205cm. Young 22y.",vb:"",video:""},
+{id:66,id_label:"066",name:"Andrii Shvets",pos:"Middle",country:"Ukraine",born:"2005 (21y)",height:203,eu:"No",club:"—",league:"Ukrainian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 203cm. Very young.",vb:"",video:""},
+{id:67,id_label:"067",name:"Ali Houshmand",pos:"Middle",country:"Iran",born:"2003 (23y)",height:205,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 205cm. Young.",vb:"",video:""},
+{id:68,id_label:"068",name:"Ronald Martinez",pos:"Middle",country:"Venezuela",born:"1998 (28y)",height:203,eu:"No",club:"—",league:"Venezuelan League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 203cm.",vb:"",video:""},
+{id:69,id_label:"069",name:"Alexander Carabali",pos:"Middle",country:"Colombia",born:"1995 (31y)",height:205,eu:"No",club:"—",league:"Colombian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"MB 205cm.",vb:"",video:""},
+{id:70,id_label:"070",name:"Mostafa Sattaripour",pos:"Libero",country:"Iran",born:"2000 (26y)",height:181,eu:"No",club:"—",league:"Iranian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Libero 181cm.",vb:"",video:""},
+{id:71,id_label:"071",name:"Luke Hulston",pos:"Libero",country:"New Zealand",born:"1998 (28y)",height:179,eu:"No",club:"—",league:"—",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Libero 179cm.",vb:"",video:""},
+{id:72,id_label:"072",name:"Enger Mieses",pos:"Libero",country:"Dominican Rep.",born:"1995 (31y)",height:175,eu:"No",club:"—",league:"Dominican League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Libero 175cm.",vb:"",video:""},
+{id:73,id_label:"073",name:"Lazar Mocic",pos:"Libero",country:"Serbia",born:"1993 (33y)",height:174,eu:"No",club:"—",league:"Serbian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Libero 174cm.",vb:"",video:""},
+{id:74,id_label:"074",name:"Yassen Ashraff",pos:"Libero",country:"Egypt",born:"2004 (22y)",height:188,eu:"No",club:"—",league:"Egyptian League",agent:"WVA - Oroz",agent_contact:"+542215571496",status:"Watching",notes:"Libero 188cm. Young.",vb:"",video:""},
+{id:75,id_label:"075",name:"Antony Gabriel Goncalves",pos:"Outside",country:"Brazil",born:"1997 (29y)",height:197,eu:"No",club:"CSU Brasov",league:"Romanian League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"Outside 197cm. Romania.",vb:"",video:""},
+{id:76,id_label:"076",name:"Cole Gillis",pos:"Outside",country:"USA",born:"2000 (26y)",height:197,eu:"No",club:"Changos Naranjito",league:"Puerto Rican League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"Outside 197cm.",vb:"",video:""},
+{id:77,id_label:"077",name:"Filip Kovacevic",pos:"Outside",country:"Serbia",born:"1996 (30y)",height:200,eu:"No",club:"Kalamata",league:"GREEK LEAGUE",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"CURRENTLY IN GREEK LEAGUE (Kalamata). Outside 200cm.",vb:"",video:""},
+{id:78,id_label:"078",name:"Gabriel Andrade Melo Franco",pos:"Outside",country:"Brazil",born:"1995 (31y)",height:198,eu:"No",club:"Panionios",league:"GREEK LEAGUE",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"CURRENTLY IN GREEK LEAGUE (Panionios). Outside 198cm.",vb:"",video:""},
+{id:79,id_label:"079",name:"Jacob Van Geell",pos:"Outside",country:"Canada",born:"2001 (25y)",height:200,eu:"No",club:"Kladno",league:"Czech League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"Outside 200cm.",vb:"",video:""},
+{id:80,id_label:"080",name:"Jakdiel Contreras Acosta",pos:"Middle",country:"Cuba",born:"2004 (22y)",height:203,eu:"No",club:"CS Rapid Bucharest",league:"Romanian League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"MB 203cm. Young 22y.",vb:"",video:""},
+{id:81,id_label:"081",name:"Jonatas Weslei Santos Cardoso",pos:"Outside",country:"Brazil",born:"1993 (33y)",height:193,eu:"No",club:"CS Dinamo Bucharest",league:"Romanian League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"Outside 193cm.",vb:"",video:""},
+{id:82,id_label:"082",name:"Maicon Jose Leite Costa",pos:"Middle",country:"Brazil",born:"1992 (34y)",height:204,eu:"No",club:"Suzano Volei",league:"Brazilian League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"MB 204cm. Prev: Knack Roeselare BEL.",vb:"",video:""},
+{id:83,id_label:"083",name:"Matheus Hoffmann da Cunda",pos:"Middle",country:"Brazil",born:"1991 (35y)",height:207,eu:"No",club:"UPCN Voley",league:"Argentine League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"MB 207cm. Prev: SL Benfica.",vb:"",video:""},
+{id:84,id_label:"084",name:"Nikolay Iliev Kartev",pos:"Middle",country:"Bulgaria",born:"1995 (31y)",height:204,eu:"Yes",club:"Montpellier",league:"French League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"MB 204cm. EU Bulgaria. Montpellier. Prev: PAOK Greece. HIGH VALUE.",vb:"",video:""},
+{id:85,id_label:"085",name:"Raje Alleyne",pos:"Opposite",country:"Barbados",born:"2001 (25y)",height:198,eu:"No",club:"JF Volei",league:"Brazilian League",agent:"Team GM",agent_contact:"vinhedo@geraldomaciel.com",status:"Watching",notes:"Opposite 198cm.",vb:"",video:""},
+{id:86,id_label:"086",name:"Hamza Hamdy Elsafy",pos:"Outside",country:"Egypt",born:"2005 (20y)",height:195,eu:"No",club:"Al-Ahly SC",league:"Egyptian League",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Age 20. Great jump, block timing. High potential.",vb:"https://volleybox.net/hamza-elsafy-awad-p72425",video:""},
+{id:87,id_label:"087",name:"Erisandy Castillo",pos:"Opposite",country:"Dominican Rep.",born:"2001 (25y)",height:null,eu:"No",club:"—",league:"Dominican League",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Opposite. Dom. Rep. Born 21/05/2001.",vb:"https://volleybox.net/es/erisandy-castillo-p104373",video:"https://www.youtube.com/watch?v=UYsAPpGzUuk"},
+{id:88,id_label:"088",name:"Andrei Vasilenko",pos:"Outside",country:"Russia",born:"1995 (31y)",height:null,eu:"No",club:"—",league:"Russian League",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Outside. Russia. 12 clubs career.",vb:"https://volleybox.net/andrei-vasilenko-p24590",video:"https://www.youtube.com/watch?v=yKsOtpFflCQ"},
+{id:89,id_label:"089",name:"Mateusz Lysikowski",pos:"Outside",country:"Poland",born:"1996 (29y)",height:185,eu:"Yes",club:"GKS Katowice",league:"Polish I Liga",agent:"Bravevolley Agency",agent_contact:"",status:"Watching",notes:"185cm, attack 345cm, block 320cm. EU Poland. I Liga. Agent: Bravevolley/Kolodziej.",vb:"https://volleybox.net/mateusz-lysikowski-p18167",video:"https://youtu.be/n08N7ss9-6I"},
+{id:90,id_label:"090",name:"Timo Lohmus",pos:"Outside",country:"Estonia",born:"2001 (25y)",height:null,eu:"No",club:"—",league:"—",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Outside. Estonia. UAE+Mongolia experience.",vb:"https://volleybox.net/timo-lohmus-p32199",video:"https://youtu.be/oTxiB55vBgQ"},
+{id:91,id_label:"091",name:"Trent Moser",pos:"Outside",country:"USA",born:"—",height:201,eu:"No",club:"BYU University",league:"NCAA USA",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"201cm. BYU. USA VNL 2026 LONG LIST — MONITOR!",vb:"",video:"https://www.youtube.com/watch?v=h936P6J7jsA"},
+{id:92,id_label:"092",name:"Brian Melgarejo",pos:"Outside",country:"Argentina",born:"1995 (31y)",height:191,eu:"No",club:"VC Limax",league:"Dutch League",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Outside 191cm, 88kg. VC Limax Netherlands. 10 clubs. Born 28/03/1995. Agent: DV Agency Buenos Aires.",vb:"https://volleybox.net/brian-melgarejo-p4927",video:"https://www.youtube.com/watch?v=I7rVQoswr4Y"}
+,
+{id:93,id_label:"093",name:"Gabriel Andrade",pos:"Outside",country:"Brazil",born:"1995 (31y)",height:198,weight:90,spike:340,block:320,hand:"Right",eu:"No",club:"—",league:"—",agent:"Direct Obs.",agent_contact:"",status:"Watching",notes:"Outside 198cm, 90kg. Born 27/04/1995. Brazil. Also known as Gabriel Franco. 10 clubs.",vb:"https://volleybox.net/gabriel-andrade-p5430",video:"https://www.youtube.com/watch?v=B_fxZkZkPwE|https://www.youtube.com/watch?v=rJ8XG2oDv6A",clubs:[]},
+{id:94,id_label:"094",name:"Cas Abraham",pos:"Outside",country:"Netherlands",born:"1999 (27y)",height:194,weight:93,spike:350,block:335,hand:"Right",eu:"Yes",club:"—",league:"—",agent:"Maximus Sport",agent_contact:"",status:"Watching",notes:"Outside 194cm, 93kg. Born 17/05/1999. Netherlands — EU passport. Spike 350cm, Block 335cm. Agency: Maximus Sport.",vb:"https://volleybox.net/cas-abraham-p26071",video:"",clubs:[]}
+,
+{id:95,id_label:"095",name:"Boris Busa",pos:"Opposite",country:"Serbia",born:"1997 (28y)",height:200,weight:97,spike:360,block:340,hand:"Right",eu:"No",club:"Panionios",league:"GREEK LEAGUE",agent:"Direct Obs.",agent_contact:"",status:"Priority",notes:"Opposite 200cm, 97kg. Born 25/04/1997. Serbia. Spike 360cm, Block 340cm. CURRENTLY IN GREEK LEAGUE — Panionios 2025/26. 9 clubs career. Sister: Bianka Busa (pro volleyball player).",vb:"https://volleybox.net/boris-busa-p6469",video:"https://www.youtube.com/watch?v=794CnrqjhN8",clubs:[],quick_note:""},
+{id:96,id_label:"096",name:"Hermans Egleskalns",pos:"Opposite",country:"Latvia",born:"1990 (35y)",height:204,weight:100,spike:357,block:340,hand:"Right",eu:"Yes",club:"AO Floisvos",league:"GREEK LEAGUE",agent:"Direct Obs.",agent_contact:"",status:"Priority",notes:"Opposite 204cm, 100kg. Born 08/12/1990. Latvia — EU passport. Spike 357cm, Block 340cm. CURRENTLY IN GREEK LEAGUE — AO Floisvos 2025/26. 11 clubs. MVP Finnish Championship 2011. Best Opposite France 2017. Prev: Tours VB, Olympiacos, Noliko Maaseik.",vb:"https://volleybox.net/hermans-egleskalns-p715",video:"",clubs:[],quick_note:""}
+];
+</script>
+</body>
+</html>
