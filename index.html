@@ -467,6 +467,39 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .act-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--bg3)}
 .act-txt{flex:1;font-size:12px;color:var(--muted);line-height:1.4}
 .act-time{font-family:var(--fm);font-size:9px;color:var(--dim);flex-shrink:0}
+
+/* Back to dashboard floating */
+.back-fab{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--b2);border-radius:12px;padding:10px 16px;font-family:var(--fh);font-size:12px;font-weight:600;color:var(--teal);cursor:pointer;box-shadow:var(--sh2);z-index:100;display:none;align-items:center;gap:6px;transition:all .2s}
+.back-fab:hover{background:var(--bg3);transform:translateY(-2px)}
+.back-fab.show{display:flex}
+
+/* ── KANBAN ── */
+.kb-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:start;padding:8px}
+.kb-col{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden;min-height:120px}
+.kb-col-hd{padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.kb-col-title{font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em}
+.kb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.kb-cnt{font-family:var(--fm);font-size:10px;color:var(--dim);background:var(--bg3);border:1px solid var(--b2);padding:1px 7px;border-radius:10px}
+.kb-cards{padding:8px;display:flex;flex-direction:column;gap:6px;min-height:60px}
+.kb-card{background:var(--bg);border:1px solid var(--b2);border-radius:var(--r);padding:10px 11px;cursor:grab;transition:all .15s;position:relative}
+.kb-card:hover{border-color:rgba(20,184,166,.3);transform:translateY(-1px);box-shadow:var(--sh)}
+.kb-card.dragging{opacity:.35;transform:rotate(1.5deg);cursor:grabbing}
+.kb-card.priority{border-left:2px solid #EF9F27}
+.kb-card.watching{border-left:2px solid #378ADD}
+.kb-card.contacted{border-left:2px solid #1D9E75}
+.kb-card.discarded{border-left:2px solid #888780;opacity:.55}
+.kb-card-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.kb-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.kb-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.2}
+.kb-sub{font-size:10px;color:var(--dim)}
+.kb-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.kb-tag{font-size:9px;padding:1px 6px;border-radius:4px;border:1px solid transparent}
+.kb-drop-hint{text-align:center;padding:14px 8px;font-size:10px;color:var(--dim);border:1px dashed var(--b2);border-radius:var(--r);margin:4px;font-family:var(--fm)}
+.kb-col.drag-over{border-color:rgba(20,184,166,.5);background:rgba(20,184,166,.03)}
+.kb-more{text-align:center;padding:5px;font-size:10px;color:var(--dim);cursor:pointer;font-family:var(--fm)}
+.kb-more:hover{color:var(--teal)}
+@media(max-width:700px){.kb-board{grid-template-columns:repeat(2,1fr);}}.
+@media(max-width:420px){.kb-board{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -537,10 +570,11 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div style="font-size:10px;color:var(--dim);margin-top:8px;text-align:center;line-height:1.5">Your data may be used to send relevant scouting updates.</div>
    </div>
   </div>
-  <div class="land-feats">
-   <div class="feat"><div class="feat-ico">🏐</div><div class="feat-t">96+ Players</div><div class="feat-d">Pre-loaded from 5 agencies</div></div>
-   <div class="feat"><div class="feat-ico">🔍</div><div class="feat-t">Smart Search</div><div class="feat-d">Instant keyword search</div></div>
-   <div class="feat"><div class="feat-ico">⭐</div><div class="feat-t">Priority Lists</div><div class="feat-d">Rate and shortlist players</div></div>
+  <div class="land-feats" style="grid-template-columns:repeat(2,1fr);max-width:420px">
+   <div class="feat"><div class="feat-ico">🔍</div><div class="feat-t">Smart Search</div><div class="feat-d">Find any player instantly by name, country, position or club</div></div>
+   <div class="feat"><div class="feat-ico">⭐</div><div class="feat-t">Priority Lists</div><div class="feat-d">Rate, shortlist and track your top targets</div></div>
+   <div class="feat"><div class="feat-ico">📤</div><div class="feat-t">Export in One Click</div><div class="feat-d">CSV, Excel or PDF ready to share with your staff</div></div>
+   <div class="feat"><div class="feat-ico">📊</div><div class="feat-t">Compare & Decide</div><div class="feat-d">Analyse candidates side by side and make the call</div></div>
   </div>
  </div>
 </div>
@@ -641,6 +675,9 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
        <button class="vm-btn" id="vm-grid" onclick="setVM('grid')" title="Grid">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="0" y="0" width="6" height="6" rx="1.5"/><rect x="8" y="0" width="6" height="6" rx="1.5"/><rect x="0" y="8" width="6" height="6" rx="1.5"/><rect x="8" y="8" width="6" height="6" rx="1.5"/></svg>
        </button>
+       <button class="vm-btn" id="vm-kanban" onclick="setVM('kanban')" title="Kanban">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="0" y="0" width="3" height="14" rx="1"/><rect x="4" y="0" width="3" height="10" rx="1"/><rect x="8" y="0" width="3" height="12" rx="1"/><rect x="12" y="0" width="2" height="7" rx="1"/></svg>
+       </button>
       </div>
      </div>
      <!-- Row 2: position chips + filter dropdowns -->
@@ -695,6 +732,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <div class="view" id="v-detail">
     <div class="back-bar">
      <button class="back-btn" onclick="goTo('dashboard')">← Back to Players</button>
+     <button class="back-btn" onclick="undoLastAction()" style="color:var(--amber);border-color:rgba(245,158,11,.2)">↩ Undo</button>
      <button class="edit-btn" onclick="openEdit()">✏️ Edit Player</button>
     </div>
     <div id="det-content"></div>
@@ -743,6 +781,10 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
      <button class="btn-sm" onclick="addNote()">+ Add Note</button>
     </div>
     <div id="nt-list"></div>
+   </div>
+   <!-- KANBAN -->
+   <div class="view" id="v-kanban">
+    <div id="kb-wrap"></div>
    </div>
    <!-- CALENDAR -->
    <div class="view" id="v-calendar">
@@ -802,12 +844,14 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <button class="gmtab" onclick="switchGMTab('players',this)">⚡ All Players</button>
    <button class="gmtab" onclick="switchGMTab('regs',this)">📋 Registrations</button>
    <button class="gmtab" onclick="switchGMTab('activity',this)">📊 Activity</button>
+   <button class="gmtab" onclick="switchGMTab('analytics',this)">📈 Analytics</button>
   </div>
   <div class="gm-sec on" id="gms-users"><div id="gm-users-wrap"></div></div>
   <div class="gm-sec" id="gms-sessions"><div id="gm-sess-wrap"></div></div>
   <div class="gm-sec" id="gms-players"><div id="gm-players-wrap"></div></div>
   <div class="gm-sec" id="gms-regs"><div id="gm-reg-wrap"></div></div>
   <div class="gm-sec" id="gms-activity"><div id="gm-activity" style="padding:8px"></div></div>
+  <div class="gm-sec" id="gms-analytics"><div id="gm-analytics" style="padding:8px"></div></div>
  </div>
 </div>
 
@@ -950,6 +994,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 </div>
 
 <div id="toast-el" class="toast"></div>
+<button class="back-fab" id="back-fab" onclick="goTo('dashboard')">🏠 Dashboard</button>
 
 
 <script>
@@ -1266,6 +1311,9 @@ function goTo(v){
   if(v==='calendar')renderCalendar();
   if(v==='compare')renderCompare();
   if(v==='trash')renderTrash();
+  // Show back-to-dashboard button when not on dashboard
+  var fab=g('back-fab');
+  if(fab) fab.className='back-fab'+(v!=='dashboard'?' show':'');
 }
 
 function toggleSB(){
@@ -1275,8 +1323,24 @@ function toggleSB(){
 }
 function setVM(m){
   VM=m;
-  ['list','card','grid'].forEach(function(x){var el=g('vm-'+x);if(el)el.className='vm-btn'+(x===m?' on':'');});
-  renderT(getF());
+  ['list','card','grid','kanban'].forEach(function(x){var el=g('vm-'+x);if(el)el.className='vm-btn'+(x===m?' on':'');});
+  if(m==='kanban'){
+    // Switch to kanban view
+    ['dashboard','search','priority','teams','agents','notes','detail','calendar','compare','trash','kanban'].forEach(function(id){
+      var el=g('v-'+id);if(el)el.className='view'+(id==='kanban'?'  on':'');
+    });
+    g('v-kanban').className='view on';
+    renderKanban(getF());
+  } else {
+    // Switch back to normal dashboard view
+    g('v-kanban').className='view';
+    g('v-dashboard').className='view on';
+    renderT(getF());
+    // Update nav
+    ['dashboard','search','priority','teams','agents','notes','calendar','compare','trash'].forEach(function(id){
+      var el=g('nb-'+id);if(el)el.className='nbtn'+(id==='dashboard'?' on':'');
+    });
+  }
 }
 
 // ═══ KPIs ═════════════════════════════════════════
@@ -1417,7 +1481,7 @@ function renderCards(list,wrap){
       var cardChk=SEL_MODE?'<div onclick="event.stopPropagation()" style="flex-shrink:0"><input type="checkbox" class="sel-cb" '+(SEL_IDS.has(p.id)?'checked':'')+' onchange="toggleSel('+p.id+',this)"></div>':'';
       return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;border-left:3px solid '+cs[1]+';'+(SEL_IDS.has(p.id)?'outline:2px solid #ef4444;':'')+'" onclick="'+(SEL_MODE?'':'showDet('+p.id+')')+'">'
         +cardChk
-        +'<div style="width:40px;height:40px;border-radius:10px;background:'+cl+';color:'+c+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500;flex-shrink:0">'+mkIni(p.name)+'</div>'
+        +'<div style="flex-shrink:0">'+getPlayerAvatar(p,40)+'</div>'
         +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;margin-bottom:2px">'+p.name+'</div>'
         +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
         +'<span class="pos-b" style="background:'+cp[0]+';color:'+cp[1]+';border-color:'+cp[1]+'40;font-size:9px">'+p.pos+'</span>'
@@ -1439,7 +1503,7 @@ function renderGrid(list,wrap){
       var cs=sc(p.status),cp=pc(p.pos),c=acc(p.id),cl=accl(p.id);
       return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:12px;padding:14px 10px;cursor:pointer;text-align:center;border-top:3px solid '+cs[1]+';position:relative;'+(SEL_IDS.has(p.id)?'outline:2px solid #ef4444;':'')+'" onclick="'+(SEL_MODE?'':'showDet('+p.id+')')+'">'
         +(SEL_MODE?'<div onclick="event.stopPropagation()" style="position:absolute;top:6px;right:6px"><input type="checkbox" class="sel-cb" '+(SEL_IDS.has(p.id)?'checked':'')+' onchange="toggleSel('+p.id+',this)"></div>':'')
-        +'<div style="width:44px;height:44px;border-radius:12px;background:'+cl+';color:'+c+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:13px;font-weight:500;margin:0 auto 8px">'+mkIni(p.name)+'</div>'
+        +'<div style="margin:0 auto 8px;width:44px;height:44px">'+getPlayerAvatar(p,44)+'</div>'
         +'<div style="font-size:12px;font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
         +'<span class="pos-b" style="background:'+cp[0]+';color:'+cp[1]+';border-color:'+cp[1]+'40;font-size:9px">'+p.pos+'</span>'
         +'<div style="font-size:10px;color:var(--muted);margin-top:4px">'+(p.country||'—')+'</div>'
@@ -1454,7 +1518,10 @@ function showDet(id){
   var cpv=pc(p.pos),scp=sc(p.status),c=acc(p.id),cl=accl(p.id);
   var vids=(p.video||'').split('|').map(function(v){return v.trim();}).filter(Boolean);
   var html='<div class="d-hero"><div class="d-top">'
-    +'<div class="d-av" style="background:'+cl+';color:'+c+'">'+mkIni(p.name)+'</div>'
+    +'<div style="position:relative;cursor:pointer" onclick="uploadPlayerPhotoURL('+id+')" title="Click to set photo URL">'
+    +getPlayerAvatar(p,52)
+    +'<div style="position:absolute;bottom:-4px;right:-4px;background:var(--teal);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px">📷</div>'
+    +'</div>'
     +'<div style="flex:1"><div class="d-nm">'+p.name+'</div><div class="d-tags">'
     +'<span class="st-b" style="background:'+scp[0]+';color:'+scp[1]+'">'+p.status+'</span>'
     +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40">'+p.pos+'</span>'
@@ -1468,6 +1535,7 @@ function showDet(id){
     +['Priority','Watching','Contacted','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
     +'</select>'
     +'<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">'
+    +'<button class="share-btn" onclick="exportPlayerPDF('+id+')" style="color:var(--red);border-color:rgba(239,68,68,.3);background:var(--rl)">📑 PDF</button>'
     +'<button class="share-btn" onclick="sharePlayer('+id+')">🔗 Share</button>'
     +'<button class="share-btn" onclick="addFollowUp(String('+id+'),this.dataset.n)" data-n="'+p.name+'" style="color:var(--amber);border-color:rgba(245,158,11,.3);background:var(--al)">📅 Remind</button>'
     +'<button class="btn-del" onclick="trashOne('+id+')">🗑 Trash</button>'
@@ -1856,6 +1924,7 @@ function switchGMTab(tab,btn){
   if(tab==='activity') renderActivityLog();
   if(tab==='players') renderGMPlayers();
   if(tab==='sessions') renderGMSess();
+  if(tab==='analytics') renderAnalytics();
 }
 function renderGMUsers(){
   var wrap=g('gm-users-wrap');
@@ -2207,7 +2276,7 @@ async function renderTrash(){
 
     list.innerHTML = rows.map(function(row){
       var p = row.data || {};
-      var cpv = POS_COL[p.pos] || ['rgba(59,130,246,.15)','#60a5fa'];
+      var cpv = POS[p.pos] || ['rgba(59,130,246,.15)','#60a5fa'];
       var delDate = row.deleted_at ? new Date(row.deleted_at).toLocaleDateString() : '—';
       return '<div class="trash-row" data-dbid="'+row.id+'" style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;opacity:.55;filter:grayscale(.4);transition:all .2s">'
         +'<input type="checkbox" class="sel-cb trash-cb" data-dbid="'+row.id+'" onchange="toggleTrashSel(this.dataset.dbid,this)">'
@@ -2279,21 +2348,17 @@ async function restorePlayer(dbId, name){
 }
 
 async function emptyTrash(){
-  if(!confirm('Permanently delete all trashed players? (Admin can still see them in Supabase)')) return;
-  // We don't actually delete from DB - just mark as "permanently_deleted"
-  // This keeps admin access in Supabase Table Editor
+  if(!confirm('Empty trash? Players will be hidden from your view.\nNote: Admin can always restore them from the God Mode panel.')) return;
   try{
-    await sbFetch('players?session_id=eq.ope-rethymno-2526&deleted=eq.true', {
+    await sbFetch('players?session_id=eq.'+CS.id+'&owner_id=eq.'+CU.id+'&deleted=eq.true',{
       method:'PATCH',
-      body:JSON.stringify({deleted_by:'__emptied__'})
+      body:JSON.stringify({deleted_by:'__user_emptied__'})
     });
-    await logActivity('🗑 Emptied trash', 'All trashed players');
+    await logActivity('\uD83D\uDDD1 Emptied trash','Session: '+CS.id);
     renderTrash();
     toast('Trash emptied');
-  }catch(e){ toast('Error'); }
+  }catch(e){ toast('Error emptying trash'); }
 }
-
-// ═══ PLAYER NOTES HISTORY ══════════════════════════════════════
 async function loadPlayerNotes(playerRef){
   try{
     var r = await sbFetch('player_notes?player_ref=eq.'+encodeURIComponent(playerRef)+'&order=created_at.desc');
@@ -2459,8 +2524,8 @@ function renderCompare(){
   var cols = players.length;
   c.innerHTML = '<div class="cmp-grid" style="grid-template-columns:repeat('+cols+',1fr)">'
     + players.map(function(p){
-        var pc2 = POS_COL[p.pos]||[];
-        var sc2 = (ST_COL||{})[p.status]||[];
+        var pc2 = POS[p.pos]||[];
+        var sc2 = STC[p.status]||[];
         return '<div class="cmp-card">'
           +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
           +'<div style="width:40px;height:40px;border-radius:10px;background:'+accl(p.id)+';color:'+acc(p.id)+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500">'+mkIni(p.name)+'</div>'
@@ -2589,8 +2654,8 @@ function filterGMPlayers(){
     +'<div>Player</div><div>Session</div><div>Owner</div><div>Status</div><div>State</div><div>Actions</div></div>'
     +filtered.map(function(row){
       var p=row.data||{};
-      var cpv=POS_COL[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
-      var stc=(ST_COL||{})[p.status]||['rgba(59,130,246,.15)','#60a5fa'];
+      var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+      var stc=STC[p.status]||['rgba(59,130,246,.15)','#60a5fa'];
       return '<div style="display:grid;grid-template-columns:1.5fr .8fr .6fr .8fr .6fr .8fr;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);align-items:center;'+(row.deleted?'opacity:.5;filter:grayscale(.5)':'')+'">'
         +'<div>'
           +'<div style="font-size:12px;font-weight:600">'+(p.name||'—')+'</div>'
@@ -2603,11 +2668,13 @@ function filterGMPlayers(){
         +'<div style="font-family:var(--fm);font-size:10px;color:var(--dim)">'+(row.owner_id||'—')+'</div>'
         +'<div><span class="st-b" style="background:'+stc[0]+';color:'+stc[1]+';font-size:9px">'+(p.status||'Watching')+'</span></div>'
         +'<div>'+(row.deleted?'<span style="font-family:var(--fm);font-size:9px;color:#f87171;background:rgba(239,68,68,.1);padding:2px 7px;border-radius:4px">Trashed</span>':'<span style="font-family:var(--fm);font-size:9px;color:#4ade80;background:rgba(34,197,94,.1);padding:2px 7px;border-radius:4px">Active</span>')+'</div>'
-        +'<div style="display:flex;gap:4px">'
+        +'<div style="display:flex;gap:3px;flex-wrap:wrap">'
           +(row.deleted
             ?'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+(p.name||'')+'" onclick="gmRestorePlayer(this.dataset.dbid,this.dataset.name)" style="color:var(--teal);border-color:rgba(20,184,166,.3);font-size:9px">↩</button>'
-            :'<button class="btn-sm" data-dbid="'+row.id+'" onclick="gmEditPlayer(this.dataset.dbid)" style="color:var(--muted);font-size:9px">✏️</button>'
-            +'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+(p.name||'')+'" onclick="gmTrashPlayer(this.dataset.dbid,this.dataset.name)" style="color:#f87171;border-color:rgba(239,68,68,.2);font-size:9px">🗑</button>')
+            :'<button class="btn-sm" data-dbid="'+row.id+'" onclick="gmEditPlayer(this.dataset.dbid)" style="color:var(--muted);font-size:9px" title="Edit">✏️</button>'
+            +'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+(p.name||'')+'" onclick="gmMovePlayer(this.dataset.dbid,this.dataset.name)" style="color:var(--amber);border-color:rgba(245,158,11,.2);font-size:9px" title="Move to session">→</button>'
+            +'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+(p.name||'')+'" onclick="gmCopyPlayer(this.dataset.dbid,this.dataset.name)" style="color:#a78bfa;border-color:rgba(167,139,250,.2);font-size:9px" title="Copy to session">⎘</button>'
+            +'<button class="btn-sm" data-dbid="'+row.id+'" data-name="'+(p.name||'')+'" onclick="gmTrashPlayer(this.dataset.dbid,this.dataset.name)" style="color:#f87171;border-color:rgba(239,68,68,.2);font-size:9px" title="Trash">🗑</button>')
         +'</div>'
       +'</div>';
     }).join('');
@@ -2660,6 +2727,744 @@ async function gmEditPlayer(dbId){
     window._GM_EDIT_DATA = p;
     openModal('em-bg');
   }catch(e){ toast('Error loading player'); }
+}
+
+
+// ═══ DEMO SESSION PLAYERS (top world players for presentation) ══
+var DEMO_PLAYERS = [
+  // Outside Hitters
+  {id:9001,id_label:'D01',name:'Wilfredo León',pos:'Outside',country:'Poland',born:'1993 (32y)',height:201,weight:98,spike:380,block:345,hand:'Right',eu:'Yes',club:'Perugia',league:'Italian Serie A',agent:'Direct',status:'Priority',
+   notes:'Best outside hitter in the world. Olympic champion with Poland. Devastating jump serve, explosive attack.',
+   verdict:'TOP PRIORITY — generational talent',
+   vb:'https://volleybox.net/wilfredo-leon-p3281',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Wilfredo_Le%C3%B3n_2019.jpg/440px-Wilfredo_Le%C3%B3n_2019.jpg',
+   clubs:[{name:'Perugia',country:'Italy',years:'2017-present'},{name:'Zenit Kazan',country:'Russia',years:'2013-2017'}]},
+  {id:9002,id_label:'D02',name:'Earvin Ngapeth',pos:'Outside',country:'France',born:'1991 (34y)',height:192,weight:83,spike:355,block:325,hand:'Right',eu:'Yes',club:'Modena',league:'Italian Serie A',agent:'Direct',status:'Priority',
+   notes:'Most creative player in volleyball. Incredible ball control, unorthodox attacks. Former world champion.',
+   verdict:'High priority — unique profile',
+   vb:'https://volleybox.net/earvin-ngapeth-p1',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Earvin_Ngapeth_2019.jpg/440px-Earvin_Ngapeth_2019.jpg',
+   clubs:[{name:'Modena',country:'Italy',years:'2022-present'},{name:'Zenit Kazan',country:'Russia',years:'2015-2022'}]},
+  // Opposites
+  {id:9003,id_label:'D03',name:'Ivan Zaytsev',pos:'Opposite',country:'Italy',born:'1988 (37y)',height:202,weight:100,spike:375,block:348,hand:'Right',eu:'Yes',club:'Modena',league:'Italian Serie A',agent:'Direct',status:'Priority',
+   notes:'The Tsar. Italy legend. Powerful serve and attack. Still performing at elite level.',
+   verdict:'Veteran leader profile',
+   vb:'https://volleybox.net/ivan-zaytsev-p2',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Ivan_Zaytsev_2019.jpg/440px-Ivan_Zaytsev_2019.jpg',
+   clubs:[{name:'Modena',country:'Italy',years:'2020-present'},{name:'Perugia',country:'Italy',years:'2016-2020'}]},
+  {id:9004,id_label:'D04',name:'Maxim Mikhaylov',pos:'Opposite',country:'Russia',born:'1988 (37y)',height:202,weight:97,spike:370,block:345,hand:'Right',eu:'No',club:'Zenit Kazan',league:'Russian VLeague',agent:'Direct',status:'Watching',
+   notes:'World champion 2011. Consistent top scorer for years. Still at elite level.',
+   verdict:'Monitoring situation',
+   vb:'https://volleybox.net/maxim-mikhaylov-p3',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Zenit Kazan',country:'Russia',years:'2005-present'}]},
+  // Setters
+  {id:9005,id_label:'D05',name:'Bruno Rezende',pos:'Setter',country:'Brazil',born:'1986 (39y)',height:190,weight:80,spike:330,block:310,hand:'Right',eu:'No',club:'Trentino',league:'Italian Serie A',agent:'Direct',status:'Watching',
+   notes:'Best setter of his generation. World champion multiple times. Incredible vision and leadership.',
+   verdict:'Legend — monitor for availability',
+   vb:'https://volleybox.net/bruno-rezende-p4',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Trentino',country:'Italy',years:'2018-present'},{name:'Lube',country:'Italy',years:'2014-2018'}]},
+  {id:9006,id_label:'D06',name:'Micah Christenson',pos:'Setter',country:'USA',born:'1993 (32y)',height:195,weight:85,spike:335,block:315,hand:'Right',eu:'No',club:'Perugia',league:'Italian Serie A',agent:'Direct',status:'Watching',
+   notes:'Top American setter. Great athleticism, excellent back row attack. Strong leadership.',
+   verdict:'Worth monitoring',
+   vb:'https://volleybox.net/micah-christenson-p5',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Perugia',country:'Italy',years:'2020-present'},{name:'Modena',country:'Italy',years:'2017-2020'}]},
+  // Middle Blockers
+  {id:9007,id_label:'D07',name:'Simone Anzani',pos:'Middle',country:'Italy',born:'1992 (33y)',height:208,weight:105,spike:365,block:352,hand:'Right',eu:'Yes',club:'Lube Civitanova',league:'Italian Serie A',agent:'Direct',status:'Watching',
+   notes:'Elite middle blocker. World champion with Italy 2022. Excellent blocking percentage.',
+   verdict:'Top European middle',
+   vb:'https://volleybox.net/simone-anzani-p6',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Lube',country:'Italy',years:'2019-present'}]},
+  {id:9008,id_label:'D08',name:'Bartosz Kurek',pos:'Middle',country:'Poland',born:'1988 (37y)',height:206,weight:102,spike:368,block:355,hand:'Right',eu:'Yes',club:'Jastrzębski Węgiel',league:'Polish PlusLiga',agent:'Direct',status:'Watching',
+   notes:'Polish legend. World champion 2018. One of the best middle blockers in history.',
+   verdict:'Monitor for career next step',
+   vb:'https://volleybox.net/bartosz-kurek-p7',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Jastrzębski',country:'Poland',years:'2020-present'}]},
+  // Liberos
+  {id:9009,id_label:'D09',name:'Jenia Grebennikov',pos:'Libero',country:'France',born:'1990 (35y)',height:183,weight:76,spike:300,block:0,hand:'Right',eu:'Yes',club:'Modena',league:'Italian Serie A',agent:'Direct',status:'Watching',
+   notes:'Best libero in the world. Acrobatic digs, perfect passing. French national team anchor.',
+   verdict:'World class standard reference',
+   vb:'https://volleybox.net/jenia-grebennikov-p8',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Modena',country:'Italy',years:'2021-present'}]},
+  {id:9010,id_label:'D10',name:'Sergio Santos',pos:'Libero',country:'Brazil',born:'1987 (38y)',height:183,weight:80,spike:295,block:0,hand:'Right',eu:'No',club:'Sada Cruzeiro',league:'Brazilian Superliga',agent:'Direct',status:'Watching',
+   notes:'Top South American libero. Elite passer, outstanding defensive skills.',
+   verdict:'Reference for libero search',
+   vb:'https://volleybox.net/sergio-santos-p9',
+   video:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   photo:'',
+   clubs:[{name:'Cruzeiro',country:'Brazil',years:'2018-present'}]},
+];
+
+// Load demo players for the demo session if empty
+async function loadDemoPlayers(){
+  if(CS.id !== 'demo-session' && CS.id !== 'ope-rethymno-2526') return;
+  if(P.length > 0) return; // already has players
+  // Only load demo players for brand new sessions
+  P = DEMO_PLAYERS.slice();
+  await saveData();
+}
+
+// ═══ PHOTO SUPPORT ═════════════════════════════════════════════
+function getPlayerAvatar(p, size){
+  size = size || 40;
+  var r = Math.round(size*.25);
+  var fs2 = Math.round(size*.3);
+  var base = 'width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;flex-shrink:0;';
+  if(p.photo && (p.photo.startsWith('http')||p.photo.startsWith('data:'))){
+    return '<img src="'+p.photo+'" style="'+base+'object-fit:cover;border:1px solid var(--b2)">';
+  }
+  return '<div style="'+base+'background:'+accl(p.id)+';color:'+acc(p.id)+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:'+fs2+'px;font-weight:500">'+mkIni(p.name)+'</div>';
+}
+
+function uploadPlayerPhoto(playerId){
+  var p = P.find(function(x){return x.id===playerId;});
+  if(!p) return;
+  var input = document.createElement('input');
+  input.type='file'; input.accept='image/*';
+  input.onchange=function(e){
+    var file=e.target.files[0]; if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      p.photo=ev.target.result;
+      saveData();
+      showDet(playerId); // refresh
+      toast('\u2713 Photo updated');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function uploadPlayerPhotoURL(playerId){
+  var url=prompt('Paste image URL:');
+  if(!url||!url.startsWith('http')) return;
+  var p=P.find(function(x){return x.id===playerId;});
+  if(!p) return;
+  p.photo=url;
+  saveData();
+  showDet(playerId);
+  toast('\u2713 Photo set');
+}
+
+// ═══ VOLLEYBOX AUTO-IMPORT FIX ═════════════════════════════════
+// Use Allorigins CORS proxy to fetch Volleybox page
+async function doImport(){
+  var url=(g('am-url')||{}).value;
+  if(!url||!url.trim()){alert('Enter a Volleybox URL first');return;}
+  url=url.trim();
+  if(!url.includes('volleybox.net')){alert('Please enter a volleybox.net URL');return;}
+
+  var btn=g('btn-import');
+  if(btn){btn.disabled=true;btn.textContent='Loading...';}
+  showProg('pw-url','pf-url','pl-url',20,'Fetching Volleybox page...');
+
+  try{
+    // Try CORS proxy to fetch the actual Volleybox page
+    var proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(url);
+    var resp=await fetch(proxyUrl);
+    if(!resp.ok) throw new Error('proxy failed');
+    var json=await resp.json();
+    var html=json.contents||'';
+
+    showProg('pw-url','pf-url','pl-url',60,'Parsing player data...');
+
+    // Parse the HTML to extract player info
+    var player=parseVolleyboxHTML(html, url);
+    if(!player||!player.name) throw new Error('Could not parse player data');
+
+    showProg('pw-url','pf-url','pl-url',100,'Done \u2713');
+    setTimeout(function(){hideProg('pw-url');},500);
+    PEND=player;
+    showPrev(player);
+
+  }catch(e){
+    hideProg('pw-url');
+    // Show manual fallback with instructions
+    var pl=g('pl-url');
+    if(pl){
+      pl.style.color='#f59e0b';
+      pl.textContent='Auto-fetch failed. Use Paste Text tab: open Volleybox, Ctrl+A, Ctrl+C, paste in next tab.';
+    }
+    g('pw-url').style.display='block';
+    console.error('Import error:',e);
+  }
+  if(btn){btn.disabled=false;btn.textContent='Import';}
+}
+
+function parseVolleyboxHTML(html, sourceUrl){
+  // Extract player data from Volleybox HTML
+  var p={vb:sourceUrl, clubs:[], eu:'No'};
+
+  // Name - usually in h1 or title
+  var nameM=html.match(/<h1[^>]*>([^<]+)<\/h1>/i) || html.match(/<title>([^|<]+)/i);
+  if(nameM) p.name=nameM[1].replace(/\s+/g,' ').trim();
+
+  // Position
+  var positions=['Outside','Opposite','Setter','Middle','Libero'];
+  for(var i=0;i<positions.length;i++){
+    if(html.toLowerCase().includes(positions[i].toLowerCase())||
+       html.toLowerCase().includes(positions[i].toLowerCase().replace('outside','outside hitter'))){
+      p.pos=positions[i]; break;
+    }
+  }
+  if(!p.pos) p.pos='Outside';
+
+  // Height - look for patterns like "201 cm" or "6'7"
+  var htM=html.match(/(\d{3})\s*cm/i);
+  if(htM) p.height=parseInt(htM[1]);
+
+  // Weight
+  var wtM=html.match(/(\d{2,3})\s*kg/i);
+  if(wtM) p.weight=parseInt(wtM[1]);
+
+  // Spike/Block reach
+  var spM=html.match(/spike[^0-9]*(\d{3})/i)||html.match(/attack[^0-9]*(\d{3})/i);
+  if(spM) p.spike=parseInt(spM[1]);
+  var blM=html.match(/block[^0-9]*(\d{3})/i);
+  if(blM) p.block=parseInt(blM[1]);
+
+  // Birth year
+  var bornM=html.match(/born[^0-9]*(\d{4})/i)||html.match(/(\d{4})[^0-9]*birth/i)||html.match(/(\d{4})-\d{2}-\d{2}/);
+  if(bornM){
+    var yr=parseInt(bornM[1]);
+    var age=new Date().getFullYear()-yr;
+    p.born=yr+' ('+age+'y)';
+  }
+
+  // Nationality/country
+  var countryM=html.match(/nationality[^:]*:\s*([A-Za-z ]+)/i)||html.match(/country[^:]*:\s*([A-Za-z ]+)/i);
+  if(countryM) p.country=countryM[1].trim();
+
+  // EU check
+  var euCountries=['Italy','France','Germany','Spain','Poland','Netherlands','Belgium','Portugal','Greece','Croatia','Slovenia','Serbia','Bulgaria','Romania','Czech','Slovakia','Hungary','Austria','Finland','Sweden','Denmark','Norway'];
+  if(p.country && euCountries.some(function(c){return p.country.includes(c);})) p.eu='Yes';
+
+  // Photo
+  var photoM=html.match(/src="([^"]*player[^"]*\.(jpg|jpeg|png|webp))"/i)||html.match(/src="([^"]*photo[^"]*\.(jpg|jpeg|png|webp))"/i);
+  if(photoM) p.photo=photoM[1];
+
+  return p;
+}
+
+// ═══ BACK TO DASHBOARD BUTTON ══════════════════════════════════
+function goBack(){
+  goTo('dashboard');
+}
+
+// ═══ UNDO / ACTIVITY LOG ENHANCEMENTS ══════════════════════════
+var ACTION_HISTORY = []; // In-memory undo stack
+
+async function undoLastAction(){
+  if(!ACTION_HISTORY.length){toast('Nothing to undo');return;}
+  var last=ACTION_HISTORY.pop();
+  if(last.type==='status_change'){
+    var p=P.find(function(x){return x.id===last.playerId;});
+    if(p){p.status=last.oldStatus;await saveData();updateKPIs();renderT(getF());toast('\u21a9 Undone: '+p.name+' back to '+last.oldStatus);}
+  } else if(last.type==='trash'){
+    await restorePlayer(last.dbId, last.name);
+    toast('\u21a9 Undone: '+last.name+' restored');
+  }
+}
+
+// Enhanced chSt with undo support
+var _origChSt=chSt;
+chSt=function(id,val){
+  var p=P.find(function(x){return x.id===id;});
+  if(p){
+    ACTION_HISTORY.push({type:'status_change',playerId:id,oldStatus:p.status,newStatus:val});
+    if(ACTION_HISTORY.length>20)ACTION_HISTORY.shift();
+  }
+  _origChSt(id,val);
+  logActivity('\u270f Status changed',p?p.name+': '+val:'');
+};
+
+// ═══ GM ACTIVITY WITH UNDO ═════════════════════════════════════
+async function renderActivityLog(){
+  var wrap=g('gm-activity');
+  if(!wrap)return;
+  wrap.innerHTML='<div style="color:var(--dim);font-size:12px;padding:1rem;text-align:center">Loading activity...</div>';
+  try{
+    var r=await sbFetch('activity_log?order=created_at.desc&limit=100');
+    if(!r.ok)throw new Error();
+    var rows=await r.json();
+    if(!rows||!rows.length){
+      wrap.innerHTML='<div style="text-align:center;padding:2rem;color:var(--dim)">No activity yet.</div>';
+      return;
+    }
+    var html='<div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">'
+      +'<input class="inp" id="act-search" placeholder="Filter activity..." oninput="filterActivity()" style="flex:1">'
+      +'<span style="font-family:var(--fm);font-size:10px;color:var(--dim)">'+rows.length+' entries</span>'
+    +'</div>'
+    +'<div id="act-list">'
+    +rows.map(function(row){
+      var t=row.created_at?new Date(row.created_at).toLocaleString():'';
+      var ico=row.action?row.action.split(' ')[0]:'•';
+      return '<div class="act-item" data-action="'+(row.action||'')+'" data-user="'+(row.user_name||'')+'" data-detail="'+(row.detail||'')+'">'
+        +'<div class="act-ico">'+ico+'</div>'
+        +'<div class="act-txt"><b>'+(row.user_name||'—')+'</b> '+(row.action||'').split(' ').slice(1).join(' ')+(row.detail?' — <span style="color:var(--teal)">'+row.detail+'</span>':'')+'</div>'
+        +'<div class="act-time">'+t+'</div>'
+      +'</div>';
+    }).join('')
+    +'</div>';
+    wrap.innerHTML=html;
+    window._ACT_ROWS=rows;
+  }catch(e){
+    wrap.innerHTML='<div style="color:var(--dim);padding:1rem">Error loading activity.</div>';
+  }
+}
+
+function filterActivity(){
+  var q=((g('act-search')||{}).value||'').toLowerCase();
+  document.querySelectorAll('.act-item').forEach(function(el){
+    var text=(el.dataset.action+' '+el.dataset.user+' '+el.dataset.detail).toLowerCase();
+    el.style.display=(!q||text.includes(q))?'flex':'none';
+  });
+}
+
+// ═══ MOVE PLAYER BETWEEN SESSIONS (Admin) ══════════════════════
+async function gmMovePlayer(dbId, playerName){
+  // Get all sessions
+  var r=await sbFetch('players?select=session_id&order=session_id.asc');
+  if(!r.ok){toast('Error');return;}
+  var rows=await r.json();
+  var sessions=[...new Set(rows.map(function(r){return r.session_id;}))];
+  var opts=sessions.join('\n');
+  var target=prompt('Move "'+playerName+'" to session:\n\n'+opts+'\n\nEnter session ID:');
+  if(!target||!target.trim())return;
+  try{
+    await sbFetch('players?id=eq.'+dbId,{method:'PATCH',body:JSON.stringify({session_id:target.trim()})});
+    await logActivity('\u27a1 Moved player',''+playerName+' -> '+target);
+    window._GM_PLAYERS=null;
+    renderGMPlayers();
+    toast('\u2713 '+playerName+' moved to '+target);
+  }catch(e){toast('Error moving player');}
+}
+
+async function gmCopyPlayer(dbId, playerName){
+  var r2=await sbFetch('players?id=eq.'+dbId);
+  if(!r2.ok){toast('Error');return;}
+  var rows2=await r2.json();
+  if(!rows2||!rows2.length)return;
+  var orig=rows2[0];
+  var r3=await sbFetch('players?select=session_id&order=session_id.asc');
+  var allRows=await r3.json();
+  var sessions=[...new Set(allRows.map(function(r){return r.session_id;}))];
+  var target=prompt('Copy "'+playerName+'" to session:\n\n'+sessions.join('\n')+'\n\nEnter session ID:');
+  if(!target||!target.trim())return;
+  try{
+    var copy=Object.assign({},orig.data,{id:Date.now()%9999999,id_label:'ADM'});
+    await sbFetch('players',{method:'POST',body:JSON.stringify({session_id:target.trim(),owner_id:orig.owner_id,data:copy})});
+    await logActivity('\u2398 Copied player',''+playerName+' -> '+target);
+    window._GM_PLAYERS=null;
+    renderGMPlayers();
+    toast('\u2713 '+playerName+' copied to '+target);
+  }catch(e){toast('Error copying player');}
+}
+
+// ═══ KANBAN VIEW ═══════════════════════════════════════════════
+var KB_DRAG_ID = null;
+
+function renderKanban(list){
+  var wrap = g('kb-wrap');
+  if(!wrap) return;
+  if(!list) list = getF();
+
+  var cols = {watching:[],contacted:[],priority:[],discarded:[]};
+  list.forEach(function(p){ if(cols[p.status]) cols[p.status].push(p); });
+
+  var colDefs = [
+    {key:'watching', label:'Watching', color:'#378ADD'},
+    {key:'contacted', label:'Contacted', color:'#1D9E75'},
+    {key:'priority', label:'Priority', color:'#EF9F27'},
+    {key:'discarded', label:'Discarded', color:'#888780'},
+  ];
+
+  wrap.innerHTML = '<div class="kb-board" id="kb-board">'
+    + colDefs.map(function(col){
+      var players = cols[col.key];
+      var cards = players.slice(0,8).map(function(p){
+        var cpv = POS[p.pos] || ['rgba(59,130,246,.15)','#60a5fa'];
+        var av = (p.photo && p.photo.startsWith('http'))
+          ? '<img src="'+p.photo+'" style="width:28px;height:28px;border-radius:7px;object-fit:cover">'
+          : '<div class="kb-av" style="background:'+accl(p.id)+';color:'+acc(p.id)+'">'+mkIni(p.name)+'</div>';
+        return '<div class="kb-card '+col.key+'" draggable="true" data-id="'+p.id+'"'
+          +' onclick="showDet('+p.id+')">'
+          +'<div class="kb-card-top">'+av
+          +'<div><div class="kb-name">'+p.name+'</div>'
+          +'<div class="kb-sub">'+(p.country||'—')+' · '+(p.height||'—')+'cm</div></div></div>'
+          +'<div class="kb-tags">'
+          +'<span class="kb-tag" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
+          +(p.eu==='Yes'?'<span class="kb-tag" style="background:rgba(167,139,250,.15);color:#a78bfa;border-color:rgba(167,139,250,.3)">EU</span>':'')
+          +(p.rating?'<span class="kb-tag" style="background:var(--al);color:var(--amber);border-color:rgba(245,158,11,.3)">★ '+p.rating+'</span>':'')
+          +'</div></div>';
+      }).join('');
+
+      var extra = players.length > 8
+        ? '<div class="kb-more">+'+(players.length-8)+' more — click to filter</div>'
+        : '';
+      var empty = !players.length
+        ? '<div class="kb-drop-hint">Drop here</div>'
+        : '';
+
+      return '<div class="kb-col" id="kbc-'+col.key+'" data-status="'+col.key+'"'
+        +' ondragover="kbOver(event,this)"'
+        +' ondragleave="kbLeave(this)"'
+        +' ondrop="kbDrop(event,this.dataset.status)">'
+        +'<div class="kb-col-hd">'
+        +'<div class="kb-col-title"><div class="kb-dot" style="background:'+col.color+'"></div>'+col.label+'</div>'
+        +'<span class="kb-cnt">'+players.length+'</span>'
+        +'</div>'
+        +'<div class="kb-cards">'+cards+extra+empty+'</div>'
+        +'</div>';
+    }).join('')
+  +'</div>';
+
+  // Wire up drag events
+  wrap.querySelectorAll('.kb-card').forEach(function(card){
+    card.addEventListener('dragstart', function(e){
+      KB_DRAG_ID = parseInt(card.dataset.id);
+      setTimeout(function(){card.classList.add('dragging');}, 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', function(){
+      card.classList.remove('dragging');
+      document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
+    });
+    // Prevent click from firing when drag ends
+    card.addEventListener('click', function(e){
+      if(card.classList.contains('dragging')) e.stopPropagation();
+    });
+  });
+}
+
+function kbOver(e, col){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
+  col.classList.add('drag-over');
+}
+function kbLeave(col){ col.classList.remove('drag-over'); }
+
+async function kbDrop(e, newStatus){
+  e.preventDefault();
+  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
+  if(!KB_DRAG_ID) return;
+  var p = P.find(function(x){ return x.id === KB_DRAG_ID; });
+  if(!p || p.status === newStatus) return;
+  var oldStatus = p.status;
+  p.status = newStatus;
+  await saveData();
+  await logActivity('✏ Status changed via Kanban', p.name+': '+oldStatus+' → '+newStatus);
+  updateKPIs();
+  renderKanban(getF());
+  toast('✓ '+p.name+' → '+newStatus);
+}
+
+// ═══ PLAYER PDF EXPORT ═════════════════════════════════════════
+function exportPlayerPDF(playerId){
+  var p = P.find(function(x){ return x.id === playerId; });
+  if(!p) return;
+
+  var cpv = POS[p.pos] || ['rgba(59,130,246,.15)','#60a5fa'];
+  var stc2 = STC[p.status] || ['rgba(59,130,246,.15)','#60a5fa'];
+  var date = new Date().toLocaleDateString('en-GB');
+
+  // Photo section
+  var photoHTML = '';
+  if(p.photo && (p.photo.startsWith('http') || p.photo.startsWith('data:'))){
+    photoHTML = '<img src="'+p.photo+'" style="width:90px;height:90px;border-radius:12px;object-fit:cover;border:2px solid #1f2937">';
+  } else {
+    var ini = mkIni(p.name);
+    photoHTML = '<div style="width:90px;height:90px;border-radius:12px;background:#1f2937;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#14b8a6;border:2px solid #374151">'+ini+'</div>';
+  }
+
+  // Career clubs
+  var careerHTML = '';
+  if(p.clubs && p.clubs.length){
+    careerHTML = p.clubs.map(function(cl){
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1f2937">'
+        +'<div><div style="font-size:12px;font-weight:600;color:#f1f5f9">'+cl.name+'</div>'
+        +'<div style="font-size:10px;color:#6b7280">'+cl.country+'</div></div>'
+        +'<div style="font-size:11px;color:#9ca3af">'+cl.years+'</div>'
+      +'</div>';
+    }).join('');
+  } else {
+    careerHTML = '<div style="font-size:12px;color:#6b7280">No clubs data</div>';
+  }
+
+  // Videos
+  var vidsHTML = '';
+  if(p.video){
+    var vids = p.video.split('|').map(function(v){return v.trim();}).filter(Boolean);
+    vidsHTML = vids.map(function(v,i){
+      return '<div style="padding:5px 0;border-bottom:1px solid #1f2937">'
+        +'<span style="font-size:11px;color:#9ca3af">Video '+(i+1)+': </span>'
+        +'<span style="font-size:11px;color:#14b8a6">'+v+'</span>'
+      +'</div>';
+    }).join('');
+  }
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Arial,sans-serif;background:#0a0f1e;color:#f1f5f9;padding:20px}'
+    +'@media print{'
+    +'  @page{margin:8mm;size:A4}'
+    +'  body{background:#fff;color:#111}'
+    +'  .dark-bg{background:#fff!important}'
+    +'  .dark-text{color:#111!important}'
+    +'  .muted{color:#555!important}'
+    +'  .card{background:#f9fafb!important;border-color:#e5e7eb!important}'
+    +'  .stat-box{background:#f3f4f6!important}'
+    +'  .header{background:#f3f4f6!important;border-bottom:2px solid #14b8a6!important}'
+    +'}'
+    +'</style></head><body>'
+
+    // Header
+    +'<div class="header" style="background:#080d1a;padding:16px 20px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="display:flex;align-items:center;gap:14px">'
+    +photoHTML
+    +'<div>'
+    +'<div style="font-size:26px;font-weight:700;letter-spacing:-.02em;color:#fff;margin-bottom:4px">'+p.name+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +'<span style="background:'+cpv[0]+';color:'+cpv[1]+';padding:3px 10px;border-radius:5px;font-size:11px;font-weight:600">'+p.pos+'</span>'
+    +'<span style="font-size:13px;color:#9ca3af">'+(p.country||'—')+'</span>'
+    +(p.born?'<span style="font-size:13px;color:#9ca3af">'+p.born+'</span>':'')
+    +(p.eu==='Yes'?'<span style="background:rgba(167,139,250,.2);color:#a78bfa;padding:2px 8px;border-radius:4px;font-size:11px">EU</span>':'')
+    +'<span style="background:'+stc2[0]+';color:'+stc2[1]+';padding:3px 10px;border-radius:5px;font-size:11px;font-weight:600">'+p.status+'</span>'
+    +'</div>'
+    +(p.agent?'<div style="font-size:12px;color:#9ca3af;margin-top:5px">Agent: <span style="color:#14b8a6">'+p.agent+'</span></div>':'')
+    +'</div></div>'
+    +'<div style="text-align:right">'
+    +'<div style="font-size:22px;font-weight:700;color:#14b8a6;font-family:monospace">Player<span style="color:#fff">Finder</span></div>'
+    +'<div style="font-size:10px;color:#6b7280;margin-top:3px">Scout Smarter. Find Better.</div>'
+    +'<div style="font-size:10px;color:#6b7280;margin-top:2px">'+date+'</div>'
+    +'</div>'
+    +'</div>'
+
+    // Physical stats
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">'
+    +[['Height','height','cm'],['Spike','spike','cm'],['Block','block','cm'],['Weight','weight','kg']].map(function(a){
+      return '<div class="stat-box" style="background:#111827;border-radius:8px;padding:12px;text-align:center;border:1px solid #1f2937">'
+        +'<div style="font-size:24px;font-weight:700;color:#14b8a6;font-family:monospace">'+(p[a[1]]||'—')+'</div>'
+        +'<div style="font-size:10px;color:#6b7280;margin-top:3px;text-transform:uppercase;letter-spacing:.06em">'+a[0]+' '+a[2]+'</div>'
+      +'</div>';
+    }).join('')
+    +'</div>'
+
+    // Two columns: career + notes
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
+
+    // Career
+    +'<div class="card" style="background:#111827;border-radius:8px;padding:14px;border:1px solid #1f2937">'
+    +'<div style="font-size:10px;color:#14b8a6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(20,184,166,.15)">Career</div>'
+    +careerHTML
+    +'<div style="margin-top:10px">'
+    +'<div style="font-size:11px;color:#6b7280">Current: <span style="color:#f1f5f9">'+(p.club||'—')+'</span></div>'
+    +(p.league?'<div style="font-size:11px;color:#6b7280;margin-top:3px">League: <span style="color:#f1f5f9">'+p.league+'</span></div>':'')
+    +'</div>'
+    +'</div>'
+
+    // Notes & Verdict
+    +'<div class="card" style="background:#111827;border-radius:8px;padding:14px;border:1px solid #1f2937">'
+    +'<div style="font-size:10px;color:#14b8a6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(20,184,166,.15)">Scouting Notes</div>'
+    +(p.notes?'<p style="font-size:12px;color:#d1d5db;line-height:1.7;margin-bottom:10px">'+p.notes+'</p>':'<p style="font-size:12px;color:#6b7280">No notes yet.</p>')
+    +(p.verdict?'<div style="border-left:2px solid #14b8a6;padding:8px 11px;background:rgba(20,184,166,.06);border-radius:0 6px 6px 0;margin-top:8px">'
+    +'<div style="font-size:9px;color:#14b8a6;text-transform:uppercase;margin-bottom:3px">Verdict</div>'
+    +'<div style="font-size:12px;color:#f1f5f9;line-height:1.6">'+p.verdict+'</div></div>':'')
+    +'</div>'
+    +'</div>'
+
+    // Videos + Volleybox
+    +(p.vb||p.video?'<div class="card" style="background:#111827;border-radius:8px;padding:12px;border:1px solid #1f2937;margin-bottom:14px">'
+    +'<div style="font-size:10px;color:#14b8a6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Links</div>'
+    +(p.vb?'<div style="padding:4px 0;font-size:11px;color:#9ca3af">Volleybox: <span style="color:#14b8a6">'+p.vb+'</span></div>':'')
+    +vidsHTML
+    +'</div>':'')
+
+    // Footer
+    +'<div style="text-align:center;padding:10px;font-size:10px;color:#374151;border-top:1px solid #1f2937;margin-top:8px">'
+    +'Generated by PlayerFinder — Scout Smarter. Find Better. — Confidential scouting report'
+    +'</div>'
+
+    +'</body></html>';
+
+  var w = window.open('','_blank');
+  if(!w){ toast('Allow popups to export PDF'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 600);
+  logActivity('📑 Exported PDF', p.name);
+}
+
+// ═══ ANALYTICS DASHBOARD ══════════════════════════════════════
+async function renderAnalytics(){
+  var wrap = g('gm-analytics');
+  if(!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--dim);padding:1rem;text-align:center">Loading analytics...</div>';
+  try{
+    // Load all data
+    var [rPlayers, rUsers, rActivity] = await Promise.all([
+      sbFetch('players?order=created_at.asc'),
+      sbFetch('users?order=joined_at.asc'),
+      sbFetch('activity_log?order=created_at.desc&limit=200')
+    ]);
+    var players = rPlayers.ok ? await rPlayers.json() : [];
+    var users = rUsers.ok ? await rUsers.json() : [];
+    var activity = rActivity.ok ? await rActivity.json() : [];
+
+    var active = players.filter(function(p){return !p.deleted;}).length;
+    var trashed = players.filter(function(p){return p.deleted;}).length;
+    var activeSess = [...new Set(players.map(function(p){return p.session_id;}))].length;
+
+    // Position breakdown
+    var posCounts = {};
+    players.filter(function(p){return !p.deleted;}).forEach(function(row){
+      var pos = (row.data||{}).pos || 'Unknown';
+      posCounts[pos] = (posCounts[pos]||0)+1;
+    });
+
+    // Status breakdown
+    var stCounts = {};
+    players.filter(function(p){return !p.deleted;}).forEach(function(row){
+      var st = (row.data||{}).status || 'Watching';
+      stCounts[st] = (stCounts[st]||0)+1;
+    });
+
+    // Users by week (last 8 weeks)
+    var now = Date.now();
+    var weeks = [0,0,0,0,0,0,0,0];
+    users.forEach(function(u){
+      if(!u.joined_at) return;
+      var diff = now - new Date(u.joined_at).getTime();
+      var wk = Math.floor(diff / (7*86400000));
+      if(wk < 8) weeks[7-wk]++;
+    });
+
+    // Activity by type
+    var actTypes = {};
+    activity.forEach(function(a){
+      var type = (a.action||'Other').split(' ')[0];
+      actTypes[type] = (actTypes[type]||0)+1;
+    });
+
+    // Most active users
+    var userAct = {};
+    activity.forEach(function(a){
+      var u = a.user_name||'Unknown';
+      userAct[u] = (userAct[u]||0)+1;
+    });
+    var topUsers = Object.keys(userAct).sort(function(a,b){return userAct[b]-userAct[a];}).slice(0,5);
+
+    var posColors = {Outside:'#60a5fa',Opposite:'#fb7185',Setter:'#4ade80',Middle:'#a78bfa',Libero:'#fbbf24'};
+    var stColors = {Priority:'#fbbf24',Watching:'#60a5fa',Contacted:'#4ade80',Discarded:'#f87171'};
+
+    function miniBar(val, max, color){
+      var pct = max ? Math.round(val/max*100) : 0;
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        +'<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:3px;transition:width .3s"></div>'
+        +'</div>'
+        +'<span style="font-family:var(--fm);font-size:10px;color:var(--muted);min-width:20px;text-align:right">'+val+'</span>'
+      +'</div>';
+    }
+
+    function sparkBar(weeks, color){
+      var max = Math.max.apply(null, weeks.concat([1]));
+      return '<div style="display:flex;align-items:flex-end;gap:2px;height:32px">'
+        + weeks.map(function(v){
+          var h = Math.max(2, Math.round(v/max*32));
+          return '<div style="flex:1;height:'+h+'px;background:'+color+';border-radius:2px 2px 0 0;opacity:'+(v?1:.3)+'"></div>';
+        }).join('')
+      +'</div>';
+    }
+
+    var html = ''
+    // KPI row
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">'
+    +[
+      {v:active,l:'Active Players',c:'var(--teal)'},
+      {v:trashed,l:'In Trash',c:'#f87171'},
+      {v:users.length,l:'Total Users',c:'var(--violet)'},
+      {v:activeSess,l:'Sessions',c:'var(--amber)'}
+    ].map(function(k){
+      return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:.9rem;border-top:2px solid '+k.c+'">'
+        +'<div style="font-size:26px;font-weight:700;color:'+k.c+';font-family:var(--fm)">'+k.v+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:2px">'+k.l+'</div>'
+      +'</div>';
+    }).join('')
+    +'</div>'
+
+    // Row 2: position breakdown + status breakdown
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">'
+
+    // Position breakdown
+    +'<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem">'
+    +'<div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">By Position</div>'
+    +['Outside','Opposite','Setter','Middle','Libero'].map(function(pos){
+      var v = posCounts[pos]||0;
+      var mx = Math.max.apply(null,Object.values(posCounts).concat([1]));
+      return '<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--muted)">'+pos+'</span></div>'
+        +miniBar(v,mx,posColors[pos]||'var(--teal)')+'</div>';
+    }).join('')
+    +'</div>'
+
+    // Status breakdown
+    +'<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem">'
+    +'<div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">By Status</div>'
+    +['Priority','Watching','Contacted','Discarded'].map(function(st){
+      var v = stCounts[st]||0;
+      var mx = Math.max.apply(null,Object.values(stCounts).concat([1]));
+      return '<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--muted)">'+st+'</span></div>'
+        +miniBar(v,mx,stColors[st]||'var(--teal)')+'</div>';
+    }).join('')
+    +'</div>'
+
+    // Most active users
+    +'<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem">'
+    +'<div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Most Active Users</div>'
+    +(topUsers.length ? topUsers.map(function(u,i){
+      var v = userAct[u];
+      var mx = userAct[topUsers[0]]||1;
+      return '<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px">'+u+'</span>'
+        +'</div>'+miniBar(v,mx,'var(--violet)')+'</div>';
+    }).join('') : '<div style="font-size:12px;color:var(--dim)">No activity yet</div>')
+    +'</div>'
+
+    +'</div>'
+
+    // Row 3: user signups sparkline
+    +'<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:1rem">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    +'<div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em">New Users — Last 8 Weeks</div>'
+    +'<div style="font-family:var(--fm);font-size:11px;color:var(--muted)">Total: '+users.length+'</div>'
+    +'</div>'
+    +sparkBar(weeks,'var(--teal)')
+    +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
+    +weeks.map(function(v,i){ return '<span style="font-family:var(--fm);font-size:9px;color:var(--dim)">W'+(i+1)+'</span>'; }).join('')
+    +'</div>'
+    +'</div>';
+
+    wrap.innerHTML = html;
+  }catch(e){
+    wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--dim)">Error loading analytics: '+e.message+'</div>';
+    console.error(e);
+  }
 }
 </script>
 </body>
