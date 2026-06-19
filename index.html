@@ -618,6 +618,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
      <div class="dd-row" onclick="setLang('el',this)">🇬🇷 Ελληνικά</div>
     </div>
    </div>
+   <button class="tbtn" onclick="openCompareModal()" style="color:var(--violet);border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
    <div class="dd-wrap">
     <button class="tbtn" onclick="toggleMenu('exp-d')">↓ Export ▾</button>
     <div class="dd-menu" id="exp-d">
@@ -626,6 +627,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
      <div class="dd-row" onclick="exportPDF()">📑 PDF</div>
     </div>
    </div>
+   <button class="tbtn" onclick="showConf('conf-exit')" style="color:var(--muted);border-color:rgba(255,255,255,.1)">⇦ Sessions</button>
    <div class="top-user" onclick="openProfile()">
     <div class="top-av" id="app-av">PF</div>
     <span id="app-name" style="font-size:11px;color:var(--muted)">Demo</span>
@@ -1154,8 +1156,7 @@ async function doLogin(){
             if(existing){
               SESS.push(Object.assign({},existing));
             } else {
-              // Create a basic session entry
-              SESS.push({id:sid,name:sid,league:'—',icon:'🏐',owner:CU.id,created:'—',status:'active'});
+              // Skip unknown sessions - don't create ghost entries
             }
           }
         });
@@ -1262,12 +1263,35 @@ function enterSess(sid){
 }
 
 function newSess(){
-  var n=prompt('Session name:');if(!n)return;
-  var l=prompt('League:');
-  var s={id:n.toLowerCase().replace(/[^a-z0-9]/g,'-')+'-'+Date.now(),name:n,league:l||'—',
-    icon:'🏐',owner:CU.id,created:new Date().toISOString().slice(0,10),status:'active'};
-  SESS.push(s);if(!CU.sessions)CU.sessions=[];CU.sessions.push(s.id);
-  renderSess();toast('Session created');
+  // Build modal instead of prompt()
+  var ov=document.createElement('div');
+  ov.id='new-sess-modal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:1rem">New Scouting Session</div>'
+    +'<div class="lfl"><label>Session name *</label><input class="linp" id="ns-name" placeholder="e.g. OPE Rethymno 2026/27"></div>'
+    +'<div class="lfl"><label>League</label><input class="linp" id="ns-league" placeholder="e.g. Greek Volleyball League A1"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:1rem;justify-content:flex-end">'
+    +'<button onclick="closeNewSessModal()" style="padding:8px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;font-family:var(--fh)">Cancel</button>'
+    +'<button id="ns-ok" style="padding:8px 16px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-family:var(--fh);font-weight:600">Create Session</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=document.getElementById('ns-name');if(el)el.focus();},50);
+  document.getElementById('ns-ok').onclick=function(){
+    var n=(document.getElementById('ns-name').value||'').trim();
+    var l=(document.getElementById('ns-league').value||'').trim();
+    if(!n){toast('Session name required');return;}
+    ov.remove();
+    var slug=n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    var sid=slug+'-'+new Date().getFullYear();
+    var s={id:sid,name:n,league:l||'—',icon:'🏐',owner:CU.id,
+           created:new Date().toISOString().slice(0,10),status:'active'};
+    SESS.push(s);
+    if(!CU.sessions)CU.sessions=[];
+    CU.sessions.push(sid);
+    renderSess();
+    toast('\u2713 Session "'+n+'" created');
+  };
 }
 
 function gotoSess(){showScr('s-sessions');renderSess();}
@@ -1578,6 +1602,7 @@ function showDet(id){
     +['Priority','Watching','Contacted','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
     +'</select>'
     +'<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">'
+    +'<button class="share-btn" onclick="quickCompare('+id+')" style="color:var(--violet);border-color:rgba(167,139,250,.3);background:var(--vl)">⚖️ Compare</button>'
     +'<button class="share-btn" onclick="exportPlayerPDF('+id+')" style="color:var(--red);border-color:rgba(239,68,68,.3);background:var(--rl)">📑 PDF</button>'
     +'<button class="share-btn" onclick="sharePlayer('+id+')">🔗 Share</button>'
     +'<button class="share-btn" onclick="addFollowUp(String('+id+'),this.dataset.n)" data-n="'+p.name+'" style="color:var(--amber);border-color:rgba(245,158,11,.3);background:var(--al)">📅 Remind</button>'
@@ -2010,16 +2035,24 @@ async function gmUnsuspend(i){
 
 function renderGMSess(){
   var wrap=g('gm-sess-wrap');
-  var hdr='<div style="display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr .8fr;background:var(--bg3);border-bottom:1px solid var(--b2);border-radius:10px 10px 0 0">'
-    +['Session','Owner','Created','Players','Status'].map(function(h){return'<div class="gm-cell" style="font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">'+h+'</div>';}).join('')+'</div>';
+  var hdr='<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr .8fr .8fr 1fr;background:var(--bg3);border-bottom:1px solid var(--b2);border-radius:10px 10px 0 0">'
+    +['Session','Owner','Created','Status','Players','Actions'].map(function(h){return'<div class="gm-cell" style="font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em">'+h+'</div>';}).join('')+'</div>';
   var rows=SESS.map(function(s){
     var owner=USERS.find(function(u){return u.id===s.owner;});
-    return'<div class="gm-row" style="display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr .8fr">'
+    var isActive=s.status!=='suspended';
+    return'<div class="gm-row" style="display:grid;grid-template-columns:1.2fr 1fr 1fr .8fr .8fr 1fr">'
       +'<div class="gm-cell" style="font-size:12px;font-weight:500">'+s.icon+' '+s.name+'</div>'
       +'<div class="gm-cell" style="font-size:11px;color:var(--muted)">'+(owner?owner.fn+' '+owner.ln:'\u2014')+'</div>'
       +'<div class="gm-cell" style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+s.created+'</div>'
-      +'<div class="gm-cell" style="font-family:var(--fm);font-size:12px;color:var(--teal)">96</div>'
-      +'<div class="gm-cell"><span class="sp sp-a">'+s.status+'</span></div></div>';
+      +'<div class="gm-cell"><span class="sp '+(isActive?'sp-a':'sp-s')+'">'+(s.status||'active')+'</span></div>'
+      +'<div class="gm-cell" style="font-family:var(--fm);font-size:12px;color:var(--teal)" id="sess-cnt-'+s.id+'">—</div>'
+      +'<div class="gm-cell" style="display:flex;gap:4px">'
+        +(isActive
+          ?'<button class="act-btn btn-wa" data-sid="'+s.id+'" data-sn="'+s.name+'" onclick="gmSuspendSession(this.dataset.sid,this.dataset.sn)" style="font-size:9px">⏸</button>'
+          :'<button class="act-btn btn-ok" data-sid="'+s.id+'" data-sn="'+s.name+'" onclick="gmResumeSession(this.dataset.sid,this.dataset.sn)" style="font-size:9px">▶</button>')
+        +'<button class="act-btn btn-ng" data-sid="'+s.id+'" data-sn="'+s.name+'" onclick="gmDeleteSession(this.dataset.sid,this.dataset.sn)" style="font-size:9px">\uD83D\uDDD1</button>'
+      +'</div>'
+    +'</div>';
   }).join('');
   wrap.innerHTML='<div class="gm-tbl">'+hdr+rows+'</div>';
 }
@@ -3593,6 +3626,292 @@ async function renderAnalytics(){
     wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--dim)">Error loading analytics: '+e.message+'</div>';
     console.error(e);
   }
+}
+
+// ═══ EXIT/CHANGE SESSION BUTTON ════════════════════════════════
+// Already handled by showConf('conf-exit') → doExit()
+// Add a quick button to topbar
+
+// ═══ COMPARE MODAL ══════════════════════════════════════════════
+var CMP_SELECTED = [];
+
+function openCompareModal(){
+  if(P.length < 2){ toast('Need at least 2 players to compare'); return; }
+  // Remove existing
+  var ex=document.getElementById('cmp-modal-ov');if(ex)ex.remove();
+
+  var ov=document.createElement('div');
+  ov.id='cmp-modal-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1.5rem';
+
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--bg2);border:1px solid var(--b2);border-radius:14px;width:480px;max-width:95vw;box-shadow:0 20px 80px rgba(0,0,0,.6)';
+
+  // Header
+  var hd=document.createElement('div');
+  hd.style.cssText='background:var(--bg);border-radius:14px 14px 0 0;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,184,166,.15)';
+  hd.innerHTML='<div style="font-size:15px;font-weight:700;color:var(--teal);font-family:var(--fm)">⚖️ Select Players to Compare</div>';
+  var xBtn=document.createElement('button');
+  xBtn.textContent='✕';
+  xBtn.style.cssText='background:var(--bg3);border:1px solid var(--b2);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px';
+  xBtn.onclick=function(){ov.remove();};
+  hd.appendChild(xBtn);
+
+  // Body
+  var body=document.createElement('div');
+  body.style.cssText='padding:1rem 1.25rem';
+  var hint=document.createElement('div');
+  hint.style.cssText='font-size:11px;color:var(--muted);margin-bottom:10px';
+  hint.innerHTML='Select 2 or 3 players — <span id="cmp-cnt" style="color:var(--teal);font-family:var(--fm)">0</span> selected';
+  body.appendChild(hint);
+
+  var list=document.createElement('div');
+  list.style.cssText='max-height:320px;overflow-y:auto;padding-right:4px';
+
+  CMP_SELECTED=[];
+  P.forEach(function(p){
+    var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+    var lbl=document.createElement('label');
+    lbl.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--b2);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s';
+    lbl.id='cmp-lbl-'+p.id;
+
+    var cb=document.createElement('input');
+    cb.type='checkbox'; cb.value=p.id;
+    cb.style.cssText='accent-color:var(--teal);width:16px;height:16px;flex-shrink:0';
+    cb.onchange=function(){cmpToggle(this);};
+
+    var av=document.createElement('div');
+    av.style.cssText='width:32px;height:32px;border-radius:8px;background:'+cpv[0]+';color:'+cpv[1]+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:500;flex-shrink:0';
+    av.textContent=mkIni(p.name);
+
+    var info=document.createElement('div');
+    info.style.cssText='flex:1;min-width:0';
+    info.innerHTML='<div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
+      +'<div style="font-size:10px;color:var(--dim)">'+p.pos+' · '+(p.country||'—')+(p.height?' · '+p.height+'cm':'')+'</div>';
+
+    lbl.appendChild(cb);
+    lbl.appendChild(av);
+    lbl.appendChild(info);
+    if(p.status==='Priority'){
+      var star=document.createElement('span');
+      star.style.cssText='font-family:var(--fm);font-size:9px;background:var(--al);color:var(--amber);padding:1px 6px;border-radius:4px;flex-shrink:0';
+      star.textContent='★ Priority';
+      lbl.appendChild(star);
+    }
+    list.appendChild(lbl);
+  });
+  body.appendChild(list);
+
+  // Footer
+  var ft=document.createElement('div');
+  ft.style.cssText='padding:.9rem 1.25rem;border-top:1px solid var(--b2);display:flex;gap:8px;justify-content:flex-end;background:var(--bg);border-radius:0 0 14px 14px';
+
+  var cancelBtn=document.createElement('button');
+  cancelBtn.textContent='Cancel';
+  cancelBtn.style.cssText='padding:9px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;font-family:var(--fh)';
+  cancelBtn.onclick=function(){ov.remove();};
+
+  var goBtn=document.createElement('button');
+  goBtn.id='cmp-go-btn';
+  goBtn.textContent='Compare →';
+  goBtn.disabled=true;
+  goBtn.style.cssText='padding:9px 20px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-family:var(--fh);font-weight:700;opacity:.4';
+  goBtn.onclick=showCompareResult;
+
+  ft.appendChild(cancelBtn);
+  ft.appendChild(goBtn);
+
+  box.appendChild(hd);
+  box.appendChild(body);
+  box.appendChild(ft);
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+}
+
+function cmpToggle(cb){
+  var id=parseInt(cb.value);
+  var lbl=document.getElementById('cmp-lbl-'+id);
+  if(cb.checked){
+    if(CMP_SELECTED.length>=3){cb.checked=false;toast('Max 3 players');return;}
+    CMP_SELECTED.push(id);
+    if(lbl){lbl.style.borderColor='var(--teal)';lbl.style.background='rgba(20,184,166,.05)';}
+  } else {
+    CMP_SELECTED=CMP_SELECTED.filter(function(x){return x!==id;});
+    if(lbl){lbl.style.borderColor='var(--b2)';lbl.style.background='';}
+  }
+  var cnt=document.getElementById('cmp-cnt');
+  if(cnt)cnt.textContent=CMP_SELECTED.length;
+  var btn=document.getElementById('cmp-go-btn');
+  if(btn){btn.disabled=CMP_SELECTED.length<2;btn.style.opacity=CMP_SELECTED.length>=2?'1':'.4';}
+}
+
+function quickCompare(playerId){
+  CMP_SELECTED=[playerId];
+  openCompareModal();
+  setTimeout(function(){
+    var cb=document.querySelector('#cmp-lbl-'+playerId+' input');
+    if(cb){cb.checked=true;cmpToggle(cb);}
+  },60);
+}
+
+function showCompareResult(){
+  var ov=document.getElementById('cmp-modal-ov');if(ov)ov.remove();
+  var players=CMP_SELECTED.map(function(id){return P.find(function(p){return p.id===id;});}).filter(Boolean);
+  if(players.length<2){toast('Select at least 2 players');return;}
+
+  var cols=players.length;
+  var colW=cols===2?'1fr 1fr':'1fr 1fr 1fr';
+  var boxW=cols===3?'800px':'600px';
+
+  function bestVal(key){
+    var vals=players.map(function(p){return parseFloat(p[key])||0;});
+    return Math.max.apply(null,vals);
+  }
+
+  var attrs=[
+    {l:'Position',k:'pos'},{l:'Country',k:'country'},{l:'Born',k:'born'},
+    {l:'Height',k:'height',u:'cm'},{l:'Spike',k:'spike',u:'cm'},
+    {l:'Block',k:'block',u:'cm'},{l:'Weight',k:'weight',u:'kg'},
+    {l:'EU',k:'eu'},{l:'Club',k:'club'},{l:'League',k:'league'},
+    {l:'Status',k:'status'}
+  ];
+
+  // Build header
+  var hdHtml='<div style="display:grid;grid-template-columns:100px '+colW+';border-bottom:2px solid rgba(20,184,166,.2)">'
+    +'<div style="padding:8px 12px;font-family:var(--fm);font-size:9px;color:var(--dim)">STAT</div>'
+    +players.map(function(p){
+      var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+      return '<div style="padding:12px;text-align:center;border-left:1px solid var(--border)">'
+        +'<div style="width:44px;height:44px;border-radius:12px;background:'+cpv[0]+';color:'+cpv[1]+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:600;margin:0 auto 6px">'+mkIni(p.name)+'</div>'
+        +'<div style="font-size:13px;font-weight:700">'+p.name+'</div>'
+        +'<div style="margin-top:4px"><span style="background:'+cpv[0]+';color:'+cpv[1]+';border:1px solid '+cpv[1]+'40;font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:4px">'+p.pos+'</span></div>'
+        +(p.status==='Priority'?'<div style="margin-top:3px;font-family:var(--fm);font-size:9px;color:var(--amber)">★ Priority</div>':'')
+      +'</div>';
+    }).join('')
+  +'</div>';
+
+  var rowsHtml=attrs.map(function(a){
+    var best=bestVal(a.k);
+    return '<div style="display:grid;grid-template-columns:100px '+colW+'">'
+      +'<div style="padding:8px 12px;font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;border-bottom:1px solid var(--border)">'+a.l+'</div>'
+      +players.map(function(p){
+        var val=p[a.k]||'—';
+        var isBest=a.u&&p[a.k]&&parseFloat(p[a.k])===best&&best>0;
+        return '<div style="padding:8px 12px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);text-align:center;background:'+(isBest?'rgba(20,184,166,.06)':'')+';">'
+          +'<span style="font-family:var(--fm);font-size:12px;font-weight:'+(isBest?700:400)+';color:'+(isBest?'var(--teal)':'var(--muted)')+'">'+val+(val!=='—'&&a.u?' '+a.u:'')+'</span>'
+          +(isBest?'<span style="display:block;font-size:9px;color:var(--teal)">▲ best</span>':'')
+        +'</div>';
+      }).join('')
+    +'</div>';
+  }).join('');
+
+  var notesHtml='<div style="display:grid;grid-template-columns:100px '+colW+';border-top:2px solid rgba(20,184,166,.08)">'
+    +'<div style="padding:8px 12px;font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase">Notes</div>'
+    +players.map(function(p){
+      return '<div style="padding:10px 12px;border-left:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.5">'+(p.notes||'—')+'</div>';
+    }).join('')
+  +'</div>';
+
+  var res=document.createElement('div');
+  res.id='cmp-result-ov';
+  res.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1.5rem';
+  res.innerHTML='<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;width:'+boxW+';max-width:95vw;box-shadow:0 20px 80px rgba(0,0,0,.6)">'
+    +'<div style="background:var(--bg);border-radius:14px 14px 0 0;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,184,166,.15)">'
+      +'<div style="font-size:15px;font-weight:700;color:var(--teal);font-family:var(--fm)">⚖️ Player Comparison</div>'
+      +'<div style="display:flex;gap:8px" id="cmp-hd-btns"></div>'
+    +'</div>'
+    +'<div style="overflow-x:auto">'+hdHtml+rowsHtml+notesHtml+'</div>'
+    +'<div style="padding:.9rem 1.25rem;border-top:1px solid var(--b2);display:flex;gap:8px;justify-content:center;background:var(--bg);border-radius:0 0 14px 14px" id="cmp-ft-btns"></div>'
+  +'</div>';
+  document.body.appendChild(res);
+
+  // Wire buttons via DOM (no inline onclick with quotes)
+  var hdBtns=document.getElementById('cmp-hd-btns');
+  var changeBtn=document.createElement('button');
+  changeBtn.textContent='← Change';
+  changeBtn.style.cssText='font-family:var(--fm);font-size:10px;padding:5px 12px;border:1px solid rgba(20,184,166,.3);background:rgba(20,184,166,.1);color:var(--teal);border-radius:6px;cursor:pointer';
+  changeBtn.onclick=function(){res.remove();openCompareModal();};
+  var closeBtn=document.createElement('button');
+  closeBtn.textContent='✕';
+  closeBtn.style.cssText='background:var(--bg3);border:1px solid var(--b2);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px';
+  closeBtn.onclick=function(){res.remove();};
+  hdBtns.appendChild(changeBtn);hdBtns.appendChild(closeBtn);
+
+  var ftBtns=document.getElementById('cmp-ft-btns');
+  var backBtn=document.createElement('button');
+  backBtn.textContent='← Back to Dashboard';
+  backBtn.style.cssText='padding:9px 24px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-family:var(--fh);font-weight:700';
+  backBtn.onclick=function(){res.remove();goTo('dashboard');};
+  ftBtns.appendChild(backBtn);
+}
+
+// ═══ GM SESSION MANAGEMENT ══════════════════════════════════════
+async function closeNewSessModal(){
+  var el=document.getElementById('new-sess-modal');
+  if(el) el.remove();
+}
+
+async function gmDeleteSession(sid, sname){
+  if(!confirm('Delete session "'+sname+'"?\nAll players in this session will be marked as deleted.')) return;
+  try{
+    // Mark all players in session as deleted
+    await sbFetch('players?session_id=eq.'+sid,{method:'PATCH',body:JSON.stringify({deleted:true,deleted_at:new Date().toISOString(),deleted_by:'admin'})});
+    // Remove from SESS array
+    SESS=SESS.filter(function(s){return s.id!==sid;});
+    await logActivity('\uD83D\uDDD1 Deleted session',sname);
+    renderGMSess();
+    toast('\u2713 Session deleted: '+sname);
+  }catch(e){toast('Error: '+e.message);}
+}
+
+async function gmSuspendSession(sid, sname){
+  // Find and update in SESS (sessions are local, mark in activity log)
+  var s=SESS.find(function(x){return x.id===sid;});
+  if(s) s.status='suspended';
+  await logActivity('\u23F8 Suspended session',sname);
+  renderGMSess();
+  toast('Session suspended: '+sname);
+}
+
+async function gmResumeSession(sid, sname){
+  var s=SESS.find(function(x){return x.id===sid;});
+  if(s) s.status='active';
+  await logActivity('\u25B6 Resumed session',sname);
+  renderGMSess();
+  toast('Session resumed: '+sname);
+}
+
+function quickCompare(playerId){
+  CMP_SELECTED = [playerId];
+  openCompareModal();
+  // Pre-check the checkbox for this player
+  setTimeout(function(){
+    var cbs = document.querySelectorAll('#cmp-modal-ov input[type=checkbox]');
+    cbs.forEach(function(cb){
+      if(parseInt(cb.value)===playerId){
+        cb.checked=true;
+        cb.closest('label').style.borderColor='var(--teal)';
+        cb.closest('label').style.background='rgba(20,184,166,.05)';
+      }
+    });
+    var cnt=document.getElementById('cmp-cnt');
+    if(cnt) cnt.textContent='1';
+  },50);
+}
+
+// Load player counts for sessions in GM
+async function loadSessCounts(){
+  try{
+    var r=await sbFetch('players?select=session_id&deleted=eq.false');
+    if(!r.ok) return;
+    var rows=await r.json();
+    var counts={};
+    rows.forEach(function(row){counts[row.session_id]=(counts[row.session_id]||0)+1;});
+    Object.keys(counts).forEach(function(sid){
+      var el=document.getElementById('sess-cnt-'+sid);
+      if(el) el.textContent=counts[sid];
+    });
+  }catch(e){}
 }
 </script>
 </body>
