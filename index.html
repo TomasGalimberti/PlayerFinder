@@ -500,6 +500,16 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .kb-more:hover{color:var(--teal)}
 @media(max-width:700px){.kb-board{grid-template-columns:repeat(2,1fr);}}.
 @media(max-width:420px){.kb-board{grid-template-columns:1fr;}}
+
+/* ── KANBAN DRAG IMPROVEMENTS ── */
+.kb-card{cursor:default}
+.kb-drag-handle{color:var(--b2);font-size:14px;cursor:grab;flex-shrink:0;line-height:1;padding:2px 4px;border-radius:4px;transition:color .15s}
+.kb-drag-handle:hover{color:var(--teal)}
+.kb-col.drag-target{border:2px dashed var(--teal)!important;background:rgba(20,184,166,.04)!important}
+.kb-col.drag-over{border:2px solid var(--teal)!important;background:rgba(20,184,166,.08)!important}
+.kb-card.dragging{opacity:.25;transform:rotate(2deg);pointer-events:none}
+@keyframes cardDrop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.kb-card.just-dropped{animation:cardDrop .18s ease}
 </style>
 </head>
 <body>
@@ -721,7 +731,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div class="sel-mode-bar" id="sel-bar">
       <span class="sel-count" id="sel-count">0 selected</span>
       <button class="btn-sm" onclick="selectAll()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">Select All</button>
-      <button class="btn-sm" onclick="compareSelected()" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
+      <button class="btn-sm" onclick="openCompareModal()" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
       <button class="btn-sm" onclick="trashSelected()" style="color:#f87171;border-color:rgba(239,68,68,.3)">🗑 Move to Trash</button>
       <button class="btn-sm" onclick="toggleSelMode()">✖ Cancel</button>
      </div>
@@ -3249,7 +3259,7 @@ function renderKanban(list){
           : '<div class="kb-av" style="background:'+accl(p.id)+';color:'+acc(p.id)+'">'+mkIni(p.name)+'</div>';
         return '<div class="kb-card '+col.key+'" draggable="true" data-id="'+p.id+'"'
           +' onclick="showDet('+p.id+')">'
-          +'<div class="kb-card-top">'+av
+          +'<div class="kb-card-top"><span class="kb-drag-handle" onclick="event.stopPropagation()">⠇</span>'+av
           +'<div><div class="kb-name">'+p.name+'</div>'
           +'<div class="kb-sub">'+(p.country||'—')+' · '+(p.height||'—')+'cm</div></div></div>'
           +'<div class="kb-tags">'
@@ -3283,12 +3293,21 @@ function renderKanban(list){
   wrap.querySelectorAll('.kb-card').forEach(function(card){
     card.addEventListener('dragstart', function(e){
       KB_DRAG_ID = parseInt(card.dataset.id);
-      setTimeout(function(){card.classList.add('dragging');}, 0);
+      setTimeout(function(){
+        card.classList.add('dragging');
+        // Show all other columns as valid drop targets
+        document.querySelectorAll('.kb-col').forEach(function(c){
+          if(!c.contains(card)) c.classList.add('drag-target');
+        });
+      }, 0);
       e.dataTransfer.effectAllowed = 'move';
     });
     card.addEventListener('dragend', function(){
       card.classList.remove('dragging');
-      document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
+      document.querySelectorAll('.kb-col').forEach(function(c){
+        c.classList.remove('drag-over');
+        c.classList.remove('drag-target');
+      });
     });
     // Prevent click from firing when drag ends
     card.addEventListener('click', function(e){
@@ -3300,12 +3319,10 @@ function renderKanban(list){
 function kbOver(e, col){
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
-  // Only add drag-over to the column, not child elements
-  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
-  // Find the kb-col parent
+  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');c.classList.add('drag-target');});
   var target = col;
   while(target && !target.classList.contains('kb-col')) target = target.parentElement;
-  if(target) target.classList.add('drag-over');
+  if(target){target.classList.add('drag-over');target.classList.remove('drag-target');}
 }
 function kbLeave(col){ col.classList.remove('drag-over'); }
 
@@ -3325,9 +3342,13 @@ async function kbDrop(e, newStatus){
   try{
     await saveData();
     await logActivity('\u270f Status via Kanban', p.name+': '+oldStatus+' \u2192 '+newStatus);
-    toast('\u2713 '+p.name+' \u2192 '+newStatus);
+    // Add drop animation to moved card
+  setTimeout(function(){
+    var movedCard=document.querySelector('.kb-card[data-id="'+p.id+'"]');
+    if(movedCard){movedCard.classList.add('just-dropped');setTimeout(function(){movedCard.classList.remove('just-dropped');},300);}
+  },50);
+  toast('\u2713 '+p.name+' \u2192 '+newStatus);
   }catch(err){
-    // Revert on failure
     p.status = oldStatus;
     renderKanban(getF());
     updateKPIs();
