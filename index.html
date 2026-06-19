@@ -550,6 +550,14 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
   to{transform:translateY(0) scale(1);opacity:1}
 }
 .kb-card.just-dropped{animation:kb-card-land .2s ease}
+
+/* ── SIGNED STATUS ── */
+.tr-signed{background:rgba(20,184,166,.06)!important;border-left:3px solid var(--teal)!important}
+.kb-card.signed{border-left:3px solid var(--teal);background:rgba(20,184,166,.06)!important}
+.kb-card.signed .kb-name::after{content:" ✓";color:var(--teal);font-family:var(--fm)}
+.signed-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(20,184,166,.15);
+  color:var(--teal);border:1px solid rgba(20,184,166,.3);font-family:var(--fm);
+  font-size:10px;padding:3px 10px;border-radius:6px;font-weight:600}
 </style>
 </head>
 <body>
@@ -915,7 +923,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <div class="em-sec"><div class="em-sec-t">Identity</div>
     <div class="fg fg2"><div class="fl"><label>Full Name</label><input class="inp" id="ef-name"></div><div class="fl"><label>Position</label><select class="inp" id="ef-pos"><option>Outside</option><option>Opposite</option><option>Setter</option><option>Middle</option><option>Libero</option></select></div></div>
     <div class="fg fg3"><div class="fl"><label>Country</label><input class="inp" id="ef-country"></div><div class="fl"><label>Born / Age</label><input class="inp" id="ef-born"></div><div class="fl"><label>Hand</label><select class="inp" id="ef-hand"><option>Right</option><option>Left</option></select></div></div>
-    <div class="fg fg2"><div class="fl"><label>EU Passport</label><select class="inp" id="ef-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div><div class="fl"><label>Status</label><select class="inp" id="ef-status"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div></div>
+    <div class="fg fg2"><div class="fl"><label>EU Passport</label><select class="inp" id="ef-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div><div class="fl"><label>Status</label><select class="inp" id="ef-status"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div></div>
    </div>
    <div class="em-sec"><div class="em-sec-t">Physical</div>
     <div class="fg fg4"><div class="fl"><label>Height cm</label><input class="inp" id="ef-ht" type="number"></div><div class="fl"><label>Spike cm</label><input class="inp" id="ef-sp" type="number"></div><div class="fl"><label>Block cm</label><input class="inp" id="ef-bl" type="number"></div><div class="fl"><label>Weight kg</label><input class="inp" id="ef-wt" type="number"></div></div>
@@ -932,6 +940,10 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div class="fl"><label>Verdict</label><textarea class="inp" id="ef-verdict"></textarea></div>
    <div style="background:rgba(20,184,166,.04);border:1px solid rgba(20,184,166,.15);border-radius:8px;padding:10px 12px;margin-top:8px">
     <div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">💰 Contract &amp; Budget</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+     <div class="fl"><label>Last Season Salary</label><input class="inp" id="ef-last-salary" placeholder="e.g. 35k/season"></div>
+     <div class="fl"><label>Asking Salary</label><input class="inp" id="ef-asking-salary" placeholder="e.g. 40k/season"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
      <div class="fl"><label>Budget (approx)</label><input class="inp" id="ef-budget" placeholder="e.g. ~25k"></div>
      <div class="fl"><label>Last Season Contract</label><input class="inp" id="ef-last-contract" placeholder="e.g. 30k/season"></div>
@@ -983,7 +995,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="prev-ns"></div>
    </div>
    <div id="eval-sec" style="display:none">
-    <div class="fg fg2" style="margin-top:8px"><div class="fl"><label>Status</label><select class="inp" id="eval-st"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div><div class="fl"><label>Agent</label><input class="inp" id="eval-agent"></div></div>
+    <div class="fg fg2" style="margin-top:8px"><div class="fl"><label>Status</label><select class="inp" id="eval-st"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div><div class="fl"><label>Agent</label><input class="inp" id="eval-agent"></div></div>
     <div class="fl"><label>Notes</label><textarea class="inp" id="eval-notes"></textarea></div>
    </div>
    <div class="brow"><button class="btn-p" onclick="saveNew()">Save Player</button><button class="btn-s" onclick="closeModal('am-bg')">Cancel</button></div>
@@ -1406,7 +1418,7 @@ var ACCL=['rgba(37,99,235,.15)','rgba(13,148,136,.15)','rgba(124,58,237,.15)','r
 var POS={Outside:['rgba(59,130,246,.15)','#60a5fa'],Opposite:['rgba(251,113,133,.15)','#fb7185'],
   Setter:['rgba(34,197,94,.15)','#4ade80'],Middle:['rgba(167,139,250,.15)','#a78bfa'],Libero:['rgba(245,158,11,.15)','#fbbf24']};
 var STC={Priority:['rgba(245,158,11,.15)','#fbbf24'],Watching:['rgba(59,130,246,.15)','#60a5fa'],
-  Contacted:['rgba(34,197,94,.15)','#4ade80'],Discarded:['rgba(239,68,68,.15)','#f87171']};
+  Contacted:['rgba(34,197,94,.15)','#4ade80'],Signed:['rgba(20,184,166,.18)','#14b8a6'],Discarded:['rgba(239,68,68,.15)','#f87171']};
 function mkIni(n){return(n||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();}
 function pc(pos){return POS[pos]||['rgba(59,130,246,.15)','#60a5fa'];}
 function sc(st){return STC[st]||['rgba(59,130,246,.15)','#60a5fa'];}
@@ -1591,7 +1603,7 @@ function renderList(list,wrap){
   var rows=list.map(function(p){
     var c=pc(p.pos),s=sc(p.status),cl=p.club&&p.club!=='—'?p.club:'—';
     var selChk=SEL_MODE?'<div class="tr-check" onclick="event.stopPropagation()"><input type="checkbox" class="sel-cb" '+(SEL_IDS.has(p.id)?'checked':'')+' onchange="toggleSel('+p.id+',this)"></div>':'';
-    return '<div class="tr'+(SEL_IDS.has(p.id)?' selected':'')+'" data-id="'+p.id+'" onclick="'+(SEL_MODE?'':'showDet('+p.id+')')+'">'
+    return '<div class="tr'+(SEL_IDS.has(p.id)?' selected':'')+(p.status==='Signed'?' tr-signed':'')+'" data-id="'+p.id+'" onclick="'+(SEL_MODE?'':'showDet('+p.id+')')+'">'
       +selChk
       +'<div class="td" style="font-family:var(--fm);font-size:9px;color:var(--dim)">'+(p.id_label||p.id)+'</div>'
       +'<div class="td" style="flex-direction:column;align-items:flex-start;gap:1px"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'
@@ -1671,7 +1683,7 @@ function showDet(id){
     +'</div></div>'
     +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
     +'<select class="st-sel" onchange="chSt('+id+',this.value)">'
-    +['Priority','Watching','Contacted','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
+    +['Priority','Watching','Contacted','Signed','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
     +'</select>'
     +'<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">'
     +'<button class="share-btn" onclick="quickCompare('+id+')" style="color:var(--violet);border-color:rgba(167,139,250,.3);background:var(--vl)">⚖️ Compare</button>'
@@ -1695,12 +1707,14 @@ function showDet(id){
   if(p.notes)html+='<div class="panel"><div class="ptitle">Notes</div><p style="font-size:13px;color:var(--muted);line-height:1.7">'+p.notes+'</p></div>';
   if(vids.length)html+='<div class="panel"><div class="ptitle">Videos</div>'+vids.map(function(v){return'<div class="vrow"><a style="width:28px;height:19px;background:#F00;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none" href="'+v+'" target="_blank"><div style="width:0;height:0;border-left:8px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-left:1px"></div></a><div style="flex:1;font-size:12px">'+( v.indexOf('youtu')>=0?'YouTube':'Video')+'</div><a href="'+v+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)">Open \u2197</a></div>';}).join('')+'</div>';
   // Budget & Contract panel
-  if(p.budget||p.last_contract||p.signed){
+  if(p.budget||p.last_contract||p.signed_for||p.last_salary||p.asking_salary){
     html+='<div class="panel"><div class="ptitle">💰 Contract & Budget</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px">';
+    if(p.last_salary) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--dim)">'+p.last_salary+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Last Salary</div></div>';
+    if(p.asking_salary) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--amber)">'+p.asking_salary+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Asking Salary</div></div>';
     if(p.budget) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--teal)">'+p.budget+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Budget</div></div>';
-    if(p.last_contract) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--amber)">'+p.last_contract+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Last Contract</div></div>';
-    if(p.signed) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:#4ade80">'+p.signed+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Signed For</div></div>';
+    if(p.last_contract) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--muted)">'+p.last_contract+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Last Contract</div></div>';
+    if(p.signed_for) html+='<div style="grid-column:1/-1;text-align:center;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:15px;font-weight:700;color:var(--teal)">✓ '+p.signed_for+'</div><div style="font-size:10px;color:var(--teal);margin-top:3px">SIGNED</div></div>';
     html+='</div></div>';
   }
   html+='<div class="panel"><div class="ptitle">Scouting Notes</div>'
@@ -1757,7 +1771,7 @@ function openEdit(){
   sv('ef-club',p.club&&p.club!=='—'?p.club:'');sv('ef-league',p.league||'');
   sv('ef-agent',p.agent||'');sv('ef-contact',p.agent_contact||'');
   sv('ef-vb',p.vb||'');sv('ef-vid',p.video||'');sv('ef-notes',p.notes||'');sv('ef-verdict',p.verdict||'');
-  sv('ef-budget',p.budget||'');sv('ef-last-contract',p.last_contract||'');sv('ef-signed',p.signed||'');
+  sv('ef-budget',p.budget||'');sv('ef-last-contract',p.last_contract||'');sv('ef-signed',p.signed_for||'');
   openModal('em-bg');
 }
 function saveEdit(){
@@ -1772,7 +1786,9 @@ function saveEdit(){
   p.notes=gv('ef-notes');p.verdict=gv('ef-verdict');
   p.budget=gv('ef-budget')||p.budget||'';
   p.last_contract=gv('ef-last-contract')||p.last_contract||'';
-  p.signed=gv('ef-signed')||p.signed||'';
+  p.signed_for=gv('ef-signed')||p.signed_for||'';
+  p.last_salary=gv('ef-last-salary')||p.last_salary||'';
+  p.asking_salary=gv('ef-asking-salary')||p.asking_salary||'';
   saveData();updateKPIs();closeModal('em-bg');showDet(EID);toast('\u2713 '+p.name+' updated');
 }
 
@@ -3321,6 +3337,7 @@ function renderKanban(list){
     {key:'watching', label:'Watching', color:'#378ADD'},
     {key:'contacted', label:'Contacted', color:'#1D9E75'},
     {key:'priority', label:'Priority', color:'#EF9F27'},
+    {key:'signed', label:'Signed ✓', color:'#14b8a6'},
     {key:'discarded', label:'Discarded', color:'#888780'},
   ];
 
@@ -4007,7 +4024,7 @@ function showCompareResult(){
     {l:'Block',k:'block',u:'cm'},{l:'Weight',k:'weight',u:'kg'},
     {l:'EU',k:'eu'},{l:'Club',k:'club'},{l:'League',k:'league'},
     {l:'Status',k:'status'},
-    {l:'Budget',k:'budget'},{l:'Last Contract',k:'last_contract'},{l:'Signed For',k:'signed'}
+    {l:'Last Salary',k:'last_salary'},{l:'Asking',k:'asking_salary'},{l:'Budget',k:'budget'},{l:'Last Contract',k:'last_contract'},{l:'Signed',k:'signed_for'}
   ];
 
   // Build header
