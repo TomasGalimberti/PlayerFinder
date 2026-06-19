@@ -897,6 +897,14 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <div class="em-sec"><div class="em-sec-t">Notes</div>
     <div class="fl" style="margin-bottom:8px"><label>Observation Notes</label><textarea class="inp" id="ef-notes"></textarea></div>
     <div class="fl"><label>Verdict</label><textarea class="inp" id="ef-verdict"></textarea></div>
+   <div style="background:rgba(20,184,166,.04);border:1px solid rgba(20,184,166,.15);border-radius:8px;padding:10px 12px;margin-top:8px">
+    <div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">💰 Contract &amp; Budget</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+     <div class="fl"><label>Budget (approx)</label><input class="inp" id="ef-budget" placeholder="e.g. ~25k"></div>
+     <div class="fl"><label>Last Season Contract</label><input class="inp" id="ef-last-contract" placeholder="e.g. 30k/season"></div>
+     <div class="fl"><label>Signed For</label><input class="inp" id="ef-signed" placeholder="e.g. OPE Rethymno 26/27"></div>
+    </div>
+   </div>
    </div>
   </div>
   <div class="modal-ft"><button class="btn-s" onclick="closeModal('em-bg')">Cancel</button><button class="btn-p" onclick="saveEdit()">💾 Save Changes</button></div>
@@ -1653,6 +1661,15 @@ function showDet(id){
     +'<div style="font-size:12px;color:var(--muted)">'+(p.league||'')+'</div></div></div>';
   if(p.notes)html+='<div class="panel"><div class="ptitle">Notes</div><p style="font-size:13px;color:var(--muted);line-height:1.7">'+p.notes+'</p></div>';
   if(vids.length)html+='<div class="panel"><div class="ptitle">Videos</div>'+vids.map(function(v){return'<div class="vrow"><a style="width:28px;height:19px;background:#F00;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none" href="'+v+'" target="_blank"><div style="width:0;height:0;border-left:8px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-left:1px"></div></a><div style="flex:1;font-size:12px">'+( v.indexOf('youtu')>=0?'YouTube':'Video')+'</div><a href="'+v+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)">Open \u2197</a></div>';}).join('')+'</div>';
+  // Budget & Contract panel
+  if(p.budget||p.last_contract||p.signed){
+    html+='<div class="panel"><div class="ptitle">💰 Contract & Budget</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+    if(p.budget) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--teal)">'+p.budget+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Budget</div></div>';
+    if(p.last_contract) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--amber)">'+p.last_contract+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Last Contract</div></div>';
+    if(p.signed) html+='<div style="text-align:center;background:var(--bg3);border-radius:8px;padding:10px"><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:#4ade80">'+p.signed+'</div><div style="font-size:10px;color:var(--dim);margin-top:3px">Signed For</div></div>';
+    html+='</div></div>';
+  }
   html+='<div class="panel"><div class="ptitle">Scouting Notes</div>'
     +'<textarea class="inp" id="qn-'+id+'" placeholder="Add observation..." style="min-height:60px">'+(p.quick_note||'')+'</textarea>'
     +'<div style="margin-top:6px;display:flex;gap:7px">'
@@ -1707,6 +1724,7 @@ function openEdit(){
   sv('ef-club',p.club&&p.club!=='—'?p.club:'');sv('ef-league',p.league||'');
   sv('ef-agent',p.agent||'');sv('ef-contact',p.agent_contact||'');
   sv('ef-vb',p.vb||'');sv('ef-vid',p.video||'');sv('ef-notes',p.notes||'');sv('ef-verdict',p.verdict||'');
+  sv('ef-budget',p.budget||'');sv('ef-last-contract',p.last_contract||'');sv('ef-signed',p.signed||'');
   openModal('em-bg');
 }
 function saveEdit(){
@@ -1719,6 +1737,9 @@ function saveEdit(){
   p.club=gv('ef-club')||'—';p.league=gv('ef-league');p.agent=gv('ef-agent');
   p.agent_contact=gv('ef-contact');p.vb=gv('ef-vb');p.video=gv('ef-vid');
   p.notes=gv('ef-notes');p.verdict=gv('ef-verdict');
+  p.budget=gv('ef-budget')||p.budget||'';
+  p.last_contract=gv('ef-last-contract')||p.last_contract||'';
+  p.signed=gv('ef-signed')||p.signed||'';
   saveData();updateKPIs();closeModal('em-bg');showDet(EID);toast('\u2713 '+p.name+' updated');
 }
 
@@ -3837,7 +3858,8 @@ function showCompareResult(){
     {l:'Height',k:'height',u:'cm'},{l:'Spike',k:'spike',u:'cm'},
     {l:'Block',k:'block',u:'cm'},{l:'Weight',k:'weight',u:'kg'},
     {l:'EU',k:'eu'},{l:'Club',k:'club'},{l:'League',k:'league'},
-    {l:'Status',k:'status'}
+    {l:'Status',k:'status'},
+    {l:'Budget',k:'budget'},{l:'Last Contract',k:'last_contract'},{l:'Signed For',k:'signed'}
   ];
 
   // Build header
