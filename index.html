@@ -510,6 +510,13 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .kb-card.dragging{opacity:.25;transform:rotate(2deg);pointer-events:none}
 @keyframes cardDrop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .kb-card.just-dropped{animation:cardDrop .18s ease}
+
+/* Drag cursor states */
+.kb-board.dragging-active .kb-card{cursor:default}
+.kb-board.dragging-active .kb-drag-handle{cursor:grabbing}
+.kb-card[draggable=true]{cursor:default}
+
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
@@ -1065,6 +1072,14 @@ async function saveData(){
     // Delete and re-insert players for this session+owner
     await sbFetch('players?session_id=eq.'+CS.id+'&owner_id=eq.'+CU.id,{method:'DELETE'});
     if(P.length){
+      // Deduplicate by id - keep last occurrence
+      var seen={};
+      var deduped=[];
+      P.slice().reverse().forEach(function(p){
+        if(!seen[p.id]){seen[p.id]=true;deduped.push(p);}
+      });
+      deduped.reverse();
+      P=deduped;
       await sbFetch('players',{
         method:'POST',
         body:JSON.stringify(P.map(function(p){
@@ -1085,7 +1100,13 @@ async function loadData(){
     var r=await sbFetch(url);
     if(r.ok){
       var rows=await r.json();
-      P=rows.filter(function(row){return !row.deleted;}).map(function(row){return row.data;});
+      var rawP=rows.filter(function(row){return !row.deleted;}).map(function(row){return row.data;});
+      // Deduplicate - keep last (highest DB id)
+      var seen2={};
+      P=rawP.filter(function(p){
+        if(seen2[p.id])return false;
+        seen2[p.id]=true;return true;
+      });
       var trashed=rows.filter(function(row){return row.deleted;}).length;
       if(trashed>0)st('badge-trash',trashed);
     }
@@ -3266,6 +3287,7 @@ function renderKanban(list){
           +'<span class="kb-tag" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
           +(p.eu==='Yes'?'<span class="kb-tag" style="background:rgba(167,139,250,.15);color:#a78bfa;border-color:rgba(167,139,250,.3)">EU</span>':'')
           +(p.rating?'<span class="kb-tag" style="background:var(--al);color:var(--amber);border-color:rgba(245,158,11,.3)">★ '+p.rating+'</span>':'')
+          +'<button onclick="event.stopPropagation();kbMoveBack('+p.id+')" title="Back to Watching" style="margin-left:auto;background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;padding:0 3px" onmouseover="this.style.color=\'var(--teal)\'" onmouseout="this.style.color=\'var(--dim)\'">↩</button>'
           +'</div></div>';
       }).join('');
 
@@ -3293,17 +3315,23 @@ function renderKanban(list){
   wrap.querySelectorAll('.kb-card').forEach(function(card){
     card.addEventListener('dragstart', function(e){
       KB_DRAG_ID = parseInt(card.dataset.id);
+      // Set drag image to the whole card for visual feedback
+      e.dataTransfer.setDragImage(card, card.offsetWidth/2, 20);
+      e.dataTransfer.effectAllowed = 'move';
       setTimeout(function(){
         card.classList.add('dragging');
-        // Show all other columns as valid drop targets
+        var board=document.getElementById('kb-board');
+        if(board) board.classList.add('dragging-active');
+        // Highlight all other columns as drop targets
         document.querySelectorAll('.kb-col').forEach(function(c){
           if(!c.contains(card)) c.classList.add('drag-target');
         });
       }, 0);
-      e.dataTransfer.effectAllowed = 'move';
     });
     card.addEventListener('dragend', function(){
       card.classList.remove('dragging');
+      var board=document.getElementById('kb-board');
+      if(board) board.classList.remove('dragging-active');
       document.querySelectorAll('.kb-col').forEach(function(c){
         c.classList.remove('drag-over');
         c.classList.remove('drag-target');
@@ -3326,30 +3354,45 @@ function kbOver(e, col){
 }
 function kbLeave(col){ col.classList.remove('drag-over'); }
 
+var KB_LAST_MOVE = null; // For undo
+
 async function kbDrop(e, newStatus){
   e.preventDefault();
-  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
+  document.querySelectorAll('.kb-col').forEach(function(c){
+    c.classList.remove('drag-over');
+    c.classList.remove('drag-target');
+  });
+  var board=document.getElementById('kb-board');
+  if(board) board.classList.remove('dragging-active');
   if(!KB_DRAG_ID) return;
   var p = P.find(function(x){ return x.id === KB_DRAG_ID; });
   KB_DRAG_ID = null;
   if(!p || p.status === newStatus) return;
   var oldStatus = p.status;
+  // Store for undo
+  KB_LAST_MOVE = {playerId: p.id, playerName: p.name, from: oldStatus, to: newStatus};
   p.status = newStatus;
-  // Immediately re-render so the card moves visually
   renderKanban(getF());
   updateKPIs();
-  // Then save to Supabase
+  // Show undo toast
+  showUndoToast(p.name+' \u2192 '+newStatus, function(){
+    p.status = oldStatus;
+    KB_LAST_MOVE = null;
+    renderKanban(getF());
+    updateKPIs();
+    saveData();
+    toast('\u21a9 Undone');
+  });
   try{
     await saveData();
-    await logActivity('\u270f Status via Kanban', p.name+': '+oldStatus+' \u2192 '+newStatus);
-    // Add drop animation to moved card
-  setTimeout(function(){
-    var movedCard=document.querySelector('.kb-card[data-id="'+p.id+'"]');
-    if(movedCard){movedCard.classList.add('just-dropped');setTimeout(function(){movedCard.classList.remove('just-dropped');},300);}
-  },50);
-  toast('\u2713 '+p.name+' \u2192 '+newStatus);
+    await logActivity('\u270f Kanban move', p.name+': '+oldStatus+' \u2192 '+newStatus);
+    setTimeout(function(){
+      var mc=document.querySelector('.kb-card[data-id="'+p.id+'"]');
+      if(mc){mc.classList.add('just-dropped');setTimeout(function(){mc.classList.remove('just-dropped');},300);}
+    },50);
   }catch(err){
     p.status = oldStatus;
+    KB_LAST_MOVE = null;
     renderKanban(getF());
     updateKPIs();
     toast('Error saving — reverted');
@@ -3902,25 +3945,44 @@ async function gmResumeSession(sid, sname){
   toast('Session resumed: '+sname);
 }
 
-function quickCompare(playerId){
-  CMP_SELECTED = [playerId];
-  openCompareModal();
-  // Pre-check the checkbox for this player
-  setTimeout(function(){
-    var cbs = document.querySelectorAll('#cmp-modal-ov input[type=checkbox]');
-    cbs.forEach(function(cb){
-      if(parseInt(cb.value)===playerId){
-        cb.checked=true;
-        cb.closest('label').style.borderColor='var(--teal)';
-        cb.closest('label').style.background='rgba(20,184,166,.05)';
-      }
-    });
-    var cnt=document.getElementById('cmp-cnt');
-    if(cnt) cnt.textContent='1';
-  },50);
+
+var _undoTimer=null;
+function showUndoToast(message,undoFn){
+  var ex=document.getElementById('undo-toast');if(ex)ex.remove();
+  if(_undoTimer)clearTimeout(_undoTimer);
+  var t=document.createElement('div');
+  t.id='undo-toast';
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9000;font-size:12px;color:var(--text);white-space:nowrap';
+  var msg=document.createElement('span');
+  msg.textContent='\u2713 '+message;
+  var btn=document.createElement('button');
+  btn.textContent='\u21a9 Undo';
+  btn.style.cssText='font-family:var(--fm);font-size:11px;padding:4px 12px;border:1px solid rgba(20,184,166,.4);background:rgba(20,184,166,.1);color:var(--teal);border-radius:6px;cursor:pointer';
+  btn.onclick=function(){t.remove();clearTimeout(_undoTimer);if(undoFn)undoFn();};
+  t.appendChild(msg);
+  t.appendChild(btn);
+  document.body.appendChild(t);
+  _undoTimer=setTimeout(function(){if(t.parentNode)t.remove();},5000);
 }
 
-// Load player counts for sessions in GM
+// Load player counts for sessions 
+function kbMoveBack(playerId){
+  var p=P.find(function(x){return x.id===playerId;});
+  if(!p)return;
+  var old=p.status;
+  if(old==='Watching'){toast('Already in Watching');return;}
+  p.status='Watching';
+  renderKanban(getF());
+  updateKPIs();
+  saveData();
+  logActivity('\u21a9 Moved back to Watching',p.name);
+  showUndoToast(p.name+' \u2192 Watching',function(){
+    p.status=old;
+    renderKanban(getF());
+    updateKPIs();
+    saveData();
+  });
+}
 async function loadSessCounts(){
   try{
     var r=await sbFetch('players?select=session_id&deleted=eq.false');
