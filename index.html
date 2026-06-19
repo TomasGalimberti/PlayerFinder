@@ -1007,14 +1007,22 @@ var VM='list',SB=true,FP=null,FEU=null,FST=null,FLEG=null,SEL={};
 var DUSERS=[
   {id:'demo',pw:'PlayerFinder',fn:'Player',ln:'Finder',email:'demo@playerfinder.app',
    club:'Rethimno Volleyball',country:'Greece',role:'Head Coach',
-   status:'active',joined:'2025-01-01',sessions:['rethimno-2526'],avatar:'',bio:''},
+   status:'active',joined:'2025-01-01',sessions:['ope-rethymno-2526','demo-session-2526'],avatar:'',bio:''},
+  {id:'tgalimberti',pw:'Tomas198688',fn:'Tomás',ln:'Galimberti',email:'tgalimberti@rethimno.gr',
+   club:'OPE Rethymno',country:'Greece',role:'Head Coach',
+   status:'active',joined:'2025-01-01',sessions:['ope-rethymno-2526'],avatar:'',bio:''},
   {id:'admin',pw:'admin2025',fn:'Admin',ln:'God',email:'admin@playerfinder.app',
    club:'HQ',country:'Global',role:'Admin',status:'active',isGod:true,
    joined:'2024-01-01',sessions:[],avatar:'',bio:''}
 ];
-var DSESS=[{id:'rethimno-2526',name:'OPE Rethymno 2025/26',
-  league:'Greek Volleyball League',icon:'🏐',owner:'demo',
-  created:'2025-06-01',status:'active'}];
+var DSESS=[
+  {id:'ope-rethymno-2526',name:'OPE Rethymno 2025/26',
+   league:'Greek Volleyball League',icon:'🏐',owner:'tgalimberti',
+   created:'2025-06-01',status:'active'},
+  {id:'demo-session-2526',name:'Demo — Possible Signings 25/26',
+   league:'Showcase Session',icon:'⭐',owner:'demo',
+   created:'2025-06-01',status:'active'}
+];
 var USERS=DUSERS.map(function(u){return Object.assign({},u);});
 var SESS=DSESS.map(function(s){return Object.assign({},s);});
 var REGS=[];
@@ -1126,10 +1134,36 @@ async function doLogin(){
       role:dbUser.role||'',
       status:dbUser.status,
       isGod:dbUser.is_god||false,
-      sessions:['ope-rethymno-2526'],
+      sessions:[],
       avatar:'',bio:'',
       db_id:dbUser.id
     };
+
+    // Load sessions this user has players in from Supabase
+    try{
+      var rSess=await sbFetch('players?owner_id=eq.'+CU.id+'&select=session_id&deleted=eq.false');
+      if(rSess.ok){
+        var sessRows=await rSess.json();
+        var userSessIds=[...new Set(sessRows.map(function(r){return r.session_id;}))];
+        CU.sessions=userSessIds;
+        // Add any sessions not already in SESS array
+        userSessIds.forEach(function(sid){
+          if(!SESS.find(function(s){return s.id===sid;})){
+            // Try to find in DSESS first
+            var existing=DSESS.find(function(s){return s.id===sid;});
+            if(existing){
+              SESS.push(Object.assign({},existing));
+            } else {
+              // Create a basic session entry
+              SESS.push({id:sid,name:sid,league:'—',icon:'🏐',owner:CU.id,created:'—',status:'active'});
+            }
+          }
+        });
+      }
+    }catch(e2){
+      // Fallback: use sessions from DSESS where user is owner
+      CU.sessions=DSESS.filter(function(s){return s.owner===CU.id;}).map(function(s){return s.id;});
+    }
 
     g('li-user').value='';g('li-pass').value='';
     err.style.display='none';
@@ -1195,7 +1229,11 @@ function renderSess(){
   else{av.textContent=ini;av.style.background='';}
   g('sess-name').textContent=CU.fn+' '+CU.ln;
   g('sess-welcome').textContent=CU.fn;
-  var mySess=SESS.filter(function(s){return s.owner===CU.id||(CU.sessions&&CU.sessions.indexOf(s.id)>=0);});
+  // Show sessions owned by user OR in their sessions list
+  var mySess=SESS.filter(function(s){
+    return s.owner===CU.id || 
+           (CU.sessions&&CU.sessions.indexOf(s.id)>=0);
+  });
   var grid=g('sess-grid');grid.innerHTML='';
   mySess.forEach(function(s){
     var card=document.createElement('div');card.className='sess-card';
@@ -1203,7 +1241,7 @@ function renderSess(){
     card.innerHTML='<div style="font-size:28px;margin-bottom:8px">'+s.icon+'</div>'
       +'<div style="font-size:15px;font-weight:700;margin-bottom:2px">'+s.name+'</div>'
       +'<div style="font-size:11px;color:var(--muted);margin-bottom:8px">'+s.league+'</div>'
-      +'<div style="display:flex;gap:6px"><span style="font-family:var(--fm);font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:10px;color:var(--dim)">96 players</span>'
+      +'<div style="display:flex;gap:6px">'
       +'<span style="font-family:var(--fm);font-size:10px;padding:2px 8px;background:var(--tl);border-radius:10px;color:var(--teal)">Active</span></div>';
     grid.appendChild(card);
   });
@@ -1282,10 +1320,15 @@ function acc(id){return ACC[id%8];}function accl(id){return ACCL[id%8];}
 async function initApp(){
   P=[];NOTES=[];TEAMS=[];FP=null;FEU=null;FST=null;FLEG=null;SEL={};
   await loadData();
-  // Only pre-load players for the original OPE Rethymno session
-  if(!P.length && CS.id==='ope-rethymno-2526' && CU.id==='demo'){
-    P=INITIAL_PLAYERS.slice();
-    await saveData(); // Save them to Supabase for this session
+  // Pre-load players based on session
+  if(!P.length){
+    if(CS.id==='ope-rethymno-2526' && CU.id==='demo'){
+      P=INITIAL_PLAYERS.slice();
+      await saveData();
+    } else if(CS.id==='demo-session-2526'){
+      P=DEMO_PLAYERS.slice();
+      await saveData();
+    }
   }
   updateKPIs();buildLeagueDD();renderT(getF());renderAg();renderTeams();goTo('dashboard');
   checkURLPlayer();
