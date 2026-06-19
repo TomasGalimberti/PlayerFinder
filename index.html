@@ -517,6 +517,39 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .kb-card[draggable=true]{cursor:default}
 
 @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── DRAG CLONE ── */
+#kb-drag-clone{
+  position:fixed;z-index:99999;pointer-events:none;
+  border-radius:var(--r);padding:10px 11px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+  border:1.5px solid var(--teal);
+  background:var(--bg2);
+  opacity:.92;transform:rotate(2deg) scale(1.03);
+  transition:opacity .1s;
+  min-width:180px;max-width:220px;
+}
+.kb-col.kb-drop-active{
+  border:2px solid var(--teal)!important;
+  background:rgba(20,184,166,.06)!important;
+  box-shadow:inset 0 0 0 2px rgba(20,184,166,.2);
+}
+.kb-col.kb-drop-hover{
+  border:2px solid var(--teal)!important;
+  background:rgba(20,184,166,.12)!important;
+}
+.kb-drag-handle{
+  color:var(--dim);font-size:14px;cursor:grab;
+  flex-shrink:0;padding:0 4px;line-height:1;
+  transition:color .15s;user-select:none;
+}
+.kb-drag-handle:hover{color:var(--teal)}
+.kb-card.kb-being-dragged{opacity:.2;pointer-events:none}
+@keyframes kb-card-land{
+  from{transform:translateY(-6px) scale(1.02);opacity:.7}
+  to{transform:translateY(0) scale(1);opacity:1}
+}
+.kb-card.just-dropped{animation:kb-card-land .2s ease}
 </style>
 </head>
 <body>
@@ -3319,10 +3352,7 @@ function renderKanban(list){
         ? '<div class="kb-drop-hint">Drop here</div>'
         : '';
 
-      return '<div class="kb-col" id="kbc-'+col.key+'" data-status="'+col.key+'"'
-        +' ondragover="kbOver(event,this)"'
-        +' ondragleave="kbLeave(this)"'
-        +' ondrop="kbDrop(event,this.dataset.status)">'
+      return '<div class="kb-col" id="kbc-'+col.key+'" data-status="'+col.key+'">'
         +'<div class="kb-col-hd">'
         +'<div class="kb-col-title"><div class="kb-dot" style="background:'+col.color+'"></div>'+col.label+'</div>'
         +'<span class="kb-cnt">'+players.length+'</span>'
@@ -3332,52 +3362,170 @@ function renderKanban(list){
     }).join('')
   +'</div>';
 
-  // Wire up drag events
+  // Wire up mouse-based drag (better cross-browser than HTML5 drag API)
   wrap.querySelectorAll('.kb-card').forEach(function(card){
-    card.addEventListener('dragstart', function(e){
-      KB_DRAG_ID = parseInt(card.dataset.id);
-      // Set drag image to the whole card for visual feedback
-      e.dataTransfer.setDragImage(card, card.offsetWidth/2, 20);
-      e.dataTransfer.effectAllowed = 'move';
-      setTimeout(function(){
-        card.classList.add('dragging');
-        var board=document.getElementById('kb-board');
-        if(board) board.classList.add('dragging-active');
-        // Highlight all other columns as drop targets
-        document.querySelectorAll('.kb-col').forEach(function(c){
-          if(!c.contains(card)) c.classList.add('drag-target');
-        });
-      }, 0);
+    var handle = card.querySelector('.kb-drag-handle');
+    if(!handle) handle = card; // fallback: whole card draggable
+
+    handle.addEventListener('mousedown', function(e){
+      if(e.button!==0) return; // left click only
+      e.preventDefault();
+      kbStartDrag(e, card);
     });
-    card.addEventListener('dragend', function(){
-      card.classList.remove('dragging');
-      var board=document.getElementById('kb-board');
-      if(board) board.classList.remove('dragging-active');
-      document.querySelectorAll('.kb-col').forEach(function(c){
-        c.classList.remove('drag-over');
-        c.classList.remove('drag-target');
-      });
-    });
-    // Prevent click from firing when drag ends
+
+    // Keep click working on card (not handle)
     card.addEventListener('click', function(e){
-      if(card.classList.contains('dragging')) e.stopPropagation();
+      if(KB_DRAGGING) e.stopPropagation();
     });
   });
 }
 
-function kbOver(e, col){
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');c.classList.add('drag-target');});
-  var target = col;
-  while(target && !target.classList.contains('kb-col')) target = target.parentElement;
-  if(target){target.classList.add('drag-over');target.classList.remove('drag-target');}
+// ── Mouse-based drag system ──────────────────────────────────
+var KB_DRAGGING = false;
+var KB_DRAG_CARD = null;
+var KB_DRAG_CLONE = null;
+var KB_DRAG_START_X = 0;
+var KB_DRAG_START_Y = 0;
+var KB_DRAG_OFFSET_X = 0;
+var KB_DRAG_OFFSET_Y = 0;
+
+function kbStartDrag(e, card){
+  KB_DRAG_ID = parseInt(card.dataset.id);
+  KB_DRAG_CARD = card;
+  KB_DRAG_START_X = e.clientX;
+  KB_DRAG_START_Y = e.clientY;
+  KB_DRAGGING = false; // not dragging yet - wait for movement
+
+  var rect = card.getBoundingClientRect();
+  KB_DRAG_OFFSET_X = e.clientX - rect.left;
+  KB_DRAG_OFFSET_Y = e.clientY - rect.top;
+
+  document.addEventListener('mousemove', kbOnMouseMove);
+  document.addEventListener('mouseup', kbOnMouseUp);
 }
-function kbLeave(col){ col.classList.remove('drag-over'); }
+
+function kbOnMouseMove(e){
+  var dx = e.clientX - KB_DRAG_START_X;
+  var dy = e.clientY - KB_DRAG_START_Y;
+  var dist = Math.sqrt(dx*dx + dy*dy);
+
+  // Only start actual drag after 5px movement
+  if(!KB_DRAGGING && dist < 5) return;
+
+  if(!KB_DRAGGING){
+    // First real move - create clone and start drag
+    KB_DRAGGING = true;
+    KB_DRAG_CARD.classList.add('kb-being-dragged');
+
+    // Create floating clone
+    KB_DRAG_CLONE = KB_DRAG_CARD.cloneNode(true);
+    KB_DRAG_CLONE.id = 'kb-drag-clone';
+    KB_DRAG_CLONE.style.width = KB_DRAG_CARD.offsetWidth + 'px';
+    document.body.appendChild(KB_DRAG_CLONE);
+
+    // Show all cols as drop targets
+    document.querySelectorAll('.kb-col').forEach(function(c){
+      if(!c.contains(KB_DRAG_CARD)) c.classList.add('kb-drop-active');
+    });
+  }
+
+  // Move clone
+  if(KB_DRAG_CLONE){
+    KB_DRAG_CLONE.style.left = (e.clientX - KB_DRAG_OFFSET_X) + 'px';
+    KB_DRAG_CLONE.style.top = (e.clientY - KB_DRAG_OFFSET_Y) + 'px';
+  }
+
+  // Highlight column under cursor
+  document.querySelectorAll('.kb-col').forEach(function(c){
+    c.classList.remove('kb-drop-hover');
+  });
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  if(el){
+    var col = el.closest ? el.closest('.kb-col') : null;
+    if(!col && el.classList.contains('kb-col')) col = el;
+    if(col && !col.contains(KB_DRAG_CARD)) col.classList.add('kb-drop-hover');
+  }
+}
+
+function kbOnMouseUp(e){
+  document.removeEventListener('mousemove', kbOnMouseMove);
+  document.removeEventListener('mouseup', kbOnMouseUp);
+
+  if(!KB_DRAGGING){
+    // Was just a click, not a drag
+    KB_DRAG_ID = null;
+    KB_DRAG_CARD = null;
+    return;
+  }
+
+  // Find which column we dropped on
+  if(KB_DRAG_CLONE) KB_DRAG_CLONE.style.display='none';
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  var targetCol = null;
+  if(el){
+    targetCol = el.closest ? el.closest('.kb-col') : null;
+    if(!targetCol && el.classList.contains('kb-col')) targetCol = el;
+  }
+
+  // Clean up
+  if(KB_DRAG_CLONE){ KB_DRAG_CLONE.remove(); KB_DRAG_CLONE=null; }
+  if(KB_DRAG_CARD){ KB_DRAG_CARD.classList.remove('kb-being-dragged'); }
+  document.querySelectorAll('.kb-col').forEach(function(c){
+    c.classList.remove('kb-drop-active','kb-drop-hover');
+  });
+
+  var newStatus = targetCol ? targetCol.dataset.status : null;
+
+  setTimeout(function(){ KB_DRAGGING = false; },50);
+
+  if(!newStatus || !KB_DRAG_ID) return;
+
+  // Execute the status change
+  kbDrop(newStatus);
+}
+
+async function kbDrop(newStatus){
+  if(!KB_DRAG_ID) return;
+  var p = P.find(function(x){ return x.id === KB_DRAG_ID; });
+  if(!p || p.status === newStatus){ KB_DRAG_ID=null; return; }
+  var oldStatus = p.status;
+  KB_LAST_MOVE = {playerId:p.id, playerName:p.name, from:oldStatus, to:newStatus};
+  p.status = newStatus;
+  var pid = KB_DRAG_ID;
+  KB_DRAG_ID = null;
+  renderKanban(getF());
+  updateKPIs();
+  showUndoToast(p.name+' \u2192 '+newStatus, function(){
+    p.status=oldStatus;
+    KB_LAST_MOVE=null;
+    renderKanban(getF());
+    updateKPIs();
+    saveData();
+    toast('\u21a9 Undone');
+  });
+  setTimeout(function(){
+    var mc=document.querySelector('.kb-card[data-id="'+pid+'"]');
+    if(mc){mc.classList.add('just-dropped');setTimeout(function(){mc.classList.remove('just-dropped');},300);}
+  },50);
+  try{
+    await saveData();
+    await logActivity('\u270f Kanban move',p.name+': '+oldStatus+' \u2192 '+newStatus);
+  }catch(err){
+    p.status=oldStatus;
+    KB_LAST_MOVE=null;
+    renderKanban(getF());
+    updateKPIs();
+    toast('Error saving \u2014 reverted');
+  }
+}
+
+// HTML5 drag handlers replaced by mouse-based system above
+function kbOver(e,col){e.preventDefault();}
+function kbLeave(col){}
 
 var KB_LAST_MOVE = null; // For undo
 
-async function kbDrop(e, newStatus){
+async function kbDrop_OLD_UNUSED(e, newStatus){
   e.preventDefault();
   document.querySelectorAll('.kb-col').forEach(function(c){
     c.classList.remove('drag-over');
