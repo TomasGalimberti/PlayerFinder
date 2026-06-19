@@ -3037,42 +3037,112 @@ function filterActivity(){
 
 // ═══ MOVE PLAYER BETWEEN SESSIONS (Admin) ══════════════════════
 async function gmMovePlayer(dbId, playerName){
-  // Get all sessions
-  var r=await sbFetch('players?select=session_id&order=session_id.asc');
-  if(!r.ok){toast('Error');return;}
-  var rows=await r.json();
-  var sessions=[...new Set(rows.map(function(r){return r.session_id;}))];
-  var opts=sessions.join('\n');
-  var target=prompt('Move "'+playerName+'" to session:\n\n'+opts+'\n\nEnter session ID:');
-  if(!target||!target.trim())return;
-  try{
-    await sbFetch('players?id=eq.'+dbId,{method:'PATCH',body:JSON.stringify({session_id:target.trim()})});
-    await logActivity('\u27a1 Moved player',''+playerName+' -> '+target);
-    window._GM_PLAYERS=null;
-    renderGMPlayers();
-    toast('\u2713 '+playerName+' moved to '+target);
-  }catch(e){toast('Error moving player');}
+  // Load all sessions from DB
+  var r = await sbFetch('players?select=session_id,owner_id&order=session_id.asc');
+  if(!r.ok){ toast('Could not load sessions'); return; }
+  var rows = await r.json();
+  var sessions = [...new Set(rows.map(function(x){ return x.session_id; }))];
+
+  // Build a simple modal overlay instead of prompt()
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)">'
+    + '<div style="font-size:15px;font-weight:700;margin-bottom:4px">Move Player</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Moving: <b style="color:var(--teal)">'+playerName+'</b></div>'
+    + '<div style="font-size:11px;color:var(--dim);margin-bottom:6px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em">Select destination session:</div>'
+    + '<select id="move-sess-sel" style="width:100%;padding:9px 11px;background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--text);font-family:var(--fh);font-size:13px;margin-bottom:1rem">'
+    + sessions.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('')
+    + '</select>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button id="move-cancel-btn" style="padding:8px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;font-family:var(--fh)">Cancel</button>'
+    + '<button id="move-confirm-btn" style="padding:8px 16px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-family:var(--fh);font-weight:600">Move →</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+
+  // Wire buttons
+  document.getElementById('move-cancel-btn').onclick = function(){ document.body.removeChild(overlay); };
+  document.getElementById('move-confirm-btn').onclick = async function(){
+    var target = document.getElementById('move-sess-sel').value;
+    if(!target){ toast('Select a session'); return; }
+    document.body.removeChild(overlay);
+    try{
+      var resp = await sbFetch('players?id=eq.'+dbId, {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Prefer':'return=representation'},
+        body:JSON.stringify({session_id:target})
+      });
+      if(!resp.ok){ var err=await resp.text(); throw new Error(err); }
+      await logActivity('➡ Moved player', playerName+' → '+target);
+      window._GM_PLAYERS = null;
+      renderGMPlayers();
+      toast('✓ '+playerName+' moved to '+target);
+    }catch(e){
+      console.error('Move error:',e);
+      toast('Error moving player: '+e.message);
+    }
+  };
 }
 
 async function gmCopyPlayer(dbId, playerName){
-  var r2=await sbFetch('players?id=eq.'+dbId);
-  if(!r2.ok){toast('Error');return;}
-  var rows2=await r2.json();
-  if(!rows2||!rows2.length)return;
-  var orig=rows2[0];
-  var r3=await sbFetch('players?select=session_id&order=session_id.asc');
-  var allRows=await r3.json();
-  var sessions=[...new Set(allRows.map(function(r){return r.session_id;}))];
-  var target=prompt('Copy "'+playerName+'" to session:\n\n'+sessions.join('\n')+'\n\nEnter session ID:');
-  if(!target||!target.trim())return;
-  try{
-    var copy=Object.assign({},orig.data,{id:Date.now()%9999999,id_label:'ADM'});
-    await sbFetch('players',{method:'POST',body:JSON.stringify({session_id:target.trim(),owner_id:orig.owner_id,data:copy})});
-    await logActivity('\u2398 Copied player',''+playerName+' -> '+target);
-    window._GM_PLAYERS=null;
-    renderGMPlayers();
-    toast('\u2713 '+playerName+' copied to '+target);
-  }catch(e){toast('Error copying player');}
+  // Load original player
+  var r2 = await sbFetch('players?id=eq.'+dbId);
+  if(!r2.ok){ toast('Error loading player'); return; }
+  var rows2 = await r2.json();
+  if(!rows2||!rows2.length){ toast('Player not found'); return; }
+  var orig = rows2[0];
+
+  // Load sessions
+  var r3 = await sbFetch('players?select=session_id&order=session_id.asc');
+  var allRows = r3.ok ? await r3.json() : [];
+  var sessions = [...new Set(allRows.map(function(x){ return x.session_id; }))];
+
+  // Modal
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)">'
+    + '<div style="font-size:15px;font-weight:700;margin-bottom:4px">Copy Player</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Copying: <b style="color:var(--violet)">'+playerName+'</b></div>'
+    + '<div style="font-size:11px;color:var(--dim);margin-bottom:6px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em">Copy to session:</div>'
+    + '<select id="copy-sess-sel" style="width:100%;padding:9px 11px;background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--text);font-family:var(--fh);font-size:13px;margin-bottom:1rem">'
+    + sessions.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('')
+    + '</select>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button id="copy-cancel-btn" style="padding:8px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer;font-family:var(--fh)">Cancel</button>'
+    + '<button id="copy-confirm-btn" style="padding:8px 16px;border:none;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;border-radius:7px;cursor:pointer;font-family:var(--fh);font-weight:600">Copy ⎘</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('copy-cancel-btn').onclick = function(){ document.body.removeChild(overlay); };
+  document.getElementById('copy-confirm-btn').onclick = async function(){
+    var target = document.getElementById('copy-sess-sel').value;
+    if(!target){ toast('Select a session'); return; }
+    document.body.removeChild(overlay);
+    try{
+      var copyData = Object.assign({}, orig.data, {
+        id: Date.now()%9999999,
+        id_label: 'CPY'
+      });
+      var resp = await sbFetch('players', {
+        method:'POST',
+        body:JSON.stringify({
+          session_id: target,
+          owner_id: orig.owner_id,
+          data: copyData,
+          deleted: false
+        })
+      });
+      if(!resp.ok){ var err=await resp.text(); throw new Error(err); }
+      await logActivity('⎘ Copied player', playerName+' → '+target);
+      window._GM_PLAYERS = null;
+      renderGMPlayers();
+      toast('✓ '+playerName+' copied to '+target);
+    }catch(e){
+      console.error('Copy error:',e);
+      toast('Error copying: '+e.message);
+    }
+  };
 }
 
 // ═══ KANBAN VIEW ═══════════════════════════════════════════════
@@ -3154,8 +3224,12 @@ function renderKanban(list){
 function kbOver(e, col){
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
+  // Only add drag-over to the column, not child elements
   document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
-  col.classList.add('drag-over');
+  // Find the kb-col parent
+  var target = col;
+  while(target && !target.classList.contains('kb-col')) target = target.parentElement;
+  if(target) target.classList.add('drag-over');
 }
 function kbLeave(col){ col.classList.remove('drag-over'); }
 
@@ -3164,14 +3238,25 @@ async function kbDrop(e, newStatus){
   document.querySelectorAll('.kb-col').forEach(function(c){c.classList.remove('drag-over');});
   if(!KB_DRAG_ID) return;
   var p = P.find(function(x){ return x.id === KB_DRAG_ID; });
+  KB_DRAG_ID = null;
   if(!p || p.status === newStatus) return;
   var oldStatus = p.status;
   p.status = newStatus;
-  await saveData();
-  await logActivity('✏ Status changed via Kanban', p.name+': '+oldStatus+' → '+newStatus);
-  updateKPIs();
+  // Immediately re-render so the card moves visually
   renderKanban(getF());
-  toast('✓ '+p.name+' → '+newStatus);
+  updateKPIs();
+  // Then save to Supabase
+  try{
+    await saveData();
+    await logActivity('\u270f Status via Kanban', p.name+': '+oldStatus+' \u2192 '+newStatus);
+    toast('\u2713 '+p.name+' \u2192 '+newStatus);
+  }catch(err){
+    // Revert on failure
+    p.status = oldStatus;
+    renderKanban(getF());
+    updateKPIs();
+    toast('Error saving — reverted');
+  }
 }
 
 // ═══ PLAYER PDF EXPORT ═════════════════════════════════════════
