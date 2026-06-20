@@ -583,6 +583,49 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
   white-space:nowrap;max-width:260px;
   display:flex;align-items:center;gap:8px;
 }
+
+/* ── MY TEAM ── */
+.court-wrap{display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start}
+.court-container{position:relative;background:#2d6a4f;border-radius:12px;overflow:hidden;
+  border:3px solid rgba(255,255,255,.15);aspect-ratio:9/8}
+.court-net{position:absolute;left:0;right:0;top:50%;height:3px;background:rgba(255,255,255,.7);z-index:2}
+.court-line{position:absolute;border:2px solid rgba(255,255,255,.4)}
+.court-outer{inset:8px}
+.court-att-front{left:8px;right:8px;top:calc(50% - 54px);height:0}
+.court-att-back{left:8px;right:8px;top:calc(50% + 54px);height:0}
+.pos-slot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;z-index:10}
+.pos-shirt{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:16px;border:2px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.12);transition:all .2s;position:relative;overflow:hidden}
+.pos-shirt:hover{transform:scale(1.1);border-color:rgba(255,255,255,.7);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.pos-slot.filled .pos-shirt{background:var(--slot-color,rgba(20,184,166,.4));
+  border-color:var(--slot-color,var(--teal));box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.pos-slot.filled .pos-shirt:hover{transform:scale(1.1)}
+.pos-label{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,.8);
+  text-align:center;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.8);font-weight:600}
+.pos-name{font-size:10px;color:rgba(255,255,255,.9);text-align:center;max-width:70px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.lib-zone{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.3);border:1px dashed rgba(255,255,255,.3);border-radius:8px;
+  padding:4px 10px;font-family:var(--fm);font-size:9px;color:rgba(255,255,255,.5);
+  text-align:center;white-space:nowrap}
+/* Team roster list */
+.team-roster{background:var(--bg2);border:1px solid var(--b2);border-radius:10px;overflow:hidden}
+.roster-hd{padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--b2);
+  font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.roster-row{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .12s}
+.roster-row:hover{background:rgba(255,255,255,.03)}
+.roster-row:last-child{border-bottom:none}
+.roster-pos{font-family:var(--fm);font-size:8px;padding:2px 5px;border-radius:4px;flex-shrink:0}
+/* Pool panel */
+.pool-panel{background:var(--bg2);border:1px solid var(--b2);border-radius:10px;overflow:hidden;margin-top:12px}
+.pool-hd{padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--b2);
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.pool-body{padding:6px 0;max-height:280px;overflow-y:auto}
+.pool-row{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;transition:background .12s}
+.pool-row:hover{background:rgba(20,184,166,.06)}
 </style>
 </head>
 <body>
@@ -730,6 +773,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <button class="nbtn" id="nb-league" data-label="My League" onclick="goTo('league')"><span class="nb-ico">🏆</span><span class="nb-lbl">My League</span></button>
     <button class="nbtn" id="nb-agents" data-label="Agents" onclick="goTo('agents')"><span class="nb-ico">🤝</span><span class="nb-lbl">Agents</span></button>
     <button class="nbtn" id="nb-notes" data-label="Notes" onclick="goTo('notes')"><span class="nb-ico">📝</span><span class="nb-lbl">Notes</span></button>
+    <button class="nbtn" id="nb-myteam" data-label="My Team" onclick="goTo('myteam')"><span class="nb-ico">👕</span><span class="nb-lbl">My Team</span></button>
     <button class="nbtn" id="nb-league" data-label="My League" onclick="goTo('league')"><span class="nb-ico">🏆</span><span class="nb-lbl">My League</span></button>
     <button class="nbtn" id="nb-compare" data-label="Compare" onclick="goTo('compare')"><span class="nb-ico">⚖️</span><span class="nb-lbl">Compare</span></button>
     <div class="sb-sec">Admin</div>
@@ -746,12 +790,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
       <div class="kl">Watching</div>
       <div class="kpi-drop-hint">Drop here</div>
      </div>
-     <div class="kpi kpi-drop" data-status="Contacted" style="--kc:#4ade80" id="drop-contacted">
-      <div class="kpi-drop-icon">📞</div>
-      <div class="kv" id="kpi-contacted">0</div>
-      <div class="kl">Contacted</div>
-      <div class="kpi-drop-hint">Drop here</div>
-     </div>
+
      <div class="kpi kpi-drop" data-status="Priority" style="--kc:var(--amber)" id="drop-priority">
       <div class="kpi-drop-icon">⭐</div>
       <div class="kv" id="kpi-p">0</div>
@@ -905,6 +944,10 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Track calls, meetings and reminders for your priority players.</div>
     <div id="fu-list"></div>
    </div>
+   <!-- MY TEAM -->
+   <div class="view" id="v-myteam">
+    <div id="myteam-root"></div>
+   </div>
    <!-- MY LEAGUE -->
    <div class="view" id="v-league">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
@@ -983,7 +1026,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
    <div class="em-sec"><div class="em-sec-t">Identity</div>
     <div class="fg fg2"><div class="fl"><label>Full Name</label><input class="inp" id="ef-name"></div><div class="fl"><label>Position</label><select class="inp" id="ef-pos"><option>Outside</option><option>Opposite</option><option>Setter</option><option>Middle</option><option>Libero</option></select></div></div>
     <div class="fg fg3"><div class="fl"><label>Country</label><input class="inp" id="ef-country"></div><div class="fl"><label>Born / Age</label><input class="inp" id="ef-born"></div><div class="fl"><label>Hand</label><select class="inp" id="ef-hand"><option>Right</option><option>Left</option></select></div></div>
-    <div class="fg fg2"><div class="fl"><label>EU Passport</label><select class="inp" id="ef-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div><div class="fl"><label>Status</label><select class="inp" id="ef-status"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div></div>
+    <div class="fg fg2"><div class="fl"><label>EU Passport</label><select class="inp" id="ef-eu"><option value="No">No</option><option value="Yes">Yes</option></select></div><div class="fl"><label>Status</label><select class="inp" id="ef-status"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div></div>
    </div>
    <div class="em-sec"><div class="em-sec-t">Physical</div>
     <div class="fg fg4"><div class="fl"><label>Height cm</label><input class="inp" id="ef-ht" type="number"></div><div class="fl"><label>Spike cm</label><input class="inp" id="ef-sp" type="number"></div><div class="fl"><label>Block cm</label><input class="inp" id="ef-bl" type="number"></div><div class="fl"><label>Weight kg</label><input class="inp" id="ef-wt" type="number"></div></div>
@@ -1055,7 +1098,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="prev-ns"></div>
    </div>
    <div id="eval-sec" style="display:none">
-    <div class="fg fg2" style="margin-top:8px"><div class="fl"><label>Status</label><select class="inp" id="eval-st"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Contacted">Contacted</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div><div class="fl"><label>Agent</label><input class="inp" id="eval-agent"></div></div>
+    <div class="fg fg2" style="margin-top:8px"><div class="fl"><label>Status</label><select class="inp" id="eval-st"><option value="Watching">Watching</option><option value="Priority">Priority</option><option value="Signed">Signed</option><option value="Discarded">Discarded</option></select></div><div class="fl"><label>Agent</label><input class="inp" id="eval-agent"></div></div>
     <div class="fl"><label>Notes</label><textarea class="inp" id="eval-notes"></textarea></div>
    </div>
    <div class="brow"><button class="btn-p" onclick="saveNew()">Save Player</button><button class="btn-s" onclick="closeModal('am-bg')">Cancel</button></div>
@@ -1478,8 +1521,7 @@ var ACC=['#2563eb','#0d9488','#7c3aed','#16a34a','#dc2626','#f59e0b','#be185d','
 var ACCL=['rgba(37,99,235,.15)','rgba(13,148,136,.15)','rgba(124,58,237,.15)','rgba(22,163,74,.15)','rgba(220,38,38,.15)','rgba(245,158,11,.15)','rgba(190,24,93,.15)','rgba(8,145,178,.15)'];
 var POS={Outside:['rgba(59,130,246,.15)','#60a5fa'],Opposite:['rgba(251,113,133,.15)','#fb7185'],
   Setter:['rgba(34,197,94,.15)','#4ade80'],Middle:['rgba(167,139,250,.15)','#a78bfa'],Libero:['rgba(245,158,11,.15)','#fbbf24']};
-var STC={Priority:['rgba(245,158,11,.15)','#fbbf24'],Watching:['rgba(59,130,246,.15)','#60a5fa'],
-  Contacted:['rgba(34,197,94,.15)','#4ade80'],Signed:['rgba(20,184,166,.18)','#14b8a6'],Discarded:['rgba(239,68,68,.15)','#f87171']};
+var STC={Priority:['rgba(245,158,11,.15)','#fbbf24'],Watching:['rgba(59,130,246,.15)','#60a5fa'],Signed:['rgba(20,184,166,.18)','#14b8a6'],Discarded:['rgba(239,68,68,.15)','#f87171']};
 function mkIni(n){return(n||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();}
 function pc(pos){return POS[pos]||['rgba(59,130,246,.15)','#60a5fa'];}
 function sc(st){return STC[st]||['rgba(59,130,246,.15)','#60a5fa'];}
@@ -1524,6 +1566,7 @@ function goTo(v){
   if(v==='compare')renderCompare();
   if(v==='trash')renderTrash();
   if(v==='league')renderLeague();
+  if(v==='myteam')renderMyTeam();
   // Show back-to-dashboard button when not on dashboard
   var fab=g('back-fab');
   if(fab) fab.className='back-fab'+(v!=='dashboard'?' show':'');
@@ -1560,8 +1603,8 @@ function setVM(m){
 function updateKPIs(){
   var n=P.length;
   ['top-n','badge-n'].forEach(function(id){st(id,n);});
-  var statuses=['Watching','Contacted','Priority','Signed','Discarded'];
-  var stMap={Watching:'kpi-watching',Contacted:'kpi-contacted',Priority:'kpi-p',Signed:'kpi-signed',Discarded:'kpi-disc'};
+  var statuses=['Watching','Priority','Signed','Discarded'];
+  var stMap={Watching:'kpi-watching',Priority:'kpi-p',Signed:'kpi-signed',Discarded:'kpi-disc'};
   statuses.forEach(function(s){
     var cnt=P.filter(function(p){return p.status===s;}).length;
     st(stMap[s],cnt);
@@ -1755,7 +1798,7 @@ function showDet(id){
     +'</div></div>'
     +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">'
     +'<select class="st-sel" onchange="chSt('+id+',this.value)">'
-    +['Priority','Watching','Contacted','Signed','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
+    +['Priority','Watching','Signed','Discarded'].map(function(s){return'<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')
     +'</select>'
     +'<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">'
     +'<button class="share-btn" onclick="quickCompare('+id+')" style="color:var(--violet);border-color:rgba(167,139,250,.3);background:var(--vl)">⚖️ Compare</button>'
@@ -3426,7 +3469,6 @@ function renderKanban(list){
 
   var colDefs = [
     {key:'watching', label:'Watching', color:'#378ADD'},
-    {key:'contacted', label:'Contacted', color:'#1D9E75'},
     {key:'priority', label:'Priority', color:'#EF9F27'},
     {key:'signed', label:'Signed ✓', color:'#14b8a6'},
     {key:'discarded', label:'Discarded', color:'#888780'},
@@ -4471,6 +4513,285 @@ function dashOnMove(e){
       +'<div>'+(p?p.name:'Player')+'<div style="font-size:10px;color:var(--dim);font-weight:400">'+(p?p.pos+' · '+p.country:'')+'</div></div>';
     DASH_DRAG_CLONE.style.left = (e.clientX - DASH_DRAG_OX) + 'px';
     DASH_DRAG_CLONE.style.top = (e.clientY - DASH_DRAG_OY) + 'px';
+  }
+
+// ═══ MY TEAM ════════════════════════════════════════════════════
+// Formation: Setter in P1 (back right), 5-1
+// Court view from above, home team at bottom half
+//
+//  NET ━━━━━━━━━━━━━━━━━━━━━━━━
+//  [P4=OH ] [P3=MB ] [P2=OP ]   ← front row (our side)
+//  [P5=MB ] [P1=SET] [P6=OH ]   ← back row
+//  [            LIB            ] ← libero separate
+//
+var MY_TEAM = {
+  slots: {
+    P4:{pos:'OH',  label:'OH',  color:'rgba(96,165,250,.55)',  x:20, y:62, name:'', playerId:null},
+    P3:{pos:'MB',  label:'MB',  color:'rgba(167,139,250,.55)', x:50, y:62, name:'', playerId:null},
+    P2:{pos:'OP',  label:'OP',  color:'rgba(251,113,133,.55)', x:80, y:62, name:'', playerId:null},
+    P5:{pos:'MB',  label:'MB',  color:'rgba(167,139,250,.55)', x:20, y:84, name:'', playerId:null},
+    P6:{pos:'OH',  label:'OH',  color:'rgba(96,165,250,.55)',  x:50, y:84, name:'', playerId:null},
+    P1:{pos:'SET', label:'SET', color:'rgba(74,222,128,.55)',  x:80, y:84, name:'', playerId:null},
+    LIB:{pos:'LIB', label:'LIB', color:'rgba(251,191,36,.55)',  x:50, y:88, name:'', playerId:null}
+  },
+  poolOpen: true
+};
+}
+
+function saveMyTeam(){
+  sSet('pf_myteam_'+(CS?CS.id:''), MY_TEAM);
+}
+
+function loadMyTeam(){
+  var saved = sGet('pf_myteam_'+(CS?CS.id:''));
+  if(saved && saved.slots) MY_TEAM = saved;
+}
+
+function renderMyTeam(){
+  loadMyTeam();
+  var root = g('myteam-root');
+  if(!root) return;
+
+  // Build on-court slots (6 positions, NO libero on court)
+  var slotKeys = ['P4','P3','P2','P5','P6','P1'];
+  var slotsHtml = slotKeys.map(function(key){
+    var sl = MY_TEAM.slots[key];
+    var p = sl.playerId ? P.find(function(x){return x.id===sl.playerId;}) : null;
+    var firstName = p ? p.name.split(' ').pop() : ''; // last word of name
+    var hasPhoto = p && p.photo && p.photo.startsWith('http');
+    var shirtInner = hasPhoto
+      ? '<img src="'+p.photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)">'
+      : '<div style="font-size:22px;line-height:1">👕</div>'
+        +'<div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-family:var(--fm);font-size:8px;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.8)">'+sl.label+'</div>';
+
+    return '<div class="pos-slot'+(p?' filled':'')+'" id="slot-'+key+'"'
+      +' data-slot="'+key+'" onclick="clickSlotBtn(event)"'
+      +' style="left:'+sl.x+'%;top:'+sl.y+'%;--slot-color:'+sl.color+'">'
+      +'<div class="pos-shirt pos-shirt-'+key+'" style="position:relative">'+shirtInner+'</div>'
+      +'<div class="pos-label">'+sl.label+'</div>'
+      +(p?'<div class="pos-name">'+firstName+'</div>':'<div class="pos-name" style="opacity:.4">empty</div>')
+    +'</div>';
+  }).join('');
+
+  // Libero — separate zone below court
+  var libSl = MY_TEAM.slots['LIB'] || {pos:'LIB',label:'LIB',color:'rgba(251,191,36,.55)',playerId:null};
+  var libP = libSl.playerId ? P.find(function(x){return x.id===libSl.playerId;}) : null;
+  var libHasPhoto = libP && libP.photo && libP.photo.startsWith('http');
+  var libInner = libHasPhoto
+    ? '<img src="'+libP.photo+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(251,191,36,.5)">'
+    : '<div style="font-size:18px">👕</div>';
+  var libLabel = libP ? libP.name : '';
+  var libNote = libP ? '\u2715 Remove' : '+ Assign';
+  var libHtml = "<div style='margin-top:8px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.35);border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:10px;cursor:pointer' onclick='clickSlotLib()'>"
+    + '<div style="position:relative">' + libInner + '</div>'
+    + '<div>'
+    + '<div style="font-family:var(--fm);font-size:9px;color:rgba(251,191,36,.8);text-transform:uppercase;letter-spacing:.06em">Libero (Special Role)</div>'
+    + '<div style="font-size:12px;font-weight:600;margin-top:1px">' + (libP ? libLabel : '<span style="color:var(--dim);font-style:italic;font-weight:400">Not assigned</span>') + '</div>'
+    + '</div>'
+    + '<div style="margin-left:auto;font-size:11px;color:var(--dim)">' + libNote + '</div>'
+    + '</div>';
+
+  // Roster list (right panel)
+  var allSlotKeys = ['P4','P3','P2','P5','P6','P1','LIB'];
+  var rosterRows = allSlotKeys.map(function(key){
+    var sl = MY_TEAM.slots[key];
+    if(!sl) return '';
+    var p = sl.playerId ? P.find(function(x){return x.id===sl.playerId;}) : null;
+    var cpv = ({OH:'rgba(96,165,250,.15)',MB:'rgba(167,139,250,.15)',OP:'rgba(251,113,133,.15)',SET:'rgba(74,222,128,.15)',LIB:'rgba(251,191,36,.15)'})[sl.label]||'rgba(59,130,246,.15)';
+    var ctc = ({OH:'#60a5fa',MB:'#a78bfa',OP:'#fb7185',SET:'#4ade80',LIB:'#fbbf24'})[sl.label]||'#60a5fa';
+    var av = p&&p.photo&&p.photo.startsWith('http')
+      ?'<img src="'+p.photo+'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex-shrink:0">'
+      :'<div style="width:30px;height:30px;border-radius:7px;background:'+cpv+';color:'+ctc+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:9px;font-weight:700;flex-shrink:0">'+sl.label+'</div>';
+    return '<div class="roster-row" onclick="clickSlotBtn(event)" data-slot="'+key+'">'  
+      +av
+      +'<div style="flex:1;min-width:0">'
+        +(p
+          ?'<div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
+           +'<div style="font-size:10px;color:var(--dim)">'+p.pos+(p.height?' · '+p.height+'cm':'')+'</div>'
+          :'<div style="font-size:11px;color:var(--dim);font-style:italic">'+sl.label+' — empty</div>')
+      +'</div>'
+      +(p?'<button onclick="removeFromTeamBtn(this)" data-slot="'+key+'" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px;padding:2px 4px">✕</button>':'<span style="font-size:14px;color:var(--dim)">+</span>')
+    +'</div>';
+  }).join('');
+
+  // Pool of available players (collapsible)
+  var teamIds = allSlotKeys.map(function(k){return MY_TEAM.slots[k]?MY_TEAM.slots[k].playerId:null;}).filter(Boolean);
+  var available = P.filter(function(p){return !teamIds.includes(p.id);});
+  var poolRows = available.length ? available.map(function(p){
+    var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+    var av=(p.photo&&p.photo.startsWith('http'))
+      ?'<img src="'+p.photo+'" style="width:26px;height:26px;border-radius:6px;object-fit:cover">'
+      :'<div style="width:26px;height:26px;border-radius:6px;background:'+cpv[0]+';color:'+cpv[1]+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:9px;font-weight:500">'+mkIni(p.name)+'</div>';
+    return '<div class="pool-row" onclick="assignFromPool('+p.id+')" title="Click to auto-assign to best slot">'
+      +av
+      +'<div style="flex:1;min-width:0;margin-left:8px"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
+      +'<div style="font-size:9px;color:var(--dim)">'+p.pos+'</div></div>'
+      +'<span style="font-family:var(--fm);font-size:8px;background:'+cpv[0]+';color:'+cpv[1]+';padding:1px 5px;border-radius:3px;flex-shrink:0">'+p.pos.substring(0,3).toUpperCase()+'</span>'
+    +'</div>';
+  }).join('') : '<div style="text-align:center;padding:1rem;font-size:11px;color:var(--dim)">All players assigned</div>';
+
+  // Count assigned
+  var assigned = teamIds.length;
+
+  root.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+      +'<div><div style="font-size:18px;font-weight:700">👕 My Team</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-top:2px">'+assigned+' / '+allSlotKeys.length+' slots filled</div></div>'
+      +'<button class="btn-sm" onclick="clearMyTeam()" style="color:var(--dim)">✕ Clear All</button>'
+    +'</div>'
+    // Main layout: court + right panel
+    +'<div style="display:grid;grid-template-columns:1fr 210px;gap:14px;align-items:start">'
+
+      // LEFT: court + libero + pool
+      +'<div>'
+        // Court
+        +'<div style="position:relative;background:linear-gradient(180deg,#1e6b4a 0%,#1a5c3e 100%);border-radius:12px;overflow:hidden;border:3px solid rgba(255,255,255,.15);aspect-ratio:16/10;min-height:220px">'
+          // Court lines - outer border
+          +'<div style="position:absolute;inset:8px;border:2px solid rgba(255,255,255,.4);border-radius:2px;pointer-events:none"></div>'
+          // Net (horizontal center line)
+          +'<div style="position:absolute;left:0;right:0;top:50%;height:4px;background:rgba(255,255,255,.75);box-shadow:0 0 8px rgba(255,255,255,.3);pointer-events:none;z-index:2"></div>'
+          // Attack lines (3m lines, dashed) - OUR SIDE
+          +'<div style="position:absolute;left:8px;right:8px;top:75%;border-top:1px dashed rgba(255,255,255,.25);pointer-events:none"></div>'
+          // Row labels
+          +'<div style="position:absolute;top:6px;left:0;right:0;text-align:center;font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.2);pointer-events:none;letter-spacing:.08em">OPPONENT SIDE</div>'
+          +'<div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.2);pointer-events:none;letter-spacing:.08em">YOUR SIDE</div>'
+          // Position slots (only on our side = bottom half, y:50%–100%)
+          +slotsHtml
+        +'</div>'
+        // Libero zone below court
+        +libHtml
+        // Pool (collapsible)
+        +'<div class="pool-panel" style="margin-top:10px">'
+          +'<div class="pool-hd" onclick="togglePool()">'
+            +'<span style="font-family:var(--fm);font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.06em">📋 Available ('+available.length+')</span>'
+            +'<span id="pool-arrow">'+(MY_TEAM.poolOpen?'▲':'▼')+'</span>'
+          +'</div>'
+          +'<div class="pool-body" id="pool-body" style="display:'+(MY_TEAM.poolOpen?'block':'none')+'">'+poolRows+'</div>'
+        +'</div>'
+      +'</div>'
+
+      // RIGHT: roster list
+      +'<div class="team-roster">'
+        +'<div class="roster-hd" style="display:flex;align-items:center;justify-content:space-between">'
+          +'<span>Starting Six</span>'
+          +'<span style="color:var(--teal)">'+assigned+'/7</span>'
+        +'</div>'
+        +rosterRows
+      +'</div>'
+    +'</div>';
+}
+
+function togglePool(){
+  MY_TEAM.poolOpen = !MY_TEAM.poolOpen;
+  var body=g('pool-body'),arrow=g('pool-arrow');
+  if(body) body.style.display=MY_TEAM.poolOpen?'block':'none';
+  if(arrow) arrow.textContent=MY_TEAM.poolOpen?'▲':'▼';
+  saveMyTeam();
+}
+
+// Click on a slot = open picker
+var _PICKING_SLOT = null;
+function removePicker(){var ov=document.getElementById('slot-picker');var sk=ov?ov.dataset.slot:null;if(ov)ov.remove();if(sk)removeFromTeam(sk);}
+function removeFromTeamBtn(btn){var k=btn.closest('[data-slot]');if(k)removeFromTeam(k.dataset.slot);}
+function clickSlotLib(){clickSlot('LIB');}
+function clickSlotBtn(e){var sl=e.currentTarget||e.target;while(sl&&!sl.dataset.slot)sl=sl.parentElement;if(sl&&sl.dataset.slot)clickSlot(sl.dataset.slot);}
+function clickSlot(slotKey){
+  _PICKING_SLOT = slotKey;
+  var sl = MY_TEAM.slots[slotKey];
+  var teamIds = Object.keys(MY_TEAM.slots).map(function(k){return MY_TEAM.slots[k].playerId;}).filter(Boolean);
+  // Show position-filtered players first
+  var matching = P.filter(function(p){return !teamIds.includes(p.id)||p.id===sl.playerId;}).sort(function(a,b){
+    var aMatch = a.pos===sl.pos||
+      (sl.pos==='OH'&&a.pos==='Outside')||(sl.pos==='OP'&&a.pos==='Opposite')||
+      (sl.pos==='MB'&&a.pos==='Middle')||(sl.pos==='SET'&&a.pos==='Setter')||(sl.pos==='LIB'&&a.pos==='Libero');
+    var bMatch = b.pos===sl.pos||
+      (sl.pos==='OH'&&b.pos==='Outside')||(sl.pos==='OP'&&b.pos==='Opposite')||
+      (sl.pos==='MB'&&b.pos==='Middle')||(sl.pos==='SET'&&b.pos==='Setter')||(sl.pos==='LIB'&&b.pos==='Libero');
+    return (bMatch?1:0)-(aMatch?1:0);
+  });
+
+  var ov=document.createElement('div');
+  ov.id='slot-picker';ov.dataset.slot=slotKey;
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.5)">'
+    +'<div style="background:var(--bg);padding:1rem 1.25rem;border-radius:14px 14px 0 0;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:13px;font-weight:700">Assign to '+sl.label+' slot</div>'
+      +'<div style="font-size:10px;color:var(--dim);margin-top:1px">Best matches shown first</div></div>'
+      +'<button id="sp-close" style="background:var(--bg3);border:1px solid var(--b2);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer">✕</button>'
+    +'</div>'
+    +'<div style="max-height:360px;overflow-y:auto" id="sp-list">'
+      +matching.map(function(p){
+        var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+        var isSelected = p.id===sl.playerId;
+        var av=(p.photo&&p.photo.startsWith('http'))
+          ?'<img src="'+p.photo+'" style="width:32px;height:32px;border-radius:8px;object-fit:cover">'
+          :'<div style="width:32px;height:32px;border-radius:8px;background:'+accl(p.id)+';color:'+acc(p.id)+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:500">'+mkIni(p.name)+'</div>';
+        return '<div onclick="assignToSlot('+p.id+')" style="display:flex;align-items:center;gap:10px;padding:10px 1.25rem;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;background:'+(isSelected?'rgba(20,184,166,.08)':'')+';" onmouseover="this.style.background=\'rgba(20,184,166,.06)\'" onmouseout="this.style.background=\''+( isSelected?'rgba(20,184,166,.08)':'')+'\'">'
+          +av
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:12px;font-weight:600">'+p.name+(isSelected?' ✓':'')+'</div>'
+            +'<div style="font-size:10px;color:var(--dim)">'+p.pos+' · '+p.country+(p.height?' · '+p.height+'cm':'')+'</div>'
+          +'</div>'
+          +'<span class="roster-pos" style="background:'+cpv[0]+';color:'+cpv[1]+';border:1px solid '+cpv[1]+'40">'+p.pos.substring(0,3).toUpperCase()+'</span>'
+        +'</div>';
+      }).join('')
+      +(sl.playerId?'<div onclick="removePicker()" style="display:flex;align-items:center;justify-content:center;padding:12px;cursor:pointer;color:#f87171;font-size:12px;border-top:1px solid var(--b2)">\u2715 Remove from slot</div>':'')
+    +'</div>'
+  +'</div>';
+  document.body.appendChild(ov);
+  document.getElementById('sp-close').onclick=function(){ov.remove();};
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+}
+
+function assignToSlot(playerId){
+  var ov=document.getElementById('slot-picker');if(ov)ov.remove();
+  if(!_PICKING_SLOT) return;
+  // Remove player from any existing slot
+  Object.keys(MY_TEAM.slots).forEach(function(k){
+    if(MY_TEAM.slots[k].playerId===playerId) MY_TEAM.slots[k].playerId=null;
+  });
+  MY_TEAM.slots[_PICKING_SLOT].playerId=playerId;
+  _PICKING_SLOT=null;
+  saveMyTeam();
+  renderMyTeam();
+}
+
+function assignFromPool(playerId){
+  // Find best matching empty slot
+  var p=P.find(function(x){return x.id===playerId;});
+  if(!p) return;
+  var posMap={'Outside':'OH','Opposite':'OP','Middle':'MB','Setter':'SET','Libero':'LIB'};
+  var targetPos=posMap[p.pos]||'OH';
+  var emptySlot=null;
+  // Find empty slot matching position
+  Object.keys(MY_TEAM.slots).forEach(function(k){
+    if(!MY_TEAM.slots[k].playerId && MY_TEAM.slots[k].pos===targetPos && !emptySlot) emptySlot=k;
+  });
+  // If no matching empty slot, find any empty slot
+  if(!emptySlot) Object.keys(MY_TEAM.slots).forEach(function(k){
+    if(!MY_TEAM.slots[k].playerId && !emptySlot) emptySlot=k;
+  });
+  if(!emptySlot){ toast('All slots full — click a shirt to swap'); return; }
+  MY_TEAM.slots[emptySlot].playerId=playerId;
+  saveMyTeam();
+  renderMyTeam();
+  toast('\u2713 '+p.name+' added to '+emptySlot);
+}
+
+function removeFromTeam(slotKey){
+  MY_TEAM.slots[slotKey].playerId=null;
+  saveMyTeam();
+  renderMyTeam();
+}
+
+function clearMyTeam(){
+  if(!confirm('Clear all team slots?')) return;
+  Object.keys(MY_TEAM.slots).forEach(function(k){ MY_TEAM.slots[k].playerId=null; });
+  saveMyTeam();
+  renderMyTeam();
+}
+    DASH_DRAG_CLONE.style.left = (e.clientX - DASH_DRAG_OX) + 'px';
+    DASH_DRAG_CLONE.style.top = (e.clientY - DASH_DRAG_OY) + 'px';
     document.body.appendChild(DASH_DRAG_CLONE);
     // Activate drop zones
     document.querySelectorAll('.kpi-drop').forEach(function(kpi){ kpi.classList.add('drop-active'); });
@@ -4557,16 +4878,12 @@ async function dashOnUp(e){
     toast('Error \u2014 reverted');
   }
 }
-;
-    renderLeague();
-    toast('\u2713 '+n+' added to '+LEAGUE_TEAMS[ti].name);
-  };
-}
 
 function removeLeaguePlayer(ti, pi){
   LEAGUE_TEAMS[ti].players.splice(pi,1);
   saveLeague();
   renderLeague();
+
 }
 </script>
 </body>
