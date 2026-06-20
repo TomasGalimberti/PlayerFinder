@@ -744,7 +744,6 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
      <div class="dd-row" onclick="setLang('el',this)">🇬🇷 Ελληνικά</div>
     </div>
    </div>
-   <button class="tbtn" onclick="openCompareModal()" style="color:var(--violet);border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
    <div class="dd-wrap">
     <button class="tbtn" onclick="toggleMenu('exp-d')">↓ Export ▾</button>
     <div class="dd-menu" id="exp-d">
@@ -774,8 +773,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <button class="nbtn" id="nb-agents" data-label="Agents" onclick="goTo('agents')"><span class="nb-ico">🤝</span><span class="nb-lbl">Agents</span></button>
     <button class="nbtn" id="nb-notes" data-label="Notes" onclick="goTo('notes')"><span class="nb-ico">📝</span><span class="nb-lbl">Notes</span></button>
     <button class="nbtn" id="nb-myteam" data-label="My Team" onclick="goTo('myteam')"><span class="nb-ico">👕</span><span class="nb-lbl">My Team</span></button>
-    <button class="nbtn" id="nb-league" data-label="My League" onclick="goTo('league')"><span class="nb-ico">🏆</span><span class="nb-lbl">My League</span></button>
-    <button class="nbtn" id="nb-compare" data-label="Compare" onclick="goTo('compare')"><span class="nb-ico">⚖️</span><span class="nb-lbl">Compare</span></button>
+    
     <div class="sb-sec">Admin</div>
     <button class="nbtn" id="nb-trash" data-label="Trash" onclick="goTo('trash')"><span class="nb-ico">🗑</span><span class="nb-lbl">Trash</span><span class="nb-bdg trash-badge" id="badge-trash">0</span></button>
    </div>
@@ -869,7 +867,7 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <div class="sel-mode-bar" id="sel-bar">
       <span class="sel-count" id="sel-count">0 selected</span>
       <button class="btn-sm" onclick="selectAll()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">Select All</button>
-      <button class="btn-sm" onclick="openCompareModal()" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">⚖️ Compare</button>
+      
       <button class="btn-sm" onclick="trashSelected()" style="color:#f87171;border-color:rgba(239,68,68,.3)">🗑 Move to Trash</button>
       <button class="btn-sm" onclick="toggleSelMode()">✖ Cancel</button>
      </div>
@@ -1547,27 +1545,32 @@ async function initApp(){
 
 // ═══ APP VIEW ROUTING ═════════════════════════════
 function goTo(v){
-  ['dashboard','search','priority','teams','agents','notes','detail'].forEach(function(id){
+  // Show/hide all views
+  ['dashboard','search','priority','teams','agents','notes','detail',
+   'kanban','trash','league','myteam'].forEach(function(id){
     var el=g('v-'+id);if(el)el.className='view'+(id===v?' on':'');
   });
-  var nbMap={dashboard:'dashboard',search:'search',priority:'priority',
-    teams:'teams',agents:'agents',notes:'notes',detail:'dashboard'};
-  ['dashboard','search','priority','teams','agents','notes'].forEach(function(id){
+  // Nav button highlighting
+  var nbMap={
+    dashboard:'dashboard',search:'search',priority:'priority',
+    agents:'agents',notes:'notes',detail:'dashboard',
+    trash:'trash',league:'league',myteam:'myteam'
+  };
+  ['dashboard','search','priority','agents','notes','trash','league','myteam'].forEach(function(id){
     var el=g('nb-'+id);if(el)el.className='nbtn'+(nbMap[v]===id?' on':'');
   });
   var c=document.querySelector('.content');if(c)c.scrollTop=0;
+  // Render functions
   if(v==='dashboard'){updateKPIs();renderT(getF());}
   if(v==='search'){g('sv-q').value='';doSearch();setTimeout(function(){g('sv-q').focus();},50);}
   if(v==='priority')renderPri();
   if(v==='agents')renderAg();
   if(v==='notes')renderNts();
-  if(v==='priority')renderPri();
-  if(v==='teams')renderTeams();
-  if(v==='compare')renderCompare();
   if(v==='trash')renderTrash();
   if(v==='league')renderLeague();
   if(v==='myteam')renderMyTeam();
-  // Show back-to-dashboard button when not on dashboard
+  if(v==='kanban'){renderKanban(getF());}
+  // Back FAB
   var fab=g('back-fab');
   if(fab) fab.className='back-fab'+(v!=='dashboard'?' show':'');
 }
@@ -1581,21 +1584,9 @@ function setVM(m){
   VM=m;
   ['list','card','grid','kanban'].forEach(function(x){var el=g('vm-'+x);if(el)el.className='vm-btn'+(x===m?' on':'');});
   if(m==='kanban'){
-    // Switch to kanban view
-    ['dashboard','search','priority','teams','agents','notes','detail','calendar','compare','trash','kanban'].forEach(function(id){
-      var el=g('v-'+id);if(el)el.className='view'+(id==='kanban'?'  on':'');
-    });
-    g('v-kanban').className='view on';
-    renderKanban(getF());
+    goTo('kanban');
   } else {
-    // Switch back to normal dashboard view
-    g('v-kanban').className='view';
-    g('v-dashboard').className='view on';
-    renderT(getF());
-    // Update nav
-    ['dashboard','search','priority','teams','agents','notes','calendar','compare','trash'].forEach(function(id){
-      var el=g('nb-'+id);if(el)el.className='nbtn'+(id==='dashboard'?' on':'');
-    });
+    goTo('dashboard');
   }
 }
 
