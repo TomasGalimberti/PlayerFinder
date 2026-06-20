@@ -1160,6 +1160,7 @@ async function loadData(){
         if(seen2[p.id])return false;
         seen2[p.id]=true;return true;
       });
+      P.sort(function(a,b){return(a.name||'').localeCompare(b.name||'');});
       var trashed=rows.filter(function(row){return row.deleted;}).length;
       if(trashed>0)st('badge-trash',trashed);
     }
@@ -1583,6 +1584,8 @@ function getF(){
   if(FST)f=f.filter(function(p){return p.status===FST;});
   if(FLEG)f=f.filter(function(p){return p.league===FLEG;});
   if(q)f=f.filter(function(p){return[p.name,p.pos,p.country,p.born,p.club,p.league,p.agent,p.notes,p.status].join(' ').toLowerCase().indexOf(q)>=0;});
+  // Always sort alphabetically by name
+  f.sort(function(a,b){return(a.name||'').localeCompare(b.name||'');});
   return f;
 }
 function applyF(){
@@ -1822,28 +1825,47 @@ function doSearch(){
 // ═══ PRIORITY ═════════════════════════════════════
 function renderPri(){
   var pris=P.filter(function(p){return p.status==='Priority';});
-  st('pri-big',pris.length);var list=g('pri-list');if(!list)return;
-  if(!pris.length){list.innerHTML='<div style="text-align:center;padding:2.5rem;color:var(--muted)"><div style="font-size:32px;color:var(--dim);margin-bottom:7px">\u2b50</div><div>No Priority players yet</div><div style="font-size:11px;margin-top:4px;color:var(--dim)">Change any player Status to Priority</div></div>';return;}
-  list.innerHTML=pris.map(function(p){
-    var c=acc(p.id),cl=accl(p.id),cpv=pc(p.pos),sel=!!SEL[p.id];
-    return'<div class="pri-card'+(sel?' sel':'')+'" id="pc-'+p.id+'" onclick="showDet('+p.id+')">'
-      +'<div class="pri-av" style="background:'+cl+';color:'+c+'">'+mkIni(p.name)+'</div>'
-      +'<div><div style="font-size:14px;font-weight:700;margin-bottom:3px">'+p.name+'</div>'
-      +'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'
-      +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
-      +'<span style="font-size:11px;color:var(--muted)">'+(p.country||'\u2014')+'</span>'
-      +(p.height?'<span style="font-family:var(--fm);font-size:11px;color:var(--muted)">'+p.height+'cm</span>':'')
-      +(p.eu==='Yes'?'<span class="eu-b" style="font-size:9px">EU</span>':'')
-      +(p.vb?'<a href="'+p.vb+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:var(--teal)" onclick="event.stopPropagation()">Volleybox \u2197</a>':'')
-      +(p.video?'<a href="'+p.video.split('|')[0].trim()+'" target="_blank" style="font-family:var(--fm);font-size:10px;color:#f87171" onclick="event.stopPropagation()">\u25b6 Video</a>':'')
-      +'</div>'+(p.notes?'<div style="font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:460px">'+p.notes+'</div>':'')+'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px" onclick="event.stopPropagation()">'
-      +'<button class="sel-btn'+(sel?' on':'')+'" onclick="togSelPri('+p.id+',this)">'+(sel?'\u2713 Selected':'[ ] Select')+'</button>'
-      +'<select class="rate-sel" onchange="saveRate('+p.id+',this.value)"><option value="">Rate...</option>'
-      +[10,9,8,7,6,5,4,3,2,1].map(function(n){return'<option value="'+n+'"'+(p.rating==n?' selected':'')+'>'+n+'/10</option>';}).join('')
-      +'</select></div></div>';
-  }).join('');
+  var signed=P.filter(function(p){return p.status==='Signed';});
+  st('pri-big',pris.length+signed.length);
+  var list=g('pri-list');if(!list)return;
+  if(!pris.length&&!signed.length){
+    list.innerHTML='<div style="text-align:center;padding:2.5rem;color:var(--muted)"><div style="font-size:32px;color:var(--dim);margin-bottom:8px">🏷</div><div>No Priority or Signed players yet</div><div style="font-size:11px;color:var(--dim);margin-top:4px">Change player status to Priority or Signed</div></div>';
+    return;
+  }
+  function mkCard(p, stColor, stLabel){
+    var cpv=POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+    var av=p.photo&&(p.photo.startsWith('http')||p.photo.startsWith('data:'))
+      ?'<img src="'+p.photo+'" style="width:40px;height:40px;border-radius:10px;object-fit:cover">'
+      :'<div style="width:40px;height:40px;border-radius:10px;background:'+accl(p.id)+';color:'+acc(p.id)+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500">'+mkIni(p.name)+'</div>';
+    return '<div style="background:var(--bg2);border:1px solid '+stColor+'40;border-left:3px solid '+stColor+';border-radius:var(--r2);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="showDet('+p.id+')">'
+      +av
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+p.name+'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+          +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
+          +'<span style="font-size:11px;color:var(--dim)">'+p.country+'</span>'
+          +(p.height?'<span style="font-family:var(--fm);font-size:10px;color:var(--dim)">'+p.height+'cm</span>':'')
+          +(p.eu==='Yes'?'<span style="font-family:var(--fm);font-size:9px;background:rgba(167,139,250,.15);color:#a78bfa;padding:1px 6px;border-radius:4px">EU</span>':'')
+        +'</div>'
+        +(p.notes?'<div style="font-size:11px;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px">'+p.notes+'</div>':'')
+        +((p.budget||p.asking_salary)?'<div style="font-size:10px;color:var(--dim);margin-top:3px">'+(p.asking_salary?'Asking: <span style="color:var(--amber);font-family:var(--fm)">'+p.asking_salary+'</span> ':'')+(p.budget?'Budget: <span style="color:var(--teal);font-family:var(--fm)">'+p.budget+'</span>':'')+'</div>':'')
+      +'</div>'
+      +(p.signed_for?'<div style="text-align:right"><div class="signed-badge">✓ Signed</div><div style="font-size:9px;color:var(--teal);margin-top:3px;font-family:var(--fm)">'+p.signed_for+'</div></div>':'')
+    +'</div>';
+  }
+  var html='';
+  if(signed.length){
+    html+='<div style="font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(20,184,166,.2)">✓ Signed ('+signed.length+')</div>';
+    html+=signed.map(function(p){return mkCard(p,'#14b8a6','Signed');}).join('<div style="height:6px"></div>');
+    if(pris.length) html+='<div style="height:14px"></div>';
+  }
+  if(pris.length){
+    html+='<div style="font-family:var(--fm);font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(245,158,11,.2)">⭐ Priority ('+pris.length+')</div>';
+    html+=pris.map(function(p){return mkCard(p,'#f59e0b','Priority');}).join('<div style="height:6px"></div>');
+  }
+  list.innerHTML=html;
 }
+
 function togSelPri(id,btn){SEL[id]=!SEL[id];btn.textContent=SEL[id]?'\u2713 Selected':'[ ] Select';btn.classList.toggle('on',!!SEL[id]);var card=g('pc-'+id);if(card)card.classList.toggle('sel',!!SEL[id]);}
 function saveRate(id,val){var p=P.find(function(x){return x.id===id;});if(p){p.rating=val;saveData();}}
 
