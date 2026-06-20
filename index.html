@@ -558,6 +558,31 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
 .signed-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(20,184,166,.15);
   color:var(--teal);border:1px solid rgba(20,184,166,.3);font-family:var(--fm);
   font-size:10px;padding:3px 10px;border-radius:6px;font-weight:600}
+
+/* ── STATUS DROP ZONES ── */
+.kpi-drop{cursor:default;transition:all .15s;position:relative;overflow:hidden;user-select:none}
+.kpi-drop-icon{font-size:18px;margin-bottom:2px;opacity:.5;transition:opacity .15s}
+.kpi-drop-hint{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--fm);
+  font-size:9px;color:var(--dim);opacity:0;transition:opacity .2s;pointer-events:none}
+.kpi-drop.drop-active{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.kpi-drop.drop-active .kpi-drop-icon{opacity:1}
+.kpi-drop.drop-hover{border-color:var(--kc)!important;background:color-mix(in srgb, var(--kc) 12%, var(--bg2))!important}
+.kpi-drop.drop-hover .kpi-drop-hint{opacity:1}
+.kpi-drop.drop-hover .kpi-drop-icon{opacity:1;transform:scale(1.2)}
+/* Draggable rows */
+.tr.dragging-row{opacity:.25;pointer-events:none}
+.tr[data-id]{cursor:grab}
+.tr[data-id]:active{cursor:grabbing}
+/* Float clone */
+#row-drag-clone{
+  position:fixed;z-index:99999;pointer-events:none;
+  background:var(--bg2);border:1px solid var(--teal);border-radius:8px;
+  padding:8px 14px;box-shadow:0 8px 32px rgba(0,0,0,.4);
+  font-size:12px;font-weight:600;color:var(--text);
+  opacity:.9;transform:rotate(1.5deg) scale(1.02);
+  white-space:nowrap;max-width:260px;
+  display:flex;align-items:center;gap:8px;
+}
 </style>
 </head>
 <body>
@@ -702,10 +727,10 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     <button class="nbtn" id="nb-search" data-label="Search" onclick="goTo('search')"><span class="nb-ico">🔍</span><span class="nb-lbl">Search</span></button>
     <button class="nbtn" id="nb-priority" data-label="Priority" onclick="goTo('priority')"><span class="nb-ico">⭐</span><span class="nb-lbl">Priority</span><span class="nb-bdg" id="badge-p">0</span></button>
     <div class="sb-sec">Scouting</div>
-    <button class="nbtn" id="nb-teams" data-label="Teams" onclick="goTo('teams')"><span class="nb-ico">🏐</span><span class="nb-lbl">Teams</span></button>
+    <button class="nbtn" id="nb-league" data-label="My League" onclick="goTo('league')"><span class="nb-ico">🏆</span><span class="nb-lbl">My League</span></button>
     <button class="nbtn" id="nb-agents" data-label="Agents" onclick="goTo('agents')"><span class="nb-ico">🤝</span><span class="nb-lbl">Agents</span></button>
     <button class="nbtn" id="nb-notes" data-label="Notes" onclick="goTo('notes')"><span class="nb-ico">📝</span><span class="nb-lbl">Notes</span></button>
-    <button class="nbtn" id="nb-calendar" data-label="Calendar" onclick="goTo('calendar')"><span class="nb-ico">📅</span><span class="nb-lbl">Calendar</span><span class="nb-bdg" id="badge-fu">0</span></button>
+    <button class="nbtn" id="nb-league" data-label="My League" onclick="goTo('league')"><span class="nb-ico">🏆</span><span class="nb-lbl">My League</span></button>
     <button class="nbtn" id="nb-compare" data-label="Compare" onclick="goTo('compare')"><span class="nb-ico">⚖️</span><span class="nb-lbl">Compare</span></button>
     <div class="sb-sec">Admin</div>
     <button class="nbtn" id="nb-trash" data-label="Trash" onclick="goTo('trash')"><span class="nb-ico">🗑</span><span class="nb-lbl">Trash</span><span class="nb-bdg trash-badge" id="badge-trash">0</span></button>
@@ -714,11 +739,37 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
   <div class="content">
    <!-- DASHBOARD -->
    <div class="view on" id="v-dashboard">
-    <div class="kpis">
-     <div class="kpi" style="--kc:var(--teal)"><div class="kv" id="kpi-n">0</div><div class="kl">Total Players</div></div>
-     <div class="kpi" style="--kc:var(--violet)"><div class="kv" id="kpi-eu">0</div><div class="kl">EU Passport</div></div>
-     <div class="kpi" style="--kc:var(--amber)"><div class="kv" id="kpi-p">0</div><div class="kl">Priority</div></div>
-     <div class="kpi" style="--kc:var(--green)"><div class="kv" id="kpi-g">0</div><div class="kl">Greek League</div></div>
+    <div class="kpis" id="status-drop-bar">
+     <div class="kpi kpi-drop" data-status="Watching" style="--kc:#60a5fa" id="drop-watching">
+      <div class="kpi-drop-icon">👁</div>
+      <div class="kv" id="kpi-watching">0</div>
+      <div class="kl">Watching</div>
+      <div class="kpi-drop-hint">Drop here</div>
+     </div>
+     <div class="kpi kpi-drop" data-status="Contacted" style="--kc:#4ade80" id="drop-contacted">
+      <div class="kpi-drop-icon">📞</div>
+      <div class="kv" id="kpi-contacted">0</div>
+      <div class="kl">Contacted</div>
+      <div class="kpi-drop-hint">Drop here</div>
+     </div>
+     <div class="kpi kpi-drop" data-status="Priority" style="--kc:var(--amber)" id="drop-priority">
+      <div class="kpi-drop-icon">⭐</div>
+      <div class="kv" id="kpi-p">0</div>
+      <div class="kl">Priority</div>
+      <div class="kpi-drop-hint">Drop here</div>
+     </div>
+     <div class="kpi kpi-drop" data-status="Signed" style="--kc:var(--teal)" id="drop-signed">
+      <div class="kpi-drop-icon">✓</div>
+      <div class="kv" id="kpi-signed">0</div>
+      <div class="kl">Signed</div>
+      <div class="kpi-drop-hint">Drop here</div>
+     </div>
+     <div class="kpi kpi-drop" data-status="Discarded" style="--kc:#f87171" id="drop-discarded">
+      <div class="kpi-drop-icon">✗</div>
+      <div class="kv" id="kpi-disc">0</div>
+      <div class="kl">Discarded</div>
+      <div class="kpi-drop-hint">Drop here</div>
+     </div>
     </div>
     <div class="fstrip">
      <!-- Row 1: search + view mode -->
@@ -853,6 +904,15 @@ a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Track calls, meetings and reminders for your priority players.</div>
     <div id="fu-list"></div>
+   </div>
+   <!-- MY LEAGUE -->
+   <div class="view" id="v-league">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+     <div style="font-size:18px;font-weight:700">🏆 My League — Opponent Teams</div>
+     <button class="btn-sm" onclick="addLeagueTeam()" style="color:var(--teal);border-color:rgba(20,184,166,.3)">+ Add Team</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Track what players your rivals signed. Stay ahead of the market.</div>
+    <div id="league-list"></div>
    </div>
    <!-- COMPARE -->
    <div class="view" id="v-compare">
@@ -1459,10 +1519,11 @@ function goTo(v){
   if(v==='priority')renderPri();
   if(v==='agents')renderAg();
   if(v==='notes')renderNts();
+  if(v==='priority')renderPri();
   if(v==='teams')renderTeams();
-  if(v==='calendar')renderCalendar();
   if(v==='compare')renderCompare();
   if(v==='trash')renderTrash();
+  if(v==='league')renderLeague();
   // Show back-to-dashboard button when not on dashboard
   var fab=g('back-fab');
   if(fab) fab.className='back-fab'+(v!=='dashboard'?' show':'');
@@ -1497,11 +1558,17 @@ function setVM(m){
 
 // ═══ KPIs ═════════════════════════════════════════
 function updateKPIs(){
-  var n=P.length,eu=P.filter(function(p){return p.eu==='Yes';}).length;
+  var n=P.length;
+  ['top-n','badge-n'].forEach(function(id){st(id,n);});
+  var statuses=['Watching','Contacted','Priority','Signed','Discarded'];
+  var stMap={Watching:'kpi-watching',Contacted:'kpi-contacted',Priority:'kpi-p',Signed:'kpi-signed',Discarded:'kpi-disc'};
+  statuses.forEach(function(s){
+    var cnt=P.filter(function(p){return p.status===s;}).length;
+    st(stMap[s],cnt);
+  });
   var pri=P.filter(function(p){return p.status==='Priority';}).length;
-  var gk=P.filter(function(p){return p.league&&p.league.indexOf('GREEK')>=0;}).length;
-  ['kpi-n','top-n','badge-n'].forEach(function(id){st(id,n);});
-  st('kpi-eu',eu);st('kpi-p',pri);st('top-p',pri);st('badge-p',pri);st('pri-big',pri);st('kpi-g',gk);
+  var signed=P.filter(function(p){return p.status==='Signed';}).length;
+  st('top-p',pri);st('badge-p',pri);st('pri-big',pri+signed);
   st('ct-all',n);
   var disc=P.filter(function(p){return p.status==='Discarded';}).length;
   st('ct-disc',disc);
@@ -1597,6 +1664,8 @@ function applyF(){
 function renderT(list){
   var wrap=g('tbl-wrap');if(!list.length){wrap.innerHTML='<div class="empty">No players match filters.</div>';return;}
   if(VM==='card')renderCards(list,wrap);else if(VM==='grid')renderGrid(list,wrap);else renderList(list,wrap);
+  // Wire dashboard drag after every render
+  setTimeout(initDashDrag, 0);
 }
 
 function posBadge(p){var c=pc(p.pos);return '<span class="pos-b" style="background:'+c[0]+';color:'+c[1]+';border-color:'+c[1]+'40">'+p.pos+'</span>';}
@@ -3401,22 +3470,24 @@ function renderKanban(list){
     }).join('')
   +'</div>';
 
-  // Wire up mouse-based drag (better cross-browser than HTML5 drag API)
-  wrap.querySelectorAll('.kb-card').forEach(function(card){
-    var handle = card.querySelector('.kb-drag-handle');
-    if(!handle) handle = card; // fallback: whole card draggable
-
-    handle.addEventListener('mousedown', function(e){
-      if(e.button!==0) return; // left click only
+  // Use event delegation — one listener on the board container
+  // This survives re-renders unlike per-card listeners
+  var board = document.getElementById('kb-board');
+  if(board){
+    // Remove old listener if any
+    if(board._kbMouseDown) board.removeEventListener('mousedown', board._kbMouseDown);
+    board._kbMouseDown = function(e){
+      if(e.button !== 0) return;
+      // Find the handle that was clicked
+      var handle = e.target.closest ? e.target.closest('.kb-drag-handle') : null;
+      if(!handle) return; // only start drag from handle
+      var card = handle.closest ? handle.closest('.kb-card') : null;
+      if(!card) return;
       e.preventDefault();
       kbStartDrag(e, card);
-    });
-
-    // Keep click working on card (not handle)
-    card.addEventListener('click', function(e){
-      if(KB_DRAGGING) e.stopPropagation();
-    });
-  });
+    };
+    board.addEventListener('mousedown', board._kbMouseDown);
+  }
 }
 
 // ── Mouse-based drag system ──────────────────────────────────
@@ -3433,55 +3504,57 @@ function kbStartDrag(e, card){
   KB_DRAG_CARD = card;
   KB_DRAG_START_X = e.clientX;
   KB_DRAG_START_Y = e.clientY;
-  KB_DRAGGING = false; // not dragging yet - wait for movement
+  KB_DRAGGING = false;
 
   var rect = card.getBoundingClientRect();
   KB_DRAG_OFFSET_X = e.clientX - rect.left;
   KB_DRAG_OFFSET_Y = e.clientY - rect.top;
 
+  // Remove any existing listeners first
+  document.removeEventListener('mousemove', kbOnMouseMove);
+  document.removeEventListener('mouseup', kbOnMouseUp);
   document.addEventListener('mousemove', kbOnMouseMove);
   document.addEventListener('mouseup', kbOnMouseUp);
 }
 
 function kbOnMouseMove(e){
+  if(!KB_DRAG_CARD) return;
   var dx = e.clientX - KB_DRAG_START_X;
   var dy = e.clientY - KB_DRAG_START_Y;
   var dist = Math.sqrt(dx*dx + dy*dy);
 
-  // Only start actual drag after 5px movement
-  if(!KB_DRAGGING && dist < 5) return;
+  if(!KB_DRAGGING && dist < 6) return;
 
   if(!KB_DRAGGING){
-    // First real move - create clone and start drag
     KB_DRAGGING = true;
     KB_DRAG_CARD.classList.add('kb-being-dragged');
 
-    // Create floating clone
+    // Clone the card for visual drag feedback
     KB_DRAG_CLONE = KB_DRAG_CARD.cloneNode(true);
     KB_DRAG_CLONE.id = 'kb-drag-clone';
-    KB_DRAG_CLONE.style.width = KB_DRAG_CARD.offsetWidth + 'px';
+    KB_DRAG_CLONE.style.cssText += ';width:'+KB_DRAG_CARD.offsetWidth+'px;left:'+(e.clientX-KB_DRAG_OFFSET_X)+'px;top:'+(e.clientY-KB_DRAG_OFFSET_Y)+'px';
     document.body.appendChild(KB_DRAG_CLONE);
 
-    // Show all cols as drop targets
+    // Highlight all other columns as drop targets
     document.querySelectorAll('.kb-col').forEach(function(c){
       if(!c.contains(KB_DRAG_CARD)) c.classList.add('kb-drop-active');
     });
   }
 
-  // Move clone
+  // Move clone with cursor
   if(KB_DRAG_CLONE){
     KB_DRAG_CLONE.style.left = (e.clientX - KB_DRAG_OFFSET_X) + 'px';
     KB_DRAG_CLONE.style.top = (e.clientY - KB_DRAG_OFFSET_Y) + 'px';
   }
 
-  // Highlight column under cursor
-  document.querySelectorAll('.kb-col').forEach(function(c){
-    c.classList.remove('kb-drop-hover');
-  });
+  // Highlight the column directly under cursor (temporarily hide clone)
+  KB_DRAG_CLONE.style.visibility = 'hidden';
   var el = document.elementFromPoint(e.clientX, e.clientY);
+  KB_DRAG_CLONE.style.visibility = 'visible';
+
+  document.querySelectorAll('.kb-col').forEach(function(c){ c.classList.remove('kb-drop-hover'); });
   if(el){
     var col = el.closest ? el.closest('.kb-col') : null;
-    if(!col && el.classList.contains('kb-col')) col = el;
     if(col && !col.contains(KB_DRAG_CARD)) col.classList.add('kb-drop-hover');
   }
 }
@@ -3497,8 +3570,8 @@ function kbOnMouseUp(e){
     return;
   }
 
-  // Find which column we dropped on
-  if(KB_DRAG_CLONE) KB_DRAG_CLONE.style.display='none';
+  // Find which column we dropped on (hide clone so it doesn't block hit test)
+  if(KB_DRAG_CLONE) KB_DRAG_CLONE.style.visibility='hidden';
   var el = document.elementFromPoint(e.clientX, e.clientY);
   var targetCol = null;
   if(el){
@@ -4204,6 +4277,296 @@ async function loadSessCounts(){
       if(el) el.textContent=counts[sid];
     });
   }catch(e){}
+}
+
+// ═══ MY LEAGUE — OPPONENT TEAMS ════════════════════════════════
+var LEAGUE_TEAMS = []; // stored locally + in session_data
+
+function renderLeague(){
+  var list = g('league-list');
+  if(!list) return;
+  // Load from session data
+  var sd = sGet('pf_league_'+CS.id);
+  if(sd) LEAGUE_TEAMS = sd;
+
+  if(!LEAGUE_TEAMS.length){
+    list.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--dim)">'
+      +'<div style="font-size:32px;margin-bottom:8px">🏆</div>'
+      +'<div style="font-weight:600;margin-bottom:4px">No teams added yet</div>'
+      +'<div style="font-size:12px">Track what your rivals signed this season</div>'
+      +'</div>';
+    return;
+  }
+
+  list.innerHTML = LEAGUE_TEAMS.map(function(team, ti){
+    var playerRows = (team.players||[]).map(function(p, pi){
+      var cpv = POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa'];
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+        +'<span class="pos-b" style="background:'+cpv[0]+';color:'+cpv[1]+';border-color:'+cpv[1]+'40;font-size:9px">'+p.pos+'</span>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:600">'+p.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim)">'+p.country+(p.height?' · '+p.height+'cm':'')+(p.salary?' · <span style="color:var(--amber);font-family:var(--fm)">'+p.salary+'</span>':'')+'</div>'
+        +'</div>'
+        +'<button onclick="removeLeaguePlayer('+ti+','+pi+')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px">✕</button>'
+      +'</div>';
+    }).join('');
+
+    return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);margin-bottom:10px;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border-bottom:1px solid var(--b2)">'
+        +'<div><div style="font-size:14px;font-weight:700">'+team.name+'</div>'
+        +'<div style="font-size:10px;color:var(--dim);margin-top:1px">'+(team.players||[]).length+' players tracked</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px">'
+          +'<button class="btn-sm" data-ti="'+ti+'" onclick="addLeaguePlayer(this.dataset.ti)" style="color:var(--teal);border-color:rgba(20,184,166,.3)">+ Player</button>'
+          +'<button class="btn-sm" data-ti="'+ti+'" onclick="removeLeagueTeam(this.dataset.ti)" style="color:#f87171;border-color:rgba(239,68,68,.2)">✕</button>'
+        +'</div>'
+      +'</div>'
+      +'<div style="padding:8px 14px">'+(playerRows||'<div style="font-size:11px;color:var(--dim);padding:8px 0">No players added yet. Click + Player</div>')+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function saveLeague(){
+  sSet('pf_league_'+CS.id, LEAGUE_TEAMS);
+}
+
+function addLeagueTeam(){
+  var ov=document.createElement('div');
+  ov.id='lt-modal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:380px;max-width:90vw">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:1rem">Add Opponent Team</div>'
+    +'<div class="fl"><label>Team Name</label><input class="inp" id="lt-name" placeholder="e.g. Olympiacos, PAOK..."></div>'
+    +'<div style="display:flex;gap:8px;margin-top:1rem;justify-content:flex-end">'
+    +'<button id="lt-cancel" style="padding:8px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer">Cancel</button>'
+    +'<button id="lt-ok" style="padding:8px 16px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-weight:700">Add Team</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=g('lt-name');if(el)el.focus();},50);
+  g('lt-cancel').onclick=function(){ov.remove();};
+  g('lt-ok').onclick=function(){
+    var n=(g('lt-name').value||'').trim();
+    if(!n){toast('Enter team name');return;}
+    ov.remove();
+    LEAGUE_TEAMS.push({name:n, players:[]});
+    saveLeague();
+    renderLeague();
+    toast('\u2713 '+n+' added');
+  };
+}
+
+function removeLeagueTeam(ti){
+  ti=parseInt(ti);
+  if(!confirm('Remove '+LEAGUE_TEAMS[ti].name+'?')) return;
+  LEAGUE_TEAMS.splice(ti,1);
+  saveLeague();
+  renderLeague();
+}
+
+function addLeaguePlayer(ti){
+  ti=parseInt(ti);
+  var ov=document.createElement('div');
+  ov.id='lp-modal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:420px;max-width:90vw">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:4px">Add Player to '+LEAGUE_TEAMS[ti].name+'</div>'
+    +'<div style="font-size:11px;color:var(--dim);margin-bottom:1rem">Track who they signed this season</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="fl"><label>Name *</label><input class="inp" id="lp-name" placeholder="Player name"></div>'
+    +'<div class="fl"><label>Position</label><select class="inp" id="lp-pos"><option>Outside</option><option>Opposite</option><option>Setter</option><option>Middle</option><option>Libero</option></select></div>'
+    +'<div class="fl"><label>Country</label><input class="inp" id="lp-country" placeholder="e.g. Poland"></div>'
+    +'<div class="fl"><label>Height (cm)</label><input class="inp" id="lp-height" type="number" placeholder="195"></div>'
+    +'<div class="fl" style="grid-column:1/-1"><label>Approx Salary</label><input class="inp" id="lp-salary" placeholder="e.g. ~40k, 50k/season"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:1rem;justify-content:flex-end">'
+    +'<button id="lp-cancel" style="padding:8px 16px;border:1px solid var(--b2);background:transparent;color:var(--muted);border-radius:7px;cursor:pointer">Cancel</button>'
+    +'<button id="lp-ok" style="padding:8px 16px;border:none;background:linear-gradient(135deg,var(--teal),var(--violet));color:#fff;border-radius:7px;cursor:pointer;font-weight:700">Add Player</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=g('lp-name');if(el)el.focus();},50);
+  g('lp-cancel').onclick=function(){ov.remove();};
+  g('lp-ok').onclick=function(){
+    var n=(g('lp-name').value||'').trim();
+    if(!n){toast('Enter player name');return;}
+    var p={
+      name:n,
+      pos:g('lp-pos').value,
+      country:(g('lp-country').value||'').trim(),
+      height:parseInt(g('lp-height').value)||null,
+      salary:(g('lp-salary').value||'').trim()
+    };
+    ov.remove();
+    LEAGUE_TEAMS[ti].players.push(p);
+    saveLeague()
+// ═══ DASHBOARD DRAG SYSTEM ══════════════════════════════════════
+// Drag rows/cards from the list onto the status KPI cards
+var DASH_DRAG_ID = null;
+var DASH_DRAG_CLONE = null;
+var DASH_DRAGGING = false;
+var DASH_DRAG_START_X = 0;
+var DASH_DRAG_START_Y = 0;
+var DASH_DRAG_OX = 0;
+var DASH_DRAG_OY = 0;
+
+function initDashDrag(){
+  // One event delegation listener on the table wrap
+  var wrap = g('tbl-wrap');
+  if(!wrap) return;
+  if(wrap._dashDown) wrap.removeEventListener('mousedown', wrap._dashDown);
+  wrap._dashDown = function(e){
+    if(e.button!==0) return;
+    var row = e.target.closest ? e.target.closest('.tr[data-id]') : null;
+    if(!row) return;
+    // Don't drag if clicking a button/select/input inside the row
+    if(e.target.tagName==='BUTTON'||e.target.tagName==='SELECT'||e.target.tagName==='INPUT'||e.target.tagName==='A') return;
+    var id = parseInt(row.dataset.id);
+    if(!id) return;
+    e.preventDefault();
+    dashStartDrag(e, row, id);
+  };
+  wrap.addEventListener('mousedown', wrap._dashDown);
+
+  // Wire up drop zones
+  document.querySelectorAll('.kpi-drop').forEach(function(kpi){
+    kpi.addEventListener('mouseenter', function(){
+      if(DASH_DRAGGING) kpi.classList.add('drop-hover');
+    });
+    kpi.addEventListener('mouseleave', function(){
+      kpi.classList.remove('drop-hover');
+    });
+  });
+}
+
+function dashStartDrag(e, row, playerId){
+  DASH_DRAG_ID = playerId;
+  DASH_DRAGGING = false;
+  DASH_DRAG_START_X = e.clientX;
+  DASH_DRAG_START_Y = e.clientY;
+  var rect = row.getBoundingClientRect();
+  DASH_DRAG_OX = e.clientX - rect.left;
+  DASH_DRAG_OY = e.clientY - rect.top;
+
+  document.removeEventListener('mousemove', dashOnMove);
+  document.removeEventListener('mouseup', dashOnUp);
+  document.addEventListener('mousemove', dashOnMove);
+  document.addEventListener('mouseup', dashOnUp);
+}
+
+function dashOnMove(e){
+  if(!DASH_DRAG_ID) return;
+  var dx = e.clientX - DASH_DRAG_START_X;
+  var dy = e.clientY - DASH_DRAG_START_Y;
+  if(!DASH_DRAGGING && Math.sqrt(dx*dx+dy*dy) < 6) return;
+
+  if(!DASH_DRAGGING){
+    DASH_DRAGGING = true;
+    // Dim the source row
+    var srcRow = document.querySelector('.tr[data-id="'+DASH_DRAG_ID+'"]');
+    if(srcRow) srcRow.classList.add('dragging-row');
+    // Create clone
+    var p = P.find(function(x){return x.id===DASH_DRAG_ID;});
+    var cpv = p ? (POS[p.pos]||['rgba(59,130,246,.15)','#60a5fa']) : ['rgba(59,130,246,.15)','#60a5fa'];
+    DASH_DRAG_CLONE = document.createElement('div');
+    DASH_DRAG_CLONE.id = 'row-drag-clone';
+    DASH_DRAG_CLONE.innerHTML = '<div style="width:28px;height:28px;border-radius:7px;background:'+cpv[0]+';color:'+cpv[1]+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:500;flex-shrink:0">'+(p?mkIni(p.name):'?')+'</div>'
+      +'<div>'+(p?p.name:'Player')+'<div style="font-size:10px;color:var(--dim);font-weight:400">'+(p?p.pos+' · '+p.country:'')+'</div></div>';
+    DASH_DRAG_CLONE.style.left = (e.clientX - DASH_DRAG_OX) + 'px';
+    DASH_DRAG_CLONE.style.top = (e.clientY - DASH_DRAG_OY) + 'px';
+    document.body.appendChild(DASH_DRAG_CLONE);
+    // Activate drop zones
+    document.querySelectorAll('.kpi-drop').forEach(function(kpi){ kpi.classList.add('drop-active'); });
+  }
+
+  if(DASH_DRAG_CLONE){
+    DASH_DRAG_CLONE.style.left = (e.clientX - DASH_DRAG_OX) + 'px';
+    DASH_DRAG_CLONE.style.top = (e.clientY - DASH_DRAG_OY) + 'px';
+  }
+
+  // Highlight drop zone under cursor
+  if(DASH_DRAG_CLONE) DASH_DRAG_CLONE.style.visibility='hidden';
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  if(DASH_DRAG_CLONE) DASH_DRAG_CLONE.style.visibility='visible';
+  document.querySelectorAll('.kpi-drop').forEach(function(kpi){ kpi.classList.remove('drop-hover'); });
+  if(el){
+    var kpi = el.closest ? el.closest('.kpi-drop') : null;
+    if(kpi) kpi.classList.add('drop-hover');
+  }
+}
+
+async function dashOnUp(e){
+  document.removeEventListener('mousemove', dashOnMove);
+  document.removeEventListener('mouseup', dashOnUp);
+
+  if(!DASH_DRAGGING){
+    DASH_DRAG_ID = null;
+    return;
+  }
+
+  // Find drop target
+  if(DASH_DRAG_CLONE) DASH_DRAG_CLONE.style.visibility='hidden';
+  var el = document.elementFromPoint(e.clientX, e.clientY);
+  var kpi = el && el.closest ? el.closest('.kpi-drop') : null;
+  var newStatus = kpi ? kpi.dataset.status : null;
+
+  // Cleanup
+  if(DASH_DRAG_CLONE){ DASH_DRAG_CLONE.remove(); DASH_DRAG_CLONE=null; }
+  var srcRow = document.querySelector('.tr[data-id="'+DASH_DRAG_ID+'"]');
+  if(srcRow) srcRow.classList.remove('dragging-row');
+  document.querySelectorAll('.kpi-drop').forEach(function(kpi2){
+    kpi2.classList.remove('drop-active','drop-hover');
+  });
+
+  var draggedId = DASH_DRAG_ID;
+  DASH_DRAG_ID = null;
+  DASH_DRAGGING = false;
+
+  if(!newStatus) return; // dropped outside a zone
+
+  var p = P.find(function(x){return x.id===draggedId;});
+  if(!p || p.status===newStatus) return;
+
+  var oldStatus = p.status;
+  p.status = newStatus;
+  updateKPIs();
+  renderT(getF());
+
+  // Animate the target KPI card
+  var targetKpi = document.querySelector('.kpi-drop[data-status="'+newStatus+'"]');
+  if(targetKpi){
+    targetKpi.style.transition='transform .15s';
+    targetKpi.style.transform='scale(1.08)';
+    setTimeout(function(){targetKpi.style.transform='';},200);
+  }
+
+  // Show undo toast
+  showUndoToast(p.name+' \u2192 '+newStatus, function(){
+    p.status=oldStatus;
+    updateKPIs();
+    renderT(getF());
+    saveData();
+    toast('\u21a9 Undone');
+  });
+
+  try{
+    await saveData();
+    await logActivity('\u27a1 Status via drag', p.name+': '+oldStatus+' \u2192 '+newStatus);
+    toast('\u2713 '+p.name+' \u2192 '+newStatus);
+  }catch(err){
+    p.status=oldStatus;
+    updateKPIs();
+    renderT(getF());
+    toast('Error \u2014 reverted');
+  }
+}
+;
+    renderLeague();
+    toast('\u2713 '+n+' added to '+LEAGUE_TEAMS[ti].name);
+  };
+}
+
+function removeLeaguePlayer(ti, pi){
+  LEAGUE_TEAMS[ti].players.splice(pi,1);
+  saveLeague();
+  renderLeague();
 }
 </script>
 </body>
