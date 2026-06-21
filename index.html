@@ -4541,7 +4541,8 @@ function loadMyTeam(){
 function renderMyTeam(){
   loadMyTeam();
   var root = g('myteam-root');
-  if(!root) return;
+  if(!root){ console.error('myteam-root not found!'); return; }
+  console.log('renderMyTeam called, slots:', Object.keys(MY_TEAM.slots).length);
 
   // Build on-court slots (6 positions, NO libero on court)
   var slotKeys = ['P4','P3','P2','P5','P6','P1'];
