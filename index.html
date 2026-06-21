@@ -4318,173 +4318,158 @@ async function loadSessCounts(){
 // Greek A1 League 2025-26 teams with logos and rosters
 var GREEK_A1_TEAMS = [
   {
-    id: 'olympiacos', name: 'Olympiacos', city: 'Piraeus',
-    logo: 'https://volleybox.net/media/upload/teams/big_1727854359G3GqP.png',
-    color: '#CC0000', badge: '🔴',
-    vb: 'https://volleybox.net/olympiacos-t1708',
-    players: [
-      {name:'Alen Pajenk', pos:'Middle', country:'Slovenia', height:205, photo:''},
-      {name:'John Perrin', pos:'Outside', country:'France', height:201, photo:''},
-      {name:'Dragan Travica', pos:'Setter', country:'Serbia', height:200, photo:''},
-      {name:'Aleksandar Atanasijević', pos:'Opposite', country:'Serbia', height:200, photo:''},
-      {name:'Nemanja Mašulović', pos:'Middle', country:'Serbia', height:205, photo:''},
-      {name:'Dimitris Tzourits', pos:'Outside', country:'Greece', height:211, photo:''},
-      {name:'Nikos Zoupani', pos:'Opposite', country:'Greece', height:202, photo:''},
-      {name:'Vasileios Kostopoulos', pos:'Outside', country:'Greece', height:197, photo:''},
-      {name:'Rafail Koumentakis', pos:'Outside', country:'Greece', height:203, photo:''},
-      {name:'Dimitris Tziavras', pos:'Libero', country:'Greece', height:177, photo:''},
-      {name:'Matéo Hasballa', pos:'Setter', country:'France', height:193, photo:''},
-      {name:'Anestis Dalakouras', pos:'Outside', country:'Greece', height:196, photo:''},
+    id:'olympiacos', name:'Olympiacos', city:'Piraeus',
+    logo:'https://upload.wikimedia.org/wikipedia/en/f/f4/Olympiacos_FC_logo.svg',
+    color:'#CC0000', vb:'https://volleybox.net/olympiacos-t1708',
+    players:[
+      {name:'Alen Pajenk',pos:'Middle',country:'Slovenia',height:205},
+      {name:'John Perrin',pos:'Outside',country:'France',height:201},
+      {name:'Dragan Travica',pos:'Setter',country:'Serbia',height:200},
+      {name:'Aleksandar Atanasijević',pos:'Opposite',country:'Serbia',height:200},
+      {name:'Nemanja Mašulović',pos:'Middle',country:'Serbia',height:205},
+      {name:'Dimitris Tzourits',pos:'Outside',country:'Greece',height:211},
+      {name:'Nikos Zoupani',pos:'Opposite',country:'Greece',height:202},
+      {name:'Christian Fromm',pos:'Outside',country:'Germany',height:199},
+      {name:'Vasileios Kostopoulos',pos:'Outside',country:'Greece',height:197},
+      {name:'Rafail Koumentakis',pos:'Outside',country:'Greece',height:203},
+      {name:'Dimitris Tziavras',pos:'Libero',country:'Greece',height:177},
+      {name:'Matéo Hasballa',pos:'Setter',country:'France',height:193},
     ]
   },
   {
-    id: 'panathinaikos', name: 'Panathinaikos', city: 'Athens',
-    logo: 'https://volleybox.net/media/upload/teams/big_1682020979w4mbh.png',
-    color: '#006400', badge: '🟢',
-    vb: 'https://volleybox.net/panathinaikos-t1745',
-    players: [
-      {name:'Facundo Conte', pos:'Outside', country:'Argentina', height:198, photo:''},
-      {name:'Theodoros Kliventos', pos:'Setter', country:'Greece', height:195, photo:''},
-      {name:'Konstantinos Stilianos', pos:'Middle', country:'Greece', height:205, photo:''},
-      {name:'Giorgos Papalexiou', pos:'Middle', country:'Greece', height:206, photo:''},
-      {name:'Konstantinos Sampanis', pos:'Opposite', country:'Greece', height:201, photo:''},
-      {name:'Rodrigo Lazo', pos:'Outside', country:'Cuba', height:196, photo:''},
-      {name:'Giorgos Siagonas', pos:'Outside', country:'Greece', height:200, photo:''},
-      {name:'Kostas Lazaridis', pos:'Libero', country:'Greece', height:180, photo:''},
-      {name:'Nikos Lianos', pos:'Libero', country:'Greece', height:178, photo:''},
-      {name:'Alexandros Gkatzelis', pos:'Middle', country:'Greece', height:204, photo:''},
+    id:'panathinaikos', name:'Panathinaikos', city:'Athens',
+    logo:'https://upload.wikimedia.org/wikipedia/en/6/6e/Panathinaikos_FC_Logo.png',
+    color:'#006400', vb:'https://volleybox.net/panathinaikos-t1745',
+    players:[
+      {name:'Facundo Conte',pos:'Outside',country:'Argentina',height:198},
+      {name:'Teodoros Kliventos',pos:'Setter',country:'Greece',height:195},
+      {name:'Giorgos Papalexiou',pos:'Middle',country:'Greece',height:206},
+      {name:'Konstantinos Sampanis',pos:'Opposite',country:'Greece',height:201},
+      {name:'Giorgos Siagonas',pos:'Outside',country:'Greece',height:200},
+      {name:'Kostas Lazaridis',pos:'Libero',country:'Greece',height:180},
+      {name:'Alexandros Gkatzelis',pos:'Middle',country:'Greece',height:204},
+      {name:'Nikos Lianos',pos:'Libero',country:'Greece',height:178},
     ]
   },
   {
-    id: 'paok', name: 'PAOK', city: 'Thessaloniki',
-    logo: 'https://volleybox.net/media/upload/teams/big_1661234567abc.png',
-    color: '#000000', badge: '⚫',
-    vb: 'https://volleybox.net/paok-thessaloniki-t1722',
-    players: [
-      {name:'Jeffrey Jendryk', pos:'Middle', country:'USA', height:208, photo:''},
-      {name:'Georgios Michelakis', pos:'Outside', country:'Greece', height:185, photo:''},
-      {name:'Menelaos Kokkinakis', pos:'Outside', country:'Greece', height:196, photo:''},
-      {name:'Dimitris Samaras', pos:'Setter', country:'Greece', height:191, photo:''},
-      {name:'Konstantinos Karypidis', pos:'Middle', country:'Greece', height:203, photo:''},
-      {name:'Sotiris Tsoufis', pos:'Opposite', country:'Greece', height:199, photo:''},
-      {name:'Alexandros Petrelis', pos:'Libero', country:'Greece', height:178, photo:''},
-      {name:'Nikolaos Karagiannis', pos:'Outside', country:'Greece', height:194, photo:''},
+    id:'paok', name:'PAOK', city:'Thessaloniki',
+    logo:'https://upload.wikimedia.org/wikipedia/en/b/b8/PAOK_FC_crest.svg',
+    color:'#1a1a1a', vb:'https://volleybox.net/paok-thessaloniki-t1722',
+    players:[
+      {name:'Jeffrey Jendryk II',pos:'Middle',country:'USA',height:208},
+      {name:'Georgios Michelakis',pos:'Outside',country:'Greece',height:185},
+      {name:'Menelaos Kokkinakis',pos:'Outside',country:'Greece',height:196},
+      {name:'Dimitris Samaras',pos:'Setter',country:'Greece',height:191},
+      {name:'Konstantinos Karypidis',pos:'Middle',country:'Greece',height:203},
+      {name:'Sotiris Tsoufis',pos:'Opposite',country:'Greece',height:199},
+      {name:'Alexandros Petrelis',pos:'Libero',country:'Greece',height:178},
     ]
   },
   {
-    id: 'panionios', name: 'Panionios', city: 'Athens',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890pan.png',
-    color: '#1E3A8A', badge: '🔵',
-    vb: 'https://volleybox.net/panionios-t4110',
-    players: [
-      {name:'Konstantinos Voulgaris', pos:'Outside', country:'Greece', height:200, photo:''},
-      {name:'Petros Varsamos', pos:'Setter', country:'Greece', height:193, photo:''},
-      {name:'Ioannis Boulierakis', pos:'Middle', country:'Greece', height:204, photo:''},
-      {name:'Stavros Petreas', pos:'Outside', country:'Greece', height:196, photo:''},
-      {name:'Serafim Lazaridis', pos:'Libero', country:'Greece', height:176, photo:''},
-      {name:'Nikolaos Sakellaropoulos', pos:'Opposite', country:'Greece', height:202, photo:''},
+    id:'panionios', name:'Panionios', city:'Nea Smyrni',
+    logo:'https://upload.wikimedia.org/wikipedia/en/8/86/Panionios_FC_Logo.png',
+    color:'#1E3A8A', vb:'https://volleybox.net/panionios-t4110',
+    players:[
+      {name:'Konstantinos Voulgaris',pos:'Outside',country:'Greece',height:200},
+      {name:'Petros Varsamos',pos:'Setter',country:'Greece',height:193},
+      {name:'Ioannis Boulierakis',pos:'Middle',country:'Greece',height:204},
+      {name:'Stavros Petreas',pos:'Outside',country:'Greece',height:196},
+      {name:'Serafim Lazaridis',pos:'Libero',country:'Greece',height:176},
+      {name:'Nikolaos Sakellaropoulos',pos:'Opposite',country:'Greece',height:202},
     ]
   },
   {
-    id: 'aons_milon', name: 'AONS Milon', city: 'Nea Smyrni',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890mil.png',
-    color: '#8B0000', badge: '🔴',
-    vb: 'https://volleybox.net/ao-milon-neas-smyrnis-t1320',
-    players: [
-      {name:'Konstantinos Chatzinikolaou', pos:'Outside', country:'Greece', height:198, photo:''},
-      {name:'Panagiotis Varelas', pos:'Setter', country:'Greece', height:190, photo:''},
-      {name:'Alexios Lappas', pos:'Outside', country:'Greece', height:201, photo:''},
-      {name:'Nikos Gkaragkounis', pos:'Middle', country:'Greece', height:205, photo:''},
-      {name:'Giorgos Theologitis', pos:'Libero', country:'Greece', height:179, photo:''},
-      {name:'Thanos Kelepouris', pos:'Opposite', country:'Greece', height:200, photo:''},
+    id:'aons_milon', name:'AONS Milon', city:'Nea Smyrni',
+    logo:'https://volleybox.net/media/upload/teams/big_1234567890mil.png',
+    color:'#8B0000', vb:'https://volleybox.net/ao-milon-neas-smyrnis-t1320',
+    players:[
+      {name:'Konstantinos Chatzinikolaou',pos:'Outside',country:'Greece',height:198},
+      {name:'Panagiotis Varelas',pos:'Setter',country:'Greece',height:190},
+      {name:'Alexios Lappas',pos:'Outside',country:'Greece',height:201},
+      {name:'Nikos Gkaragkounis',pos:'Middle',country:'Greece',height:205},
+      {name:'Giorgos Theologitis',pos:'Libero',country:'Greece',height:179},
+      {name:'Thanos Kelepouris',pos:'Opposite',country:'Greece',height:200},
     ]
   },
   {
-    id: 'ofi_crete', name: 'OFI Crete', city: 'Heraklion',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890ofi.png',
-    color: '#FF8C00', badge: '🟠',
-    vb: 'https://volleybox.net/ofi-crete-t5323',
-    players: [
-      {name:'Michalis Vratsanos', pos:'Outside', country:'Greece', height:197, photo:''},
-      {name:'Dimitris Lianos', pos:'Setter', country:'Greece', height:190, photo:''},
-      {name:'Antonis Papadopoulos', pos:'Middle', country:'Greece', height:203, photo:''},
-      {name:'Stavros Zouganelis', pos:'Outside', country:'Greece', height:195, photo:''},
-      {name:'Kostas Politis', pos:'Libero', country:'Greece', height:177, photo:''},
-      {name:'Ioannis Karabas', pos:'Opposite', country:'Greece', height:199, photo:''},
+    id:'ofi_crete', name:'OFI Crete', city:'Heraklion',
+    logo:'https://upload.wikimedia.org/wikipedia/en/e/e3/OFI_Crete_Logo.svg',
+    color:'#FF8C00', vb:'https://volleybox.net/ofi-crete-t5323',
+    players:[
+      {name:'Michalis Vratsanos',pos:'Outside',country:'Greece',height:197},
+      {name:'Dimitris Lianos',pos:'Setter',country:'Greece',height:190},
+      {name:'Antonis Papadopoulos',pos:'Middle',country:'Greece',height:203},
+      {name:'Stavros Zouganelis',pos:'Outside',country:'Greece',height:195},
+      {name:'Kostas Politis',pos:'Libero',country:'Greece',height:177},
+      {name:'Ioannis Karabas',pos:'Opposite',country:'Greece',height:199},
     ]
   },
   {
-    id: 'ao_kalamata', name: 'AO Kalamata 1980', city: 'Kalamata',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890kal.png',
-    color: '#006400', badge: '🟢',
-    vb: 'https://volleybox.net/ao-kalamata-1980-t8471',
-    players: [
-      {name:'Giorgos Galanis', pos:'Outside', country:'Greece', height:196, photo:''},
-      {name:'Kostas Mountakis', pos:'Setter', country:'Greece', height:191, photo:''},
-      {name:'Panagiotis Spanakis', pos:'Middle', country:'Greece', height:202, photo:''},
-      {name:'Apostolos Andreopoulos', pos:'Outside', country:'Greece', height:194, photo:''},
-      {name:'Nikos Sfikakis', pos:'Libero', country:'Greece', height:176, photo:''},
+    id:'ao_kalamata', name:'AO Kalamata 1980', city:'Kalamata',
+    logo:'https://volleybox.net/media/upload/teams/big_1234567890kal.png',
+    color:'#006400', vb:'https://volleybox.net/ao-kalamata-1980-t8471',
+    players:[
+      {name:'Giorgos Galanis',pos:'Outside',country:'Greece',height:196},
+      {name:'Kostas Mountakis',pos:'Setter',country:'Greece',height:191},
+      {name:'Panagiotis Spanakis',pos:'Middle',country:'Greece',height:202},
+      {name:'Apostolos Andreopoulos',pos:'Outside',country:'Greece',height:194},
+      {name:'Nikos Sfikakis',pos:'Libero',country:'Greece',height:176},
     ]
   },
   {
-    id: 'aop_kifisias', name: 'AOP Kifisias', city: 'Kifissia',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890kif.png',
-    color: '#4B0082', badge: '🟣',
-    vb: 'https://volleybox.net/aop-kifisias-t1289',
-    players: [
-      {name:'Konstantinos Detorakis', pos:'Outside', country:'Greece', height:198, photo:''},
-      {name:'Giorgos Polatidis', pos:'Setter', country:'Greece', height:192, photo:''},
-      {name:'Stelios Konstantinidis', pos:'Middle', country:'Greece', height:204, photo:''},
-      {name:'Nikos Themelis', pos:'Opposite', country:'Greece', height:200, photo:''},
-      {name:'Spyros Terzis', pos:'Libero', country:'Greece', height:178, photo:''},
+    id:'aop_kifisias', name:'AOP Kifisias', city:'Kifissia',
+    logo:'https://volleybox.net/media/upload/teams/big_1234567890kif.png',
+    color:'#4B0082', vb:'https://volleybox.net/aop-kifisias-t1289',
+    players:[
+      {name:'Konstantinos Detorakis',pos:'Outside',country:'Greece',height:198},
+      {name:'Giorgos Polatidis',pos:'Setter',country:'Greece',height:192},
+      {name:'Stelios Konstantinidis',pos:'Middle',country:'Greece',height:204},
+      {name:'Nikos Themelis',pos:'Opposite',country:'Greece',height:200},
+      {name:'Spyros Terzis',pos:'Libero',country:'Greece',height:178},
     ]
   },
   {
-    id: 'ao_flisvos', name: 'AO Flisvos', city: 'Palaio Faliro',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890fli.png',
-    color: '#00008B', badge: '🔵',
-    vb: 'https://volleybox.net/ao-flisvos-t14972',
-    players: [
-      {name:'Alexandros Bouras', pos:'Outside', country:'Greece', height:195, photo:''},
-      {name:'Ioannis Dimitrakopoulos', pos:'Setter', country:'Greece', height:190, photo:''},
-      {name:'Nikos Manicas', pos:'Middle', country:'Greece', height:203, photo:''},
-      {name:'Giorgos Apostolou', pos:'Outside', country:'Greece', height:196, photo:''},
-      {name:'Kostas Fotiou', pos:'Libero', country:'Greece', height:175, photo:''},
+    id:'ao_flisvos', name:'AO Flisvos', city:'Palaio Faliro',
+    logo:'https://volleybox.net/media/upload/teams/big_1234567890fli.png',
+    color:'#00008B', vb:'https://volleybox.net/ao-flisvos-t14972',
+    players:[
+      {name:'Alexandros Bouras',pos:'Outside',country:'Greece',height:195},
+      {name:'Ioannis Dimitrakopoulos',pos:'Setter',country:'Greece',height:190},
+      {name:'Nikos Manicas',pos:'Middle',country:'Greece',height:203},
+      {name:'Giorgos Apostolou',pos:'Outside',country:'Greece',height:196},
+      {name:'Kostas Fotiou',pos:'Libero',country:'Greece',height:175},
     ]
   },
   {
-    id: 'ao_foinikas', name: 'A.O. Foinikas Syros', city: 'Syros',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890foi.png',
-    color: '#FF4500', badge: '🟠',
-    vb: 'https://volleybox.net/ao-foinikas-syros-t1501',
-    players: [
-      {name:'Panagiotis Kapoutsis', pos:'Outside', country:'Greece', height:197, photo:''},
-      {name:'Christos Makris', pos:'Setter', country:'Greece', height:191, photo:''},
-      {name:'Giorgos Tzavellas', pos:'Middle', country:'Greece', height:202, photo:''},
-      {name:'Tasos Nikolopoulos', pos:'Outside', country:'Greece', height:194, photo:''},
-      {name:'Antonis Gkizas', pos:'Libero', country:'Greece', height:177, photo:''},
+    id:'ao_foinikas', name:'AO Foinikas Syros', city:'Syros',
+    logo:'https://volleybox.net/media/upload/teams/big_1234567890foi.png',
+    color:'#FF4500', vb:'https://volleybox.net/ao-foinikas-syros-t1501',
+    players:[
+      {name:'Panagiotis Kapoutsis',pos:'Outside',country:'Greece',height:197},
+      {name:'Christos Makris',pos:'Setter',country:'Greece',height:191},
+      {name:'Giorgos Tzavellas',pos:'Middle',country:'Greece',height:202},
+      {name:'Tasos Nikolopoulos',pos:'Outside',country:'Greece',height:194},
+      {name:'Antonis Gkizas',pos:'Libero',country:'Greece',height:177},
     ]
   },
   {
-    id: 'aris', name: 'Aris Thessaloniki', city: 'Thessaloniki',
-    logo: 'https://volleybox.net/media/upload/teams/big_1234567890ari.png',
-    color: '#FFD700', badge: '🟡',
-    vb: 'https://volleybox.net/aris-thessaloniki-t1328',
-    players: [
-      {name:'Ioannis Chrysohoou', pos:'Outside', country:'Greece', height:196, photo:''},
-      {name:'Stavros Bakogiorgos', pos:'Setter', country:'Greece', height:190, photo:''},
-      {name:'Alexandros Zamanis', pos:'Middle', country:'Greece', height:203, photo:''},
-      {name:'Apostolos Tsiotras', pos:'Opposite', country:'Greece', height:199, photo:''},
-      {name:'Tasos Bakalis', pos:'Libero', country:'Greece', height:176, photo:''},
+    id:'aris', name:'Aris Thessaloniki', city:'Thessaloniki',
+    logo:'https://upload.wikimedia.org/wikipedia/en/2/2b/Aris_Thessaloniki_FC_emblem.svg',
+    color:'#FFD700', vb:'https://volleybox.net/aris-thessaloniki-t1328',
+    players:[
+      {name:'Ioannis Chrysohoou',pos:'Outside',country:'Greece',height:196},
+      {name:'Stavros Bakogiorgos',pos:'Setter',country:'Greece',height:190},
+      {name:'Alexandros Zamanis',pos:'Middle',country:'Greece',height:203},
+      {name:'Apostolos Tsiotras',pos:'Opposite',country:'Greece',height:199},
+      {name:'Tasos Bakalis',pos:'Libero',country:'Greece',height:176},
     ]
   },
   {
-    id: 'ope_rethymno', name: 'OPE Rethymno', city: 'Rethymno',
-    logo: 'https://volleybox.net/media/upload/teams/big_1727854359G3GqP.png',
-    color: '#14b8a6', badge: '🏐',
-    vb: 'https://volleybox.net/ope-rethymno-t2433',
-    isMyTeam: true,
-    players: [] // Will be populated from P array (Signed players)
+    id:'ope_rethymno', name:'OPE Rethymno', city:'Rethymno',
+    logo:'https://volleybox.net/media/upload/teams/big_1727854359G3GqP.png',
+    color:'#14b8a6', vb:'https://volleybox.net/ope-rethymno-t2433',
+    isMyTeam:true,
+    players:[]
   }
 ];
 
@@ -4536,26 +4521,27 @@ function renderLeague(){
 }
 
 function renderLeagueCards(teams){
-  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">'
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">'
     +teams.map(function(t){
-      var isMyTeam = t.isMyTeam;
-      var signedPlayers = isMyTeam ? P.filter(function(p){return p.status==='Signed';}) : [];
-      var playerCount = isMyTeam ? signedPlayers.length : t.players.length;
-      var confirmedCount = isMyTeam ? signedPlayers.length : t.players.filter(function(p){
+      var isMyTeam=t.isMyTeam;
+      var signedPl=isMyTeam?P.filter(function(p){return p.status==='Signed';}):[];
+      var playerCount=isMyTeam?signedPl.length:t.players.length;
+      var confirmedCount=isMyTeam?signedPl.length:t.players.filter(function(p){
         return LEAGUE_CONFIRMATIONS[t.id+'_'+p.name];
       }).length;
-      
-      return '<div data-tid="'+t.id+'" onclick="selectLeagueTeamBtn(this)" style="background:var(--bg2);border:1px solid '+(isMyTeam?'var(--teal)':'var(--b2)')+';border-radius:12px;padding:16px 14px;cursor:pointer;transition:all .15s;text-align:center;position:relative;overflow:hidden"'
-        +(isMyTeam?'<div style="position:absolute;top:8px;right:8px;font-family:var(--fm);font-size:8px;background:var(--teal);color:#fff;padding:2px 6px;border-radius:4px">MY TEAM</div>':'')
-        // Team logo circle
-        +'<div style="width:56px;height:56px;border-radius:50%;background:'+t.color+'20;border:2px solid '+t.color+'40;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:28px">'
-          +t.badge
-        +'</div>'
-        +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">'+t.name+'</div>'
+      var logoHtml = t.logo && (t.logo.includes('wikimedia')||t.logo.includes('upload.wikipedia'))
+        ? '<img src="'+t.logo+'" style="width:52px;height:52px;object-fit:contain">'
+          +'<div style="display:none;width:52px;height:52px;background:'+t.color+'22;border-radius:50%;align-items:center;justify-content:center;font-size:24px">⚽</div>'
+        : '<div style="width:52px;height:52px;background:'+t.color+'22;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px">🏐</div>';
+      return '<div data-tid="'+t.id+'" onclick="selectLeagueTeamBtn(this)" style="background:var(--bg2);border:1.5px solid '+(isMyTeam?'var(--teal)':'var(--b2)')+';border-radius:14px;padding:16px 12px;cursor:pointer;transition:all .15s;text-align:center;position:relative">'
+        +(isMyTeam?'<div style="position:absolute;top:6px;right:6px;font-family:var(--fm);font-size:8px;background:var(--teal);color:#fff;padding:2px 6px;border-radius:4px;font-weight:600">MY TEAM</div>':'')
+        // Logo
+        +'<div style="display:flex;justify-content:center;align-items:center;height:60px;margin-bottom:10px">'+logoHtml+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.2">'+t.name+'</div>'
         +'<div style="font-size:10px;color:var(--dim);margin-bottom:8px">'+t.city+'</div>'
-        +'<div style="display:flex;gap:6px;justify-content:center">'
-          +'<span style="font-family:var(--fm);font-size:9px;background:var(--bg3);padding:2px 8px;border-radius:4px;color:var(--muted)">'+playerCount+' players</span>'
-          +(confirmedCount>0?'<span style="font-family:var(--fm);font-size:9px;background:rgba(20,184,166,.15);color:var(--teal);padding:2px 8px;border-radius:4px">'+confirmedCount+' ✓</span>':'')
+        +'<div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">'
+          +'<span style="font-family:var(--fm);font-size:9px;background:var(--bg3);padding:2px 7px;border-radius:4px;color:var(--muted)">'+playerCount+' players</span>'
+          +(confirmedCount>0?'<span style="font-family:var(--fm);font-size:9px;background:rgba(20,184,166,.15);color:var(--teal);padding:2px 7px;border-radius:4px">'+confirmedCount+' ✓</span>':'')
         +'</div>'
       +'</div>';
     }).join('')
@@ -4588,110 +4574,105 @@ function renderLeagueList(teams){
 }
 
 function renderTeamRoster(teamId){
-  var team = GREEK_A1_TEAMS.find(function(t){return t.id===teamId;});
+  var team=GREEK_A1_TEAMS.find(function(t){return t.id===teamId;});
   if(!team) return;
-  var root = g('league-list');
-  if(!root) return;
+  var root=g('league-list');if(!root) return;
 
-  var players = team.isMyTeam ? P.filter(function(p){return p.status==='Signed';}) : team.players;
-  var posColors = {Outside:'#60a5fa',Opposite:'#fb7185',Middle:'#a78bfa',Setter:'#4ade80',Libero:'#fbbf24'};
-  var posBg = {Outside:'rgba(96,165,250,.15)',Opposite:'rgba(251,113,133,.15)',Middle:'rgba(167,139,250,.15)',Setter:'rgba(74,222,128,.15)',Libero:'rgba(251,191,36,.15)'};
+  var players=team.isMyTeam?P.filter(function(p){return p.status==='Signed';}):team.players;
+  var posColors={Outside:'#60a5fa',Opposite:'#fb7185',Middle:'#a78bfa',Setter:'#4ade80',Libero:'#fbbf24'};
+  var posBg={Outside:'rgba(96,165,250,.15)',Opposite:'rgba(251,113,133,.15)',Middle:'rgba(167,139,250,.15)',Setter:'rgba(74,222,128,.15)',Libero:'rgba(251,191,36,.15)'};
 
-  // Group by position for court view
-  var byPos = {Outside:[],Opposite:[],Middle:[],Setter:[],Libero:[]};
+  // Court positions
+  var byPos={Outside:[],Opposite:[],Middle:[],Setter:[],Libero:[]};
   players.forEach(function(p){
-    var pos = team.isMyTeam ? p.pos : p.pos;
-    if(byPos[pos]) byPos[pos].push(p);
-    else byPos['Outside'].push(p);
+    var pos=p.pos||'Outside';
+    if(byPos[pos])byPos[pos].push(p);else byPos.Outside.push(p);
   });
 
-  // Build court with shirt icons
-  function courtSlot(p, label, left, top, isMyTeam2){
-    if(!p) return '<div style="position:absolute;left:'+left+'%;top:'+top+'%;transform:translate(-50%,-50%);text-align:center;opacity:.35">'
-      +'<div style="font-size:24px">👕</div>'
-      +'<div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.5)">'+label+'</div>'
-      +'</div>';
-    var av = (p.photo&&p.photo.startsWith('http'))
-      ?'<img src="'+p.photo+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5)">'
-      :'<div style="width:36px;height:36px;border-radius:50%;background:'+( posBg[p.pos]||'rgba(59,130,246,.2)')+';color:'+(posColors[p.pos]||'#60a5fa')+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;font-weight:600;border:2px solid rgba(255,255,255,.3)">'+label+'</div>';
-    return '<div style="position:absolute;left:'+left+'%;top:'+top+'%;transform:translate(-50%,-50%);text-align:center;cursor:'+(isMyTeam2?'pointer':'default')+'"'+(isMyTeam2?' onclick="showDet('+p.id+')"':'')+' title="'+p.name+'">'
-      +'<div>'+av+'</div>'
-      +'<div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.9);margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,.8);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name.split(' ').pop()+'</div>'
+  function miniSlot(p, label, left, top){
+    var pc=posColors[p?p.pos:'Outside']||'#60a5fa';
+    var pb=posBg[p?p.pos:'Outside']||'rgba(96,165,250,.15)';
+    var hasPhoto=p&&p.photo&&p.photo.startsWith('http');
+    var inner=hasPhoto
+      ?'<img src="'+p.photo+'" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.4)">'
+      :'<div style="width:30px;height:30px;border-radius:50%;background:'+(p?pb:'rgba(255,255,255,.08)')+';color:'+(p?pc:'rgba(255,255,255,.3)')+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:9px;font-weight:600;border:1.5px solid '+(p?pc:'rgba(255,255,255,.2)')+'">'+label+'</div>';
+    return '<div style="position:absolute;left:'+left+'%;top:'+top+'%;transform:translate(-50%,-50%);text-align:center;z-index:5"'+(p&&team.isMyTeam?' onclick="showDet('+p.id+')" style="cursor:pointer"':'')+' title="'+(p?p.name:label+' — empty')+'">'
+      +inner
+      +(p?'<div style="font-family:var(--fm);font-size:7px;color:rgba(255,255,255,.85);margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:45px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name.split(' ').pop()+'</div>':'')
     +'</div>';
   }
 
-  var oh1 = byPos.Outside[0]||null, oh2 = byPos.Outside[1]||null;
-  var mb1 = byPos.Middle[0]||null, mb2 = byPos.Middle[1]||null;
-  var op = byPos.Opposite[0]||null;
-  var setter = byPos.Setter[0]||null;
-  var libero = byPos.Libero[0]||null;
+  var oh1=byPos.Outside[0]||null,oh2=byPos.Outside[1]||null;
+  var mb1=byPos.Middle[0]||null,mb2=byPos.Middle[1]||null;
+  var op=byPos.Opposite[0]||null,setter=byPos.Setter[0]||null,lib=byPos.Libero[0]||null;
 
-  var courtHtml =
-    '<div style="position:relative;background:linear-gradient(180deg,#1a5c3e 0%,#1e6b4a 100%);border-radius:12px;overflow:hidden;border:3px solid rgba(255,255,255,.15);aspect-ratio:16/9;min-height:200px;margin-bottom:12px">'
-      // Court lines
-      +'<div style="position:absolute;inset:8px;border:2px solid rgba(255,255,255,.35);pointer-events:none"></div>'
-      +'<div style="position:absolute;left:0;right:0;top:50%;height:3px;background:rgba(255,255,255,.7);box-shadow:0 0 8px rgba(255,255,255,.3);pointer-events:none"></div>'
-      +'<div style="position:absolute;left:8px;right:8px;top:75%;border-top:1px dashed rgba(255,255,255,.2);pointer-events:none"></div>'
-      // Team badge
-      +'<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:24px;opacity:.15;pointer-events:none">'+team.badge+'</div>'
-      // Labels
-      +'<div style="position:absolute;top:8px;left:12px;font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.2)">OPPONENT</div>'
-      +'<div style="position:absolute;bottom:8px;right:12px;font-family:var(--fm);font-size:8px;color:rgba(255,255,255,.2)">YOUR SIDE</div>'
-      // Players: side-out formation Setter P1
-      +courtSlot(oh1,'OH',20,63,team.isMyTeam)
-      +courtSlot(mb1,'MB',50,63,team.isMyTeam)
-      +courtSlot(op,'OP',80,63,team.isMyTeam)
-      +courtSlot(mb2,'MB',20,82,team.isMyTeam)
-      +courtSlot(oh2,'OH',50,82,team.isMyTeam)
-      +courtSlot(setter,'S',80,82,team.isMyTeam)
-    +'</div>'
-    // Libero separate
-    +(libero?'<div style="background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px">'
-      +'<div style="font-size:18px">🟡</div>'
-      +'<div><div style="font-family:var(--fm);font-size:8px;color:rgba(251,191,36,.7);text-transform:uppercase">Libero</div>'
-      +'<div style="font-size:12px;font-weight:600;color:var(--amber)">'+(team.isMyTeam?libero.name:libero.name)+'</div></div>'
-    +'</div>':'');
+  // Mini court (compact)
+  var courtHtml='<div style="position:relative;background:linear-gradient(180deg,#1a5c3e 0%,#1e6b4a 100%);border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.15);min-height:180px;aspect-ratio:4/3;margin-bottom:8px">'
+    +'<div style="position:absolute;inset:6px;border:1.5px solid rgba(255,255,255,.3);pointer-events:none"></div>'
+    +'<div style="position:absolute;left:0;right:0;top:50%;height:3px;background:rgba(255,255,255,.7);pointer-events:none"></div>'
+    +'<div style="position:absolute;left:6px;right:6px;top:75%;border-top:1px dashed rgba(255,255,255,.2);pointer-events:none"></div>'
+    +'<div style="position:absolute;top:4px;left:0;right:0;text-align:center;font-family:var(--fm);font-size:7px;color:rgba(255,255,255,.2);pointer-events:none">OPP</div>'
+    +miniSlot(oh1,'OH',20,63)
+    +miniSlot(mb1,'MB',50,63)
+    +miniSlot(op,'OP',80,63)
+    +miniSlot(mb2,'MB',20,83)
+    +miniSlot(oh2,'OH',50,83)
+    +miniSlot(setter,'S',80,83)
+  +'</div>'
+  // Libero
+  +(lib?'<div style="background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3);border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:14px">🟡</div><div><div style="font-family:var(--fm);font-size:8px;color:rgba(251,191,36,.7)">LIBERO</div><div style="font-size:11px;font-weight:600;color:var(--amber)">'+lib.name+'</div></div></div>'
+    :'<div style="background:rgba(251,191,36,.04);border:1px dashed rgba(251,191,36,.2);border-radius:6px;padding:5px 10px;font-size:10px;color:var(--dim);margin-bottom:8px">Libero — not assigned</div>');
 
-  // Player roster list
-  var rosterHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+  // Roster list with confirm/deny
+  var rosterHtml='<div style="display:flex;flex-direction:column;gap:3px">'
     +players.map(function(p,i){
-      var confirmed = team.isMyTeam ? (p.status==='Signed') : LEAGUE_CONFIRMATIONS[teamId+'_'+p.name];
-      var pc = posColors[team.isMyTeam?p.pos:p.pos]||'#60a5fa';
-      var pb = posBg[team.isMyTeam?p.pos:p.pos]||'rgba(59,130,246,.15)';
-      var posLabel = team.isMyTeam ? p.pos.substring(0,3).toUpperCase() : p.pos.substring(0,3).toUpperCase();
-      var av = (p.photo&&p.photo.startsWith('http'))
-        ?'<img src="'+p.photo+'" style="width:26px;height:26px;border-radius:6px;object-fit:cover">'
-        :'<div style="width:26px;height:26px;border-radius:6px;background:'+pb+';color:'+pc+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:9px;font-weight:600;flex-shrink:0">'+posLabel+'</div>';
-      return '<div style="background:var(--bg2);border:1px solid '+(confirmed?'rgba(20,184,166,.3)':'var(--b2)')+';border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:'+(team.isMyTeam?'pointer':'default')+'"'+(team.isMyTeam?' onclick="showDet('+p.id+')"':'')+' style="position:relative">'
+      var confirmed=team.isMyTeam?true:LEAGUE_CONFIRMATIONS[teamId+'_'+p.name];
+      var pc=posColors[p.pos]||'#60a5fa';
+      var pb=posBg[p.pos]||'rgba(96,165,250,.15)';
+      var posShort=(p.pos||'').substring(0,3).toUpperCase();
+      var av=(p.photo&&p.photo.startsWith('http'))
+        ?'<img src="'+p.photo+'" style="width:24px;height:24px;border-radius:6px;object-fit:cover;flex-shrink:0">'
+        :'<div style="width:24px;height:24px;border-radius:6px;background:'+pb+';color:'+pc+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:8px;font-weight:600;flex-shrink:0">'+posShort+'</div>';
+      return '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;background:var(--bg2);border-radius:7px;border:1px solid '+(confirmed?'rgba(20,184,166,.25)':'rgba(239,68,68,.1)')+';">'
         +av
         +'<div style="flex:1;min-width:0">'
           +'<div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>'
-          +'<div style="font-size:9px;color:var(--dim)">'+(team.isMyTeam?(p.country||''):(p.country||''))+(p.height?' · '+p.height+'cm':'')+'</div>'
+          +'<div style="font-size:9px;color:var(--dim)">'+(p.country||'')+(p.height?' · '+p.height+'cm':'')+'</div>'
         +'</div>'
-        +(confirmed
-          ?'<span style="font-family:var(--fm);font-size:9px;color:var(--teal)">✓</span>'
-          :(!team.isMyTeam?'<button data-tid="'+teamId+'" data-pn="'+p.name+'" onclick="toggleLeagueConfBtn(this)" style="background:none;border:1px solid var(--b2);border-radius:4px;color:var(--dim);cursor:pointer;font-size:9px;padding:1px 5px;white-space:nowrap">Confirm</button>':'')
+        +(team.isMyTeam
+          ?'<span style="font-family:var(--fm);font-size:9px;color:var(--teal)">✓ Signed</span>'
+          :confirmed
+            ?'<button data-tid="'+teamId+'" data-pn="'+p.name+'" onclick="toggleLeagueConfBtn(this)" style="font-family:var(--fm);font-size:9px;background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.3);color:var(--teal);padding:2px 7px;border-radius:5px;cursor:pointer">✓ Confirmed</button>'
+            :'<button data-tid="'+teamId+'" data-pn="'+p.name+'" onclick="toggleLeagueConfBtn(this)" style="font-family:var(--fm);font-size:9px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:2px 7px;border-radius:5px;cursor:pointer">✗ Confirm?</button>'
         )
       +'</div>';
     }).join('')
+    +(!players.length?'<div style="text-align:center;padding:1.5rem;font-size:11px;color:var(--dim)">No players tracked yet</div>':'')
   +'</div>';
 
-  root.innerHTML =
-    // Back button + team header
-    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">'
-      +'<button onclick="selectLeagueTeam(null)" style="background:var(--bg3);border:1px solid var(--b2);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--fm);font-size:11px">← Back</button>'
-      +'<div style="font-size:24px">'+team.badge+'</div>'
+  // Logo display  
+  var logoHtml=team.logo&&(team.logo.includes('wikimedia')||team.logo.includes('upload.wikipedia'))
+    ?'<img src="'+team.logo+'" style="width:44px;height:44px;object-fit:contain">'
+    :'<span style="font-size:32px">🏐</span>';
+
+  root.innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">'
+      +'<button data-tid="" onclick="selectLeagueTeam(null)" style="background:var(--bg3);border:1px solid var(--b2);color:var(--muted);padding:5px 10px;border-radius:7px;cursor:pointer;font-family:var(--fm);font-size:11px">← Back</button>'
+      +logoHtml
       +'<div>'
-        +'<div style="font-size:16px;font-weight:700">'+team.name+'</div>'
-        +'<div style="font-size:11px;color:var(--dim)">'+team.city+' · '+players.length+' players'+( team.isMyTeam?' · My Team':'')+'</div>'
+        +'<div style="font-size:16px;font-weight:700">'+team.name+(team.isMyTeam?' <span style="font-family:var(--fm);font-size:10px;background:var(--teal);color:#fff;padding:2px 6px;border-radius:4px">MY TEAM</span>':'')+'</div>'
+        +'<div style="font-size:10px;color:var(--dim)">'+team.city+' · '+players.length+' players</div>'
       +'</div>'
-      +(team.vb?'<a href="'+team.vb+'" target="_blank" style="margin-left:auto;font-family:var(--fm);font-size:9px;color:var(--teal);text-decoration:none;border:1px solid rgba(20,184,166,.3);padding:4px 8px;border-radius:6px">Volleybox ↗</a>':'')
+      +(team.vb?'<a href="'+team.vb+'" target="_blank" style="margin-left:auto;font-family:var(--fm);font-size:9px;color:var(--teal);text-decoration:none;border:1px solid rgba(20,184,166,.3);padding:3px 8px;border-radius:5px">Volleybox ↗</a>':'')
     +'</div>'
-    // Court visualization
-    +courtHtml
-    // Roster
-    +'<div style="font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Roster ('+players.length+')</div>'
-    +rosterHtml;
+    // Two-column layout: court left, roster right
+    +'<div style="display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:start">'
+      +'<div>'+courtHtml+'</div>'
+      +'<div>'
+        +'<div style="font-family:var(--fm);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Roster ('+players.length+')</div>'
+        +rosterHtml
+      +'</div>'
+    +'</div>';
 }
 
 function selectLeagueTeam(teamId){
