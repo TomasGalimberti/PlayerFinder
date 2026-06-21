@@ -4487,6 +4487,24 @@ function loadLeagueConf(){
   if(saved) LEAGUE_CONFIRMATIONS = saved;
 }
 
+
+function getTeamLogoHtml(t, size){
+  size = size||52;
+  var clr = t.color||'#14b8a6';
+  var initials = t.name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,3).toUpperCase();
+  var szPx = size+'px';
+  var fsPx = Math.round(size*0.3)+'px';
+  var br = Math.round(size*0.15)+'px';
+  // Wikipedia SVG logos load reliably — use them
+  if(t.logo && t.logo.startsWith('https://upload.wikimedia')){
+    return '<div style="width:'+szPx+';height:'+szPx+';display:flex;align-items:center;justify-content:center">'
+      +'<img src="'+t.logo+'" width="'+size+'" height="'+size+'" style="object-fit:contain;max-width:'+szPx+';max-height:'+szPx+'">'
+    +'</div>';
+  }
+  // Fallback: colored badge with initials (always works)
+  return '<div style="width:'+szPx+';height:'+szPx+';border-radius:'+br+';background:'+clr+';display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:'+fsPx+';font-weight:800;color:#fff;letter-spacing:-1px;flex-shrink:0">'+initials+'</div>';
+}
+
 function renderLeague(){
   loadLeagueConf();
   var root = g('league-list');
@@ -4529,10 +4547,9 @@ function renderLeagueCards(teams){
       var confirmedCount=isMyTeam?signedPl.length:t.players.filter(function(p){
         return LEAGUE_CONFIRMATIONS[t.id+'_'+p.name];
       }).length;
-      var logoHtml = t.logo && (t.logo.includes('wikimedia')||t.logo.includes('upload.wikipedia'))
-        ? '<img src="'+t.logo+'" style="width:52px;height:52px;object-fit:contain">'
+      var logoHtml = getTeamLogoHtml(t, 52);
+
           +'<div style="display:none;width:52px;height:52px;background:'+t.color+'22;border-radius:50%;align-items:center;justify-content:center;font-size:24px">⚽</div>'
-        : '<div style="width:52px;height:52px;background:'+t.color+'22;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px">🏐</div>';
       return '<div data-tid="'+t.id+'" onclick="selectLeagueTeamBtn(this)" style="background:var(--bg2);border:1.5px solid '+(isMyTeam?'var(--teal)':'var(--b2)')+';border-radius:14px;padding:16px 12px;cursor:pointer;transition:all .15s;text-align:center;position:relative">'
         +(isMyTeam?'<div style="position:absolute;top:6px;right:6px;font-family:var(--fm);font-size:8px;background:var(--teal);color:#fff;padding:2px 6px;border-radius:4px;font-weight:600">MY TEAM</div>':'')
         // Logo
@@ -4549,29 +4566,33 @@ function renderLeagueCards(teams){
 }
 
 function renderLeagueList(teams){
-  return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:10px;overflow:hidden">'
-    +'<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--bg);padding:8px 14px;font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--b2)">'
+  return '<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:12px;overflow:hidden">'
+    +'<div style="display:grid;grid-template-columns:2fr 1fr 60px 80px;background:var(--bg);padding:8px 16px;font-family:var(--fm);font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--b2)">'
       +'<div>Team</div><div>City</div><div>Players</div><div>Confirmed</div>'
     +'</div>'
     +teams.map(function(t){
-      var signedPlayers = t.isMyTeam ? P.filter(function(p){return p.status==='Signed';}) : [];
-      var playerCount = t.isMyTeam ? signedPlayers.length : t.players.length;
-      var confirmedCount = t.isMyTeam ? signedPlayers.length : t.players.filter(function(p){
+      var signedPl=t.isMyTeam?P.filter(function(p){return p.status==='Signed';}):[];
+      var playerCount=t.isMyTeam?signedPl.length:t.players.length;
+      var confirmedCount=t.isMyTeam?signedPl.length:t.players.filter(function(p){
         return LEAGUE_CONFIRMATIONS[t.id+'_'+p.name];
       }).length;
-      return '<div data-tid="'+t.id+'" onclick="selectLeagueTeamBtn(this)" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;align-items:center;transition:background .12s"'
+
+      return '<div data-tid="'+t.id+'" onclick="selectLeagueTeamBtn(this)" style="display:grid;grid-template-columns:2fr 1fr 60px 80px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;align-items:center">'
         +'<div style="display:flex;align-items:center;gap:10px">'
-          +'<span style="font-size:20px">'+t.badge+'</span>'
-          +'<div><div style="font-size:12px;font-weight:600">'+(t.isMyTeam?'⭐ ':'')+t.name+'</div>'
-          +'<div style="font-size:10px;color:var(--dim)">'+t.city+'</div></div>'
+          +logoHtml
+          +'<div>'
+            +'<div style="font-size:12px;font-weight:600">'+(t.isMyTeam?'⭐ ':'')+t.name+'</div>'
+            +'<div style="font-size:10px;color:var(--dim)">'+t.city+'</div>'
+          +'</div>'
         +'</div>'
         +'<div style="font-size:11px;color:var(--muted)">'+t.city+'</div>'
         +'<div style="font-family:var(--fm);font-size:12px;color:var(--muted)">'+playerCount+'</div>'
-        +'<div style="font-family:var(--fm);font-size:12px;color:'+(confirmedCount>0?'var(--teal)':'var(--dim)')+'">'+(confirmedCount>0?confirmedCount+' ✓':'—')+'</div>'
+        +'<div style="font-family:var(--fm);font-size:12px;color:'+(confirmedCount>0?'var(--teal)':'var(--dim)')+'">'+( confirmedCount>0?confirmedCount+' ✓':'—')+'</div>'
       +'</div>';
     }).join('')
   +'</div>';
 }
+
 
 function renderTeamRoster(teamId){
   var team=GREEK_A1_TEAMS.find(function(t){return t.id===teamId;});
@@ -4651,9 +4672,7 @@ function renderTeamRoster(teamId){
   +'</div>';
 
   // Logo display  
-  var logoHtml=team.logo&&(team.logo.includes('wikimedia')||team.logo.includes('upload.wikipedia'))
-    ?'<img src="'+team.logo+'" style="width:44px;height:44px;object-fit:contain">'
-    :'<span style="font-size:32px">🏐</span>';
+  var logoHtml = getTeamLogoHtml(team, 44);
 
   root.innerHTML=
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">'
